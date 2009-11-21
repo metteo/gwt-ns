@@ -145,7 +145,7 @@ public class RevoluteJoint extends Joint {
 
 		if (m_enableLimit) {
 			final float jointAngle = b2.m_sweep.a - b1.m_sweep.a - m_referenceAngle;
-			if (MathUtils.abs(m_upperAngle - m_lowerAngle) < 2.0f * Settings.angularSlop) {
+			if (Math.abs(m_upperAngle - m_lowerAngle) < 2.0f * Settings.angularSlop) {
 				m_limitState = LimitState.EQUAL_LIMITS;
 			} else if (jointAngle <= m_lowerAngle) {
 				if (m_limitState != LimitState.AT_LOWER_LIMIT) {
@@ -266,11 +266,11 @@ public class RevoluteJoint extends Joint {
 				m_limitForce += limitForce;
 			} else if (m_limitState == LimitState.AT_LOWER_LIMIT) {
 				final float oldLimitForce = m_limitForce;
-				m_limitForce = MathUtils.max(m_limitForce + limitForce, 0.0f);
+				m_limitForce = Math.max(m_limitForce + limitForce, 0.0f);
 				limitForce = m_limitForce - oldLimitForce;
 			} else if (m_limitState == LimitState.AT_UPPER_LIMIT) {
 				final float oldLimitForce = m_limitForce;
-				m_limitForce = MathUtils.min(m_limitForce + limitForce, 0.0f);
+				m_limitForce = Math.min(m_limitForce + limitForce, 0.0f);
 				limitForce = m_limitForce - oldLimitForce;
 			}
 
@@ -364,26 +364,26 @@ public class RevoluteJoint extends Joint {
 				// Prevent large angular corrections
 				final float limitC = MathUtils.clamp(angle, -Settings.maxAngularCorrection, Settings.maxAngularCorrection);
 				limitImpulse = -m_motorMass * limitC;
-				angularError = MathUtils.abs(limitC);
+				angularError = Math.abs(limitC);
 			} else if (m_limitState == LimitState.AT_LOWER_LIMIT) {
 				float limitC = angle - m_lowerAngle;
-				angularError = MathUtils.max(0.0f, -limitC);
+				angularError = Math.max(0.0f, -limitC);
 
 				// Prevent large angular corrections and allow some slop.
 				limitC = MathUtils.clamp(limitC + Settings.angularSlop, -Settings.maxAngularCorrection, 0.0f);
 				limitImpulse = -m_motorMass * limitC;
 				final float oldLimitImpulse = m_limitPositionImpulse;
-				m_limitPositionImpulse = MathUtils.max(m_limitPositionImpulse + limitImpulse, 0.0f);
+				m_limitPositionImpulse = Math.max(m_limitPositionImpulse + limitImpulse, 0.0f);
 				limitImpulse = m_limitPositionImpulse - oldLimitImpulse;
 			} else if (m_limitState == LimitState.AT_UPPER_LIMIT) {
 				float limitC = angle - m_upperAngle;
-				angularError = MathUtils.max(0.0f, limitC);
+				angularError = Math.max(0.0f, limitC);
 
 				// Prevent large angular corrections and allow some slop.
 				limitC = MathUtils.clamp(limitC - Settings.angularSlop, 0.0f, Settings.maxAngularCorrection);
 				limitImpulse = -m_motorMass * limitC;
 				final float oldLimitImpulse = m_limitPositionImpulse;
-				m_limitPositionImpulse = MathUtils.min(m_limitPositionImpulse + limitImpulse, 0.0f);
+				m_limitPositionImpulse = Math.min(m_limitPositionImpulse + limitImpulse, 0.0f);
 				limitImpulse = m_limitPositionImpulse - oldLimitImpulse;
 			}
 

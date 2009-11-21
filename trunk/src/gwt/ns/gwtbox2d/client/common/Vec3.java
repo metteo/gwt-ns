@@ -144,7 +144,7 @@ public class Vec3 {
 		//if (Float.floatToIntBits(z) != Float.floatToIntBits(other.z))
 		//	return false;
 		//the above seems very strange, but i don't know the intentions of the
-		//author here. regardless, need to change for gwt
+		//author. regardless, need to change for gwt
 		if (x != other.x)
 			return false;
 		if (y != other.y)

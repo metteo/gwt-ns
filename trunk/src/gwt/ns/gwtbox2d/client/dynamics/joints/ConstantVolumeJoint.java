@@ -1,6 +1,5 @@
 package gwt.ns.gwtbox2d.client.dynamics.joints;
 
-import gwt.ns.gwtbox2d.client.common.MathUtils;
 import gwt.ns.gwtbox2d.client.common.Settings;
 import gwt.ns.gwtbox2d.client.common.Vec2;
 import gwt.ns.gwtbox2d.client.dynamics.Body;
@@ -100,7 +99,7 @@ public class ConstantVolumeJoint extends Joint {
 			final int next = (i==bodies.length-1)?0:i+1;
 			final float dx = bodies[next].getMemberWorldCenter().x-bodies[i].getMemberWorldCenter().x;
 			final float dy = bodies[next].getMemberWorldCenter().y-bodies[i].getMemberWorldCenter().y;
-			float dist = MathUtils.sqrt(dx*dx+dy*dy);
+			float dist = (float) Math.sqrt(dx*dx+dy*dy);
 			if (dist < Settings.EPSILON) {
 				dist = 1.0f;
 			}

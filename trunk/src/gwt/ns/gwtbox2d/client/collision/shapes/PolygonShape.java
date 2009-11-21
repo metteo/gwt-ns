@@ -214,7 +214,7 @@ public class PolygonShape extends Shape implements SupportsGenericDistance{
 		for (int i = 0; i < m_vertexCount; ++i) {
 			d.set(m_coreVertices[i]);
 			d.subLocal(center);
-			m_sweepRadius = MathUtils.max(m_sweepRadius, d.length());
+			m_sweepRadius = Math.max(m_sweepRadius, d.length());
 		}
 	}
 

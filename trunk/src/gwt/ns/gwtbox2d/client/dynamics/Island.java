@@ -267,7 +267,7 @@ public class Island {
 					minSleepTime = 0.0f;
 				} else {
 					b.m_sleepTime += step.dt;
-					minSleepTime = MathUtils.min(minSleepTime, b.m_sleepTime);
+					minSleepTime = Math.min(minSleepTime, b.m_sleepTime);
 				}
 			}
 

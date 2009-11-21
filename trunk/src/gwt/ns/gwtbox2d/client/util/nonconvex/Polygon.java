@@ -47,13 +47,13 @@ public class Polygon {
 		float x4 = b1.x; float y4 = b1.y;
 		
 		//AABB early exit
-		if (MathUtils.max(x1,x2) < MathUtils.min(x3,x4) || MathUtils.max(x3,x4) < MathUtils.min(x1,x2) ) return false;
-		if (MathUtils.max(y1,y2) < MathUtils.min(y3,y4) || MathUtils.max(y3,y4) < MathUtils.min(y1,y2) ) return false;
+		if (Math.max(x1,x2) < Math.min(x3,x4) || Math.max(x3,x4) < Math.min(x1,x2) ) return false;
+		if (Math.max(y1,y2) < Math.min(y3,y4) || Math.max(y3,y4) < Math.min(y1,y2) ) return false;
 		
 		float ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3));
 		float ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3));
 		float denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
-		if (MathUtils.abs(denom) < Settings.EPSILON) {
+		if (Math.abs(denom) < Settings.EPSILON) {
 			//Lines are too close to parallel to call
 			return false;
 		}
@@ -171,7 +171,7 @@ public class Polygon {
 			dx1 /= norm1; dy1 /= norm1;
 			float cross = dx0 * dy1 - dx1 * dy0;
 			float dot = dx0 * dx1 + dy0 * dy1;
-			if (MathUtils.abs(cross) < tolerance && dot > 0 && newNVertices > 3) {
+			if (Math.abs(cross) < tolerance && dot > 0 && newNVertices > 3) {
 				mergeMe[i] = true;
 				--newNVertices;
 			} else {
@@ -552,7 +552,7 @@ public class Polygon {
 			for (int j=i+1; j<pin.nVertices; ++j){
 				//Don't worry about pinch points where the points
 				//are actually just dupe neighbors
-				if (MathUtils.abs(pin.x[i]-pin.x[j])<tol&&MathUtils.abs(pin.y[i]-pin.y[j])<tol&&j!=i+1){
+				if (Math.abs(pin.x[i]-pin.x[j])<tol&&Math.abs(pin.y[i]-pin.y[j])<tol&&j!=i+1){
 					pinchIndexA = i;
 					pinchIndexB = j;
 					//printf("pinch: %f, %f == %f, %f\n",pin.x[i],pin.y[i],pin.x[j],pin.y[j]);
@@ -680,11 +680,11 @@ public class Polygon {
 						d1.normalize();
 						d2.normalize();
 						d3.normalize();
-						float cross12 = MathUtils.abs( Vec2.cross(d1,d2) );
-						float cross23 = MathUtils.abs( Vec2.cross(d2,d3) );
-						float cross31 = MathUtils.abs( Vec2.cross(d3,d1) );
+						float cross12 = Math.abs( Vec2.cross(d1,d2) );
+						float cross23 = Math.abs( Vec2.cross(d2,d3) );
+						float cross31 = Math.abs( Vec2.cross(d3,d1) );
 						//Find the maximum minimum angle
-						float minCross = MathUtils.min(cross12, MathUtils.min(cross23,cross31));
+						float minCross = Math.min(cross12, Math.min(cross23,cross31));
 						if (minCross > earMaxMinCross){
 							earIndex = i;
 							earMaxMinCross = minCross;
@@ -1007,7 +1007,7 @@ public class Polygon {
 							dx1 /= norm1; dy1 /= norm1;
 							float cross = dx0 * dy1 - dx1 * dy0;
 							float dot = dx0*dx1 + dy0*dy1;
-							if (MathUtils.abs(cross) < Settings.angularSlop && dot > 0) {
+							if (Math.abs(cross) < Settings.angularSlop && dot > 0) {
 								//Angle too close, split the triangle across from this point.
 								//This is guaranteed to result in two triangles that satify
 								//the tolerance (one of the angles is 90 degrees)

@@ -28,47 +28,6 @@ package gwt.ns.gwtbox2d.client.common;
  * method
  */
 public class MathUtils {
-	
-	public static final float sin(float x){
-		return (float) Math.sin(x);
-	}
-	
-	public static final float cos(float x){
-		return (float) Math.cos(x);
-	}
-
-	public static final float abs(final float x) {
-		return Math.abs(x);
-	}
-	
-	public static final int floor(final float x) {
-		return (int) Math.floor(x);
-	}
-	
-	public static final int ceil(final float x){
-		return (int) Math.ceil(x);
-	}
-	
-	public static final int round(final float x){
-		return Math.round(x);
-	}
-
-	// Max/min rewritten here because for some reason MathUtils.max/min
-	// can run absurdly slow for such simple functions...
-	// TODO: profile, see if this just seems to be the case or is actually
-	// causing issues...
-	public final static float max(final float a, final float b) {
-		return Math.max(a, b);
-	}
-
-	public final static int max(final int a, final int b) {
-		return Math.max(a, b);
-	}
-
-	public final static float min(final float a, final float b) {
-		return Math.min(a, b);
-	}
-
 	public final static float map(final float val, final float fromMin, final float fromMax,
 			final float toMin, final float toMax) {
 		final float mult = (val - fromMin) / (fromMax - fromMin);
@@ -114,33 +73,5 @@ public class MathUtils {
 
 	public final static boolean isPowerOfTwo(final int x) {
 		return x > 0 && (x & x - 1) == 0;
-	}
-
-	public static final float atan2(final float y, final float x) {
-		return (float) Math.atan2(y, x);
-	}
-	
-	
-
-	/**
-	 * Computes a fast approximation to <code>Math.pow(a, b)</code>.
-	 * Adapted from <url>http://www.dctsystems.co.uk/Software/power.html</url>.
-	 * 
-	 * @param a
-	 *            a positive number
-	 * @param b
-	 *            a number
-	 * @return a^b
-	 */
-	public static final float pow(final float a, float b) {
-		return (float) Math.pow(a, b);
-	}
-
-	public static final float sqrt(float x) {
-		return (float) Math.sqrt(x);
-	}
-
-	public final static float invSqrt(float x) {
-		return (float) (1. / Math.sqrt(x));
 	}
 }

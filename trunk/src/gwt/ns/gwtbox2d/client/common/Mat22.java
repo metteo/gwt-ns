@@ -103,7 +103,7 @@ public class Mat22 {
 	 * @param angle Rotation (in radians) that matrix represents.
 	 */
 	public final void set(final float angle) {
-		final float c = MathUtils.cos(angle), s = MathUtils.sin(angle);
+		final float c = (float) Math.cos(angle), s = (float) Math.sin(angle);
 		col1.x = c; col2.x = -s;
 		col1.y = s; col2.y = c;
 	}
@@ -183,10 +183,10 @@ public class Mat22 {
 	 * @return Absolute value matrix
 	 */
 	public final Mat22 abs() {
-		return new Mat22(MathUtils.abs(col1.x),
-		                 MathUtils.abs(col2.x),
-		                 MathUtils.abs(col1.y),
-		                 MathUtils.abs(col2.y));
+		return new Mat22(Math.abs(col1.x),
+							Math.abs(col2.x),
+							Math.abs(col1.y),
+							Math.abs(col2.y));
 	}
 
 	/* djm: added */
@@ -205,10 +205,10 @@ public class Mat22 {
 
 	/* djm created */
 	public static void absToOut(final Mat22 R, final Mat22 out){
-		out.col1.x = MathUtils.abs(R.col1.x);
-		out.col1.y = MathUtils.abs(R.col1.y);
-		out.col2.x = MathUtils.abs(R.col2.x);
-		out.col2.y = MathUtils.abs(R.col2.y);
+		out.col1.x = Math.abs(R.col1.x);
+		out.col1.y = Math.abs(R.col1.y);
+		out.col2.x = Math.abs(R.col2.x);
+		out.col2.y = Math.abs(R.col2.y);
 	}
 
 	/**
@@ -459,8 +459,8 @@ public class Mat22 {
 	
 	public final static Mat22 createRotationalTransform(float angle){
 		Mat22 mat = new Mat22();
-		final float c = MathUtils.cos(angle);
-		final float s = MathUtils.sin(angle);
+		final float c = (float) Math.cos(angle);
+		final float s = (float) Math.sin(angle);
 		mat.col1.x = c;
 		mat.col2.x = -s;
 		mat.col1.y = s;
@@ -469,8 +469,8 @@ public class Mat22 {
 	}
 	
 	public final static void createRotationalTransform(float angle, Mat22 out){
-		final float c = MathUtils.cos(angle);
-		final float s = MathUtils.sin(angle);
+		final float c = (float) Math.cos(angle);
+		final float s = (float) Math.sin(angle);
 		out.col1.x = c;
 		out.col2.x = -s;
 		out.col1.y = s;

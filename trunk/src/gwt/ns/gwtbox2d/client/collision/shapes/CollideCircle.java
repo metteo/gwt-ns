@@ -26,7 +26,6 @@ package gwt.ns.gwtbox2d.client.collision.shapes;
 import gwt.ns.gwtbox2d.client.collision.Collision;
 import gwt.ns.gwtbox2d.client.collision.Manifold;
 import gwt.ns.gwtbox2d.client.common.Mat22;
-import gwt.ns.gwtbox2d.client.common.MathUtils;
 import gwt.ns.gwtbox2d.client.common.Settings;
 import gwt.ns.gwtbox2d.client.common.Vec2;
 import gwt.ns.gwtbox2d.client.common.XForm;
@@ -80,7 +79,7 @@ public class CollideCircle {
 			manifold.normal.set(0.0f, 1.0f);
 		}
 		else {
-			final float dist = MathUtils.sqrt(distSqr);
+			final float dist = (float) Math.sqrt(distSqr);
 			separation = dist - radiusSum;
 			final float a = 1.0f / dist;
 			manifold.normal.x = a * colCCD.x;
@@ -143,7 +142,7 @@ public class CollideCircle {
 			manifold.normal.set(0.0f, 1.0f);
 		}
 		else {
-			final float dist = MathUtils.sqrt(distSqr);
+			final float dist = (float) Math.sqrt(distSqr);
 			separation = dist - r2;
 			final float a = 1.0f / dist;
 			manifold.normal.x = a * colPCD.x;
@@ -255,7 +254,7 @@ public class CollideCircle {
 
 		float ex = vertices[vertIndex2].x - vertices[vertIndex1].x;
 		float ey = vertices[vertIndex2].y - vertices[vertIndex1].y;
-		final float length = MathUtils.sqrt(ex * ex + ey * ey);
+		final float length = (float) Math.sqrt(ex * ex + ey * ey);
 		assert(length > Settings.EPSILON);
 		final float invLength = 1.0f / length;
 		ex *= invLength;
@@ -295,7 +294,7 @@ public class CollideCircle {
 
 		float dx = cLocalx - px;
 		float dy = cLocaly - py;
-		final float dist = MathUtils.sqrt(dx * dx + dy * dy);
+		final float dist = (float) Math.sqrt(dx * dx + dy * dy);
 		if (dist > radius) {
 			return;
 		}

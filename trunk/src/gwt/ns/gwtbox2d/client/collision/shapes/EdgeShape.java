@@ -5,7 +5,6 @@ import gwt.ns.gwtbox2d.client.collision.MassData;
 import gwt.ns.gwtbox2d.client.collision.Segment;
 import gwt.ns.gwtbox2d.client.collision.SegmentCollide;
 import gwt.ns.gwtbox2d.client.collision.SupportsGenericDistance;
-import gwt.ns.gwtbox2d.client.common.MathUtils;
 import gwt.ns.gwtbox2d.client.common.RaycastResult;
 import gwt.ns.gwtbox2d.client.common.Settings;
 import gwt.ns.gwtbox2d.client.common.Vec2;
@@ -84,7 +83,7 @@ public class EdgeShape extends Shape implements SupportsGenericDistance {
 		final float dx2 = m_coreV2.x - center.x;
 		final float dy2 = m_coreV2.y - center.y;
 		final float d2 = dx2*dx2+dy2*dy2;
-		m_sweepRadius = MathUtils.sqrt(d1 > d2 ? d1 : d2);
+		m_sweepRadius = (float) Math.sqrt(d1 > d2 ? d1 : d2);
 	}
 
 	/**
