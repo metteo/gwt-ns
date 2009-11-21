@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 1.7.1//EN" "http://google-web-toolkit.googlecode.com/svn/tags/1.7.1/distro-source/core/src/gwt-module.dtd">
+<module>
+  <!-- Inherit the core Web Toolkit stuff.                        -->
+  <inherits name='com.google.gwt.core.Core'/>
+  <inherits name='com.google.gwt.user.UserAgent'/>
+
+  <!-- if a user is requesting GWT create a system appropriate Transform,
+		return a webkit impl for webkit, otherwise return software implementation 
+		
+		TODO: more detailed detection to allow support of standard CSSMatrix in
+		future browsers -->
+		
+  <!-- default -->
+  <replace-with class='gwt.ns.transforms.client.impl.TransformImplDefault'>
+    <when-type-is class='gwt.ns.transforms.client.Transform'/>
+  </replace-with>
+  
+  <!-- safari 4+ and chrome -->
+  <replace-with class='gwt.ns.transforms.client.impl.TransformImplWebkit'>
+    <when-type-is class='gwt.ns.transforms.client.Transform'/>
+    <when-property-is name='user.agent' value='safari'/>
+  </replace-with>
+
+</module>

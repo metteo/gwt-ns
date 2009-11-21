@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 1.7.1//EN" "http://google-web-toolkit.googlecode.com/svn/tags/1.7.1/distro-source/core/src/gwt-module.dtd">
+<module>
+  <!-- Inherit the core Web Toolkit stuff.                        -->
+  <inherits name='com.google.gwt.core.Core'/>
+  <inherits name='com.google.gwt.user.UserAgent'/>
+
+  <!-- deferred binding logic supported by ie6, ie8, but only a subset
+		of safari and gecko (1.9.1+).
+		TODO: perhaps add logic to specifically detect proprietary browser
+		support unless standard support is found (not really a rush)	-->
+  <!-- default -->
+  <replace-with class='gwt.ns.transformedelement.client.impl.TransformedElementImplDefault'>
+    <when-type-is class='gwt.ns.transformedelement.client.TransformedElement'/>
+  </replace-with>
+  
+  <!-- latest firefox -->
+  <replace-with class='gwt.ns.transformedelement.client.impl.TransformedElementImplGecko'>
+    <when-type-is class='gwt.ns.transformedelement.client.TransformedElement' />
+    <when-property-is name='user.agent' value='gecko1_8' />
+  </replace-with>
+  
+  <!-- safari 4+ and chrome -->
+  <replace-with class='gwt.ns.transformedelement.client.impl.TransformedElementImplWebkit'>
+    <when-type-is class='gwt.ns.transformedelement.client.TransformedElement'/>
+    <when-property-is name='user.agent' value='safari'/>
+  </replace-with>
+
+  <!-- Other module inherits          -->
+  <inherits name="gwt.ns.transforms.Transforms" />
+</module>
