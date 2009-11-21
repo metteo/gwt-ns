@@ -23,7 +23,6 @@
 
 package gwt.ns.gwtbox2d.client.collision;
 
-import gwt.ns.gwtbox2d.client.common.MathUtils;
 import gwt.ns.gwtbox2d.client.common.Settings;
 import gwt.ns.gwtbox2d.client.common.Vec2;
 import gwt.ns.gwtbox2d.client.pooling.TLBoundValues;
@@ -839,9 +838,9 @@ public class BroadPhase {
 		final float ay = aabb.lowerBound.y - m_worldAABB.upperBound.y;
 		final float bx = m_worldAABB.lowerBound.x - aabb.upperBound.x;
 		final float by = m_worldAABB.lowerBound.y - aabb.upperBound.y;
-		final float dx = MathUtils.max( ax, bx);
-		final float dy = MathUtils.max( ay, by);
-		return (MathUtils.max( dx, dy) < 0.0f);
+		final float dx = Math.max( ax, bx);
+		final float dy = Math.max( ay, by);
+		return (Math.max( dx, dy) < 0.0f);
 	}
 	
 	

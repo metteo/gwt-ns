@@ -41,7 +41,6 @@ import gwt.ns.gwtbox2d.client.collision.shapes.Shape;
 import gwt.ns.gwtbox2d.client.collision.shapes.ShapeType;
 import gwt.ns.gwtbox2d.client.common.Color3f;
 import gwt.ns.gwtbox2d.client.common.Mat22;
-import gwt.ns.gwtbox2d.client.common.MathUtils;
 import gwt.ns.gwtbox2d.client.common.RaycastResult;
 import gwt.ns.gwtbox2d.client.common.Settings;
 import gwt.ns.gwtbox2d.client.common.Vec2;
@@ -763,7 +762,7 @@ public class World {
 
 			island.solve(step, m_gravity, m_positionCorrection, m_allowSleep);
 
-			m_positionIterationCount = MathUtils.max(m_positionIterationCount, Island.m_positionIterationCount);
+			m_positionIterationCount = Math.max(m_positionIterationCount, Island.m_positionIterationCount);
 
 			// Post solve cleanup.
 			for (int i = 0; i < island.m_bodyCount; ++i) {
@@ -889,7 +888,7 @@ public class World {
 					assert(0.0f <= toi && toi <= 1.0f);
 
 					if (toi > 0.0f && toi < 1.0f) {
-						toi = MathUtils.min((1.0f - toi) * t0 + toi, 1.0f);
+						toi = Math.min((1.0f - toi) * t0 + toi, 1.0f);
 					}
 
 					c.m_toi = toi;

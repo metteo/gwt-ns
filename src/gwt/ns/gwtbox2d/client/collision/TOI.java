@@ -24,7 +24,6 @@
 package gwt.ns.gwtbox2d.client.collision;
 
 import gwt.ns.gwtbox2d.client.collision.shapes.Shape;
-import gwt.ns.gwtbox2d.client.common.MathUtils;
 import gwt.ns.gwtbox2d.client.common.Settings;
 import gwt.ns.gwtbox2d.client.common.Sweep;
 import gwt.ns.gwtbox2d.client.common.Vec2;
@@ -100,7 +99,7 @@ public class TOI {
 				if (distance > 2.0f * Settings.toiSlop) {
 					targetDistance = 1.5f * Settings.toiSlop;
 				} else {
-					targetDistance = MathUtils.max(0.05f * Settings.toiSlop, distance - 0.5f * Settings.toiSlop);
+					targetDistance = Math.max(0.05f * Settings.toiSlop, distance - 0.5f * Settings.toiSlop);
 				}
 			}
 
@@ -116,7 +115,7 @@ public class TOI {
 			float normaly = p2.y - p1.y;
 			final float lenSqrd = normalx * normalx + normaly * normaly;
 			if (lenSqrd >= Settings.EPSILON*Settings.EPSILON) {
-				final float length = MathUtils.sqrt(lenSqrd);
+				final float length = (float) Math.sqrt(lenSqrd);
 				final float invLength = 1.0f / length;
 				normalx *= invLength;
 				normaly *= invLength;
@@ -125,10 +124,10 @@ public class TOI {
 			// Compute upper bound on remaining movement.
 			// INLINED
 			//float approachVelocityBound = Vec2.dot(normal, v) + MathUtils.abs(omega1) * r1 + MathUtils.abs(omega2) * r2;
-			final float approachVelocityBound = (normalx * vx + normaly * vy) + MathUtils.abs(omega1) * r1 + MathUtils.abs(omega2) * r2;
+			final float approachVelocityBound = (normalx * vx + normaly * vy) + Math.abs(omega1) * r1 + Math.abs(omega2) * r2;
 			//System.out.println("avb: "+approachVelocityBound);
 			//System.out.println("Normal" + normal);
-			if (MathUtils.abs(approachVelocityBound) < Settings.EPSILON) {
+			if (Math.abs(approachVelocityBound) < Settings.EPSILON) {
 				alpha = 1.0f;
 				break;
 			}

@@ -47,7 +47,6 @@ import gwt.ns.gwtbox2d.client.collision.shapes.PointShape;
 import gwt.ns.gwtbox2d.client.collision.shapes.PolygonShape;
 import gwt.ns.gwtbox2d.client.collision.shapes.Shape;
 import gwt.ns.gwtbox2d.client.collision.shapes.ShapeType;
-import gwt.ns.gwtbox2d.client.common.MathUtils;
 import gwt.ns.gwtbox2d.client.common.Settings;
 import gwt.ns.gwtbox2d.client.common.Vec2;
 import gwt.ns.gwtbox2d.client.common.XForm;
@@ -215,10 +214,10 @@ public final class Distance {
 			// new Vec2( MathUtils.abs(w.x-points[i].x),
 			// MathUtils.abs(w.y-points[i].y));//Vec2.abs(w - points[i]);
 			// Vec2 m = Vec2.max(Vec2.abs(w), Vec2.abs(points[i]));
-			final float dx = MathUtils.abs(w.x - v.x);
-			final float dy = MathUtils.abs(w.y - v.y);
-			final float mx = MathUtils.max(MathUtils.abs(w.x), MathUtils.abs(points[i].x));
-			final float my = MathUtils.max(MathUtils.abs(w.y), MathUtils.abs(points[i].y));
+			final float dx = Math.abs(w.x - v.x);
+			final float dy = Math.abs(w.y - v.y);
+			final float mx = Math.max(Math.abs(w.x), Math.abs(points[i].x));
+			final float my = Math.max(Math.abs(w.y), Math.abs(points[i].y));
 
 			if (dx < k_tolerance * (mx + 1.0f) && dy < k_tolerance * (my + 1.0f)) {
 				return true;
@@ -278,7 +277,7 @@ public final class Distance {
 					x2.set(w2);
 				}
 				g_GJK_Iterations = iter;
-				return MathUtils.sqrt(vSqr);
+				return (float) Math.sqrt(vSqr);
 			}
 
 			switch (pointCount) {
@@ -316,7 +315,7 @@ public final class Distance {
 
 			float maxSqr = -Float.MAX_VALUE;// -FLT_MAX;
 			for (int i = 0; i < pointCount; ++i) {
-				maxSqr = MathUtils.max(maxSqr, Vec2.dot(points[i], points[i]));
+				maxSqr = Math.max(maxSqr, Vec2.dot(points[i], points[i]));
 			}
 
 			if (pointCount == 3 || vSqr <= 100.0f * Settings.EPSILON * maxSqr) {
@@ -325,13 +324,13 @@ public final class Distance {
 				final float vy = x2.y - x1.y;
 				vSqr = vx * vx + vy * vy;
 
-				return MathUtils.sqrt(vSqr);
+				return (float) Math.sqrt(vSqr);
 				//
 			}
 		}
 
 		g_GJK_Iterations = maxIterations;
-		return MathUtils.sqrt(vSqr);
+		return (float) Math.sqrt(vSqr);
 		//
 	}
 
@@ -524,7 +523,7 @@ public final class Distance {
 			distance -= r;
 			float dx = x2.x - x1.x;
 			float dy = x2.y - x1.y;
-			final float length = MathUtils.sqrt(dx * dx + dy * dy);
+			final float length = (float) Math.sqrt(dx * dx + dy * dy);
 			if (length >= Settings.EPSILON) {
 				final float invLength = 1.0f / length;
 				dx *= invLength;
@@ -576,7 +575,7 @@ public final class Distance {
 			distance -= r;
 			float dx = x2.x - x1.x;
 			float dy = x2.y - x1.y;
-			final float length = MathUtils.sqrt(dx * dx + dy * dy);
+			final float length = (float) Math.sqrt(dx * dx + dy * dy);
 			if (length >= Settings.EPSILON) {
 				final float invLength = 1.0f / length;
 				dx *= invLength;

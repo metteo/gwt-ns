@@ -114,8 +114,8 @@ public class PulleyJoint extends Joint {
 
 		m_constant = def.length1 + m_ratio * def.length2;
 
-		m_maxLength1 = MathUtils.min(def.maxLength1, m_constant - m_ratio * MIN_PULLEY_LENGTH);
-		m_maxLength2 = MathUtils.min(def.maxLength2, (m_constant - MIN_PULLEY_LENGTH) / m_ratio);
+		m_maxLength1 = Math.min(def.maxLength1, m_constant - m_ratio * MIN_PULLEY_LENGTH);
+		m_maxLength2 = Math.min(def.maxLength2, (m_constant - MIN_PULLEY_LENGTH) / m_ratio);
 
 		m_force = 0.0f;
 		m_limitForce1 = 0.0f;
@@ -274,7 +274,7 @@ public class PulleyJoint extends Joint {
 			final float Cdot = -Vec2.dot(m_u1, v1) - m_ratio * Vec2.dot(m_u2, v2);
 			float force = -step.inv_dt * m_pulleyMass * Cdot;
 			final float oldForce = m_force;
-			m_force = MathUtils.max(0.0f, m_force + force);
+			m_force = Math.max(0.0f, m_force + force);
 			force = m_force - oldForce;
 
 			P1.set(m_u1);
@@ -297,7 +297,7 @@ public class PulleyJoint extends Joint {
 			final float Cdot = -Vec2.dot(m_u1, v1);
 			float force = -step.inv_dt * m_limitMass1 * Cdot;
 			final float oldForce = m_limitForce1;
-			m_limitForce1 = MathUtils.max(0.0f, m_limitForce1 + force);
+			m_limitForce1 = Math.max(0.0f, m_limitForce1 + force);
 			force = m_limitForce1 - oldForce;
 
 			//Vec2 P1 = m_u1.mul(-step.dt * force);
@@ -316,7 +316,7 @@ public class PulleyJoint extends Joint {
 			final float Cdot = -Vec2.dot(m_u2, v2);
 			float force = -step.inv_dt * m_limitMass2 * Cdot;
 			final float oldForce = m_limitForce2;
-			m_limitForce2 = MathUtils.max(0.0f, m_limitForce2 + force);
+			m_limitForce2 = Math.max(0.0f, m_limitForce2 + force);
 			force = m_limitForce2 - oldForce;
 
 			//Vec2 P2 = m_u2.mul(-step.dt * force);
@@ -384,12 +384,12 @@ public class PulleyJoint extends Joint {
 			}
 
 			float C = m_constant - length1 - m_ratio * length2;
-			linearError = MathUtils.max(linearError, -C);
+			linearError = Math.max(linearError, -C);
 
 			C = MathUtils.clamp(C + Settings.linearSlop, -Settings.maxLinearCorrection, 0.0f);
 			float impulse = -m_pulleyMass * C;
 			final float oldImpulse = m_positionImpulse;
-			m_positionImpulse = MathUtils.max(0.0f, m_positionImpulse + impulse);
+			m_positionImpulse = Math.max(0.0f, m_positionImpulse + impulse);
 			impulse = m_positionImpulse - oldImpulse;
 
 			//Vec2 P1 = m_u1.mul(-impulse);
@@ -430,11 +430,11 @@ public class PulleyJoint extends Joint {
 			}
 
 			float C = m_maxLength1 - length1;
-			linearError = MathUtils.max(linearError, -C);
+			linearError = Math.max(linearError, -C);
 			C = MathUtils.clamp(C + Settings.linearSlop, -Settings.maxLinearCorrection, 0.0f);
 			float impulse = -m_limitMass1 * C;
 			final float oldLimitPositionImpulse = m_limitPositionImpulse1;
-			m_limitPositionImpulse1 = MathUtils.max(0.0f, m_limitPositionImpulse1 + impulse);
+			m_limitPositionImpulse1 = Math.max(0.0f, m_limitPositionImpulse1 + impulse);
 			impulse = m_limitPositionImpulse1 - oldLimitPositionImpulse;
 
 			//Vec2 P1 = m_u1.mul(-impulse);
@@ -469,11 +469,11 @@ public class PulleyJoint extends Joint {
 			}
 
 			float C = m_maxLength2 - length2;
-			linearError = MathUtils.max(linearError, -C);
+			linearError = Math.max(linearError, -C);
 			C = MathUtils.clamp(C + Settings.linearSlop, -Settings.maxLinearCorrection, 0.0f);
 			float impulse = -m_limitMass2 * C;
 			final float oldLimitPositionImpulse = m_limitPositionImpulse2;
-			m_limitPositionImpulse2 = MathUtils.max(0.0f, m_limitPositionImpulse2 + impulse);
+			m_limitPositionImpulse2 = Math.max(0.0f, m_limitPositionImpulse2 + impulse);
 			impulse = m_limitPositionImpulse2 - oldLimitPositionImpulse;
 
 			//Vec2 P2 = m_u2.mul(-impulse);

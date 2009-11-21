@@ -227,7 +227,7 @@ public class DistanceJoint extends Joint {
 		b1.synchronizeTransform();
 		b2.synchronizeTransform();
 
-		return MathUtils.abs(C) < Settings.linearSlop;
+		return Math.abs(C) < Settings.linearSlop;
 	}
 
 	// djm pooled, and use pool above

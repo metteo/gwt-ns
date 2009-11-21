@@ -5,7 +5,6 @@ import gwt.ns.gwtbox2d.client.collision.MassData;
 import gwt.ns.gwtbox2d.client.collision.Segment;
 import gwt.ns.gwtbox2d.client.collision.SegmentCollide;
 import gwt.ns.gwtbox2d.client.common.Mat22;
-import gwt.ns.gwtbox2d.client.common.MathUtils;
 import gwt.ns.gwtbox2d.client.common.RaycastResult;
 import gwt.ns.gwtbox2d.client.common.Settings;
 import gwt.ns.gwtbox2d.client.common.Vec2;
@@ -131,7 +130,7 @@ public class PointShape extends Shape {
 		}
 
 		// Find the point of intersection of the line with the circle.
-		float a = -(c + MathUtils.sqrt(sigma));
+		float a = (float) -(c + Math.sqrt(sigma));
 
 		// Is the intersection point on the segment?
 		if (0.0f <= a && a <= maxLambda * rr){
@@ -154,7 +153,7 @@ public class PointShape extends Shape {
 		//Vec2 d = m_localPosition.sub(center);
 		final float dx = m_localPosition.x - center.x;
 		final float dy = m_localPosition.y - center.y;
-		m_sweepRadius = MathUtils.sqrt(dx*dx + dy*dy) - Settings.toiSlop;
+		m_sweepRadius = (float) (Math.sqrt(dx*dx + dy*dy) - Settings.toiSlop);
 	}
 
 	/**

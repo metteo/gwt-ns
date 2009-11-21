@@ -300,7 +300,7 @@ public class ContactSolver {
 				float lambda = - ccp.normalMass * (vn - ccp.velocityBias);
 
 				// b2Clamp the accumulated force
-				final float newImpulse = MathUtils.max(ccp.normalImpulse + lambda, 0.0f);
+				final float newImpulse = Math.max(ccp.normalImpulse + lambda, 0.0f);
 				lambda = newImpulse - ccp.normalImpulse;
 
 				// Apply contact impulse
@@ -347,7 +347,7 @@ public class ContactSolver {
 
 				// b2Clamp the accumulated force
 				final float maxFriction = friction * ccp.normalImpulse;
-				final float newImpulse = MathUtils.max(-maxFriction, MathUtils.min(ccp.tangentImpulse + lambda, maxFriction));
+				final float newImpulse = Math.max(-maxFriction, Math.min(ccp.tangentImpulse + lambda, maxFriction));
 				lambda = newImpulse - ccp.tangentImpulse;
 
 				// Apply contact impulse
@@ -444,7 +444,7 @@ public class ContactSolver {
 				final float separation = dpx*normal.x + dpy*normal.y + ccp.separation;//b2Dot(dp, normal) + ccp->separation;
 
 				// Track max constraint error.
-				minSeparation = MathUtils.min(minSeparation, separation);
+				minSeparation = Math.min(minSeparation, separation);
 
 				// Prevent large corrections and allow slop.
 				final float C = baumgarte * MathUtils.clamp(separation + Settings.linearSlop, -Settings.maxLinearCorrection, 0.0f);
@@ -454,7 +454,7 @@ public class ContactSolver {
 
 				// b2Clamp the accumulated impulse
 				final float impulse0 = ccp.positionImpulse;
-				ccp.positionImpulse = MathUtils.max(impulse0 + dImpulse, 0.0f);
+				ccp.positionImpulse = Math.max(impulse0 + dImpulse, 0.0f);
 				dImpulse = ccp.positionImpulse - impulse0;
 
 				final float impulsex = dImpulse * normal.x;

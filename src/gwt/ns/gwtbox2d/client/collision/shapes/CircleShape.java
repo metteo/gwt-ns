@@ -28,7 +28,6 @@ import gwt.ns.gwtbox2d.client.collision.MassData;
 import gwt.ns.gwtbox2d.client.collision.Segment;
 import gwt.ns.gwtbox2d.client.collision.SegmentCollide;
 import gwt.ns.gwtbox2d.client.common.Mat22;
-import gwt.ns.gwtbox2d.client.common.MathUtils;
 import gwt.ns.gwtbox2d.client.common.RaycastResult;
 import gwt.ns.gwtbox2d.client.common.Settings;
 import gwt.ns.gwtbox2d.client.common.Vec2;
@@ -77,8 +76,8 @@ public class CircleShape extends Shape {
 		// Vec2 d = m_localPosition.sub(center);
 		final float dx = m_localPosition.x - center.x;
 		final float dy = m_localPosition.y - center.y;
-		m_sweepRadius = MathUtils.sqrt(dx * dx + dy * dy) + m_radius
-				- Settings.toiSlop;
+		m_sweepRadius = (float) (Math.sqrt(dx * dx + dy * dy) + m_radius
+				- Settings.toiSlop);
 	}
 
 	// djm gwt.ns.gwtbox2d.pooling
@@ -141,7 +140,7 @@ public class CircleShape extends Shape {
 		}
 
 		// Find the point of intersection of the line with the circle.
-		float a = -(c + MathUtils.sqrt(sigma));
+		float a = (float) -(c + Math.sqrt(sigma));
 
 //		 System.out.println(a + "; " + maxLambda + "; " + rr + "  ; " + (a <= maxLambda * rr));
 
@@ -279,8 +278,8 @@ public class CircleShape extends Shape {
 		float l2 = l * l;
 		float area = (float) (r2
 				* (Math.asin(l / m_radius) + Settings.pi / 2.0f) + l
-				* MathUtils.sqrt(r2 - l2));
-		float com = (float) (-2.0f / 3.0f * MathUtils.pow(r2 - l2, 1.5f) / area);
+				* Math.sqrt(r2 - l2));
+		float com = (float) (-2.0f / 3.0f * Math.pow(r2 - l2, 1.5f) / area);
 
 		c.x = p.x + normal.x * com;
 		c.y = p.y + normal.y * com;
