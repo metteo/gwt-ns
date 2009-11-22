@@ -289,14 +289,14 @@ public class CircleShape extends Shape {
 		if (l > m_radius) {
 			// Completely wet
 			c.set(p);
-			return Settings.pi * m_radius * m_radius;
+			return (float) (Math.PI * m_radius * m_radius);
 		}
 
 		// Magic
 		float r2 = m_radius * m_radius;
 		float l2 = l * l;
 		float area = (float) (r2
-				* (Math.asin(l / m_radius) + Settings.pi / 2.0f) + l
+				* (Math.asin(l / m_radius) + Math.PI / 2.0f) + l
 				* Math.sqrt(r2 - l2));
 		float com = (float) (-2.0f / 3.0f * Math.pow(r2 - l2, 1.5f) / area);
 

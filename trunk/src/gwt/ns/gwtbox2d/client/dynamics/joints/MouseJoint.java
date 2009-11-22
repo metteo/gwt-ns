@@ -1,4 +1,23 @@
 /*
+ * This file has been modified from the original JBox2D source.
+ * Original source license found below.
+ * 
+ * Modifications Copyright 2009 Brendan Kenny
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
  * JBox2D - A Java Port of Erin Catto's Box2D
  * 
  * JBox2D homepage: http://jbox2d.sourceforge.net/
@@ -24,7 +43,6 @@
 package gwt.ns.gwtbox2d.client.dynamics.joints;
 
 import gwt.ns.gwtbox2d.client.common.Mat22;
-import gwt.ns.gwtbox2d.client.common.Settings;
 import gwt.ns.gwtbox2d.client.common.Vec2;
 import gwt.ns.gwtbox2d.client.common.XForm;
 import gwt.ns.gwtbox2d.client.dynamics.Body;
@@ -75,7 +93,7 @@ public class MouseJoint extends Joint {
 		final float mass = m_body2.m_mass;
 
 		// Frequency
-		final float omega = 2.0f * Settings.pi * def.frequencyHz;
+		final float omega = (float) (2.0f * Math.PI * def.frequencyHz);
 
 		// Damping coefficient
 		final float d = 2.0f * mass * def.dampingRatio * omega;

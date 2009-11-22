@@ -1,4 +1,23 @@
 /*
+ * This file has been modified from the original JBox2D source.
+ * Original source license found below.
+ * 
+ * Modifications Copyright 2009 Brendan Kenny
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
  * JBox2D - A Java Port of Erin Catto's Box2D
  * 
  * JBox2D homepage: http://jbox2d.sourceforge.net/
@@ -308,7 +327,12 @@ public class CollidePoly {
 	// Choose reference edge as min(minA, minB)
 	// Find incident edge
 	// Clip
-
+	// pooling variables to reduce array creation
+	private ClipVertex incidentEdge[] = new ClipVertex[2];
+	private ClipVertex clipPoints1[] = new ClipVertex[2];
+	private ClipVertex clipPoints2[] = new ClipVertex[2];
+	
+	
 	// The normal points from 1 to 2
 	// djm optimized
 	public final void collidePolygons(final Manifold manif,
@@ -355,7 +379,6 @@ public class CollidePoly {
 			flip = 0;
 		}
 
-		final ClipVertex incidentEdge[] = new ClipVertex[2];
 		findIncidentEdge(incidentEdge, poly1, xf1, edge1, poly2, xf2);
 
 		final int count1 = poly1.getVertexCount();
@@ -387,8 +410,6 @@ public class CollidePoly {
 		final float sideOffset2 = sideNormal.x * v12x + sideNormal.y * v12y;
 
 		// Clip incident edge against extruded edge1 side edges.
-		final ClipVertex clipPoints1[] = new ClipVertex[2];
-		final ClipVertex clipPoints2[] = new ClipVertex[2];
 		int np;
 
 		// Clip to box side 1
