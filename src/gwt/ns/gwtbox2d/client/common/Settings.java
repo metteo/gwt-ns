@@ -1,7 +1,26 @@
 /*
+ * This file has been modified from the original JBox2D source.
+ * Original source license found below.
+ * 
+ * Modifications Copyright 2009 Brendan Kenny
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
  * JBox2D - A Java Port of Erin Catto's Box2D
  * 
- * JBox2D homepage: http://jbox2d.sourceforge.net/ 
+ * JBox2D homepage: http://jbox2d.sourceforge.net/
  * Box2D homepage: http://www.box2d.org
  * 
  * This software is provided 'as-is', without any express or implied
@@ -30,54 +49,8 @@ public class Settings {
 
     /** A "close to zero" float epsilon value for use */
     public static final float EPSILON = 1.1920928955078125E-7f;
-
-    /** Pi. */
-    public static final float pi = (float) Math.PI;
     
     // JBox2D specific settings
-    /**
-     * needs to be final, or will slow down math methods
-     */
-    public static final boolean FAST_MATH = true;
-    public static final boolean SINCOS_LUT_ENABLED = true;
-    /**
-     * smaller the precision, the larger the table.  If
-     * a small table is used (eg, precision is .006 or greater),
-     * make sure you set the table to lerp it's results.  Accuracy chart
-     * is in the MathUtils source.  Or, run the tests
-     * yourself in {@link org.jbox2d.testbed.mathtests.SinCosTest}.</br>
-     * </br>
-     * Good lerp precision values:
-     * <ul><li>.0092</li>
-     * <li>.008201</li>
-     * <li>.005904</li>
-     * <li>.005204</li>
-     * <li>.004305</li>
-     * <li>.002807</li>
-     * <li>.001508</li>
-     * <li>9.32500E-4</li>
-     * <li>7.48000E-4</li>
-     * <li>8.47000E-4</li>
-     * <li>.0005095</li>
-     * <li>.0001098</li>
-     * <li>9.50499E-5</li>
-     * <li>6.08500E-5</li>
-     * <li>3.07000E-5</li>
-     * <li>1.53999E-5</li></ul>
-     * 
-     */
-    public static final float SINCOS_LUT_PRECISION = .00131f;
-	public static final int SINCOS_LUT_LENGTH = (int) Math.ceil(Math.PI*2 / SINCOS_LUT_PRECISION);
-    /**
-     * Use if the table's precision is large (eg .006 or greater).
-     * Although it is more expensive, it greatly increases
-     * accuracy.  Look in the MathUtils source for some test results
-     * on the accuracy and speed of lerp vs non lerp.  Or, run the tests
-     * yourself in {@link SinCosTest}.
-     */
-    public static final boolean SINCOS_LUT_LERP = false;
-    
-    
 
     // Define your unit system here. The default system is
     // meters-kilograms-seconds. For the tuning to work well,
@@ -87,12 +60,14 @@ public class Settings {
     // Use of these settings has been deprecated - they do not even
     // exist anymore in the C++ version of the engine, and future support
     // is unlikely.
+    @Deprecated
     public static final float lengthUnitsPerMeter = 1.0f;
+    @Deprecated
     public static final float massUnitsPerKilogram = 1.0f;
+    @Deprecated
     public static final float timeUnitsPerSecond = 1.0f;
 
     // Collision
-    
     public static final int maxManifoldPoints = 2;
     public static final int maxShapesPerBody = 64;
     public static final int maxPolygonVertices = 8;
@@ -114,7 +89,7 @@ public class Settings {
      * A small angle used as a gwt.ns.gwtbox2d.collision and constraint tolerance. Usually it is
      * chosen to be numerically significant, but visually insignificant.
 	 */
-    public static final float angularSlop = 2.0f / 180.0f * pi; // 2 degrees
+    public static final float angularSlop = (float) (2.0f / 180.0f * Math.PI); // 2 degrees
 
     /**
 	 * A velocity threshold for elastic collisions. Any gwt.ns.gwtbox2d.collision with a relative linear
@@ -133,7 +108,7 @@ public class Settings {
      * The maximum angular position correction used when solving constraints. This helps to
      * prevent overshoot.
      */
-    public static final float maxAngularCorrection = 8.0f / 180.0f * pi; // 8 degrees
+    public static final float maxAngularCorrection = (float) (8.0f / 180.0f * Math.PI); // 8 degrees
 
     /**
      * This scale factor controls how fast overlap is resolved. Ideally this would be 1 so
