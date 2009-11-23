@@ -21,7 +21,6 @@ package gwt.ns.transforms.client;
 	inverse (why? maybe wait until use case comes up for designing api)
 	
 	units?? ems, px, cm allowed in firefox at least...
-	skew?
 	shear?
 	copy constructor? get copy at all?
 	set transform origin (will need to store somehow for when full xform output to string)
@@ -129,5 +128,33 @@ public interface Transformable {
 	 * styling transform was
 	 */
 	public void reset();
+	
+	/**
+	 * Skews local coordinates around the X axis by the given angle
+	 * 
+	 * @param angle
+	 */
+	public void skewXLocal(double angle);
+	
+	/**
+	 * Skews local coordinates around the Y axis by the given angle
+	 * 
+	 * @param angle
+	 */
+	public void skewYLocal(double angle);
+	
+	/**
+	 * Skews view coordinates around the X axis by the given angle
+	 * 
+	 * @param angle
+	 */
+	public void skewXView(double angle);
+	
+	/**
+	 * Skews view coordinates around the Y axis by the given angle
+	 * 
+	 * @param angle
+	 */
+	public void skewYView(double angle);
 
 }

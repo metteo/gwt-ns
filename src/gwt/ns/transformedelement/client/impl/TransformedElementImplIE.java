@@ -23,16 +23,16 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 
 /**
- * Implementation of CSS transform for gecko browsers
- * will only work in 1.9.1 up to when standard is implemented
+ * Implementation of CSS transform for IE
  */
-public class TransformedElementImplGecko extends TransformedElement {
+public class TransformedElementImplIE extends TransformedElement {
 	protected Element target;
 	protected Style targetStyle;
 	
 	@Override
 	protected void initElement(Element elem) {
 		// we can directly instantiate default transform
+		// TODO: IE dom tree mangling for translations
 		transform = new TransformImplDefault();
 		target = elem;
 		targetStyle = target.getStyle();
@@ -40,20 +40,33 @@ public class TransformedElementImplGecko extends TransformedElement {
 
 	@Override
 	public void setTransform() {
-		targetStyle.setProperty("MozTransform", get2dCssString());
+		// TODO: this blows out any current filter
+		// consider: "filters.item('DXImageTransform.Microsoft.Matrix')"
+		targetStyle.setProperty("filter", get2dFilterString());
+	}
+	
+	/**
+	 * get the MsFilter string that will set the element to the current
+	 * transform
+	 * 
+	 * @return filter property string
+	 */
+	protected String get2dFilterString() {
+		StringBuilder str = new StringBuilder("progid:DXImageTransform.Microsoft.Matrix(");
+		str.append(  "M11=").append(transform.m11());
+		str.append(", M12=").append(transform.m12());
+		str.append(", M21=").append(transform.m21());
+		str.append(", M22=").append(transform.m22());
+		str.append(", DX=").append(transform.m14());
+		str.append(", DY=").append(transform.m24());
+		str.append(", SizingMethod = 'auto expand')");
+		
+		return str.toString();
 	}
 
 	@Override
 	public String get2dCssString() {
-			StringBuilder tmp = new StringBuilder("matrix(");
-			tmp.append(toFixed(transform.m11())).append(", ");
-			tmp.append(toFixed(transform.m21())).append(", ");
-			tmp.append(toFixed(transform.m12())).append(", ");
-			tmp.append(toFixed(transform.m22())).append(", ");
-			tmp.append(toFixed(transform.m14())).append("px, ");
-			tmp.append(toFixed(transform.m24())).append("px)");
-			
-			return tmp.toString();
+		return "";
 	}
 
 }

@@ -42,5 +42,18 @@ public class TransformedElementImplWebkit extends TransformedElement {
 	public void setTransform() {
 		targetStyle.setProperty("WebkitTransform", get2dCssString());
 	}
+	
+	@Override
+	public String get2dCssString() {
+			StringBuilder tmp = new StringBuilder("matrix(");
+			tmp.append(toFixed(transform.m11())).append(", ");
+			tmp.append(toFixed(transform.m21())).append(", ");
+			tmp.append(toFixed(transform.m12())).append(", ");
+			tmp.append(toFixed(transform.m22())).append(", ");
+			tmp.append(toFixed(transform.m14())).append(", ");
+			tmp.append(toFixed(transform.m24())).append(")");
+			
+			return tmp.toString();
+	}
 
 }

@@ -64,6 +64,17 @@ public class TransformImplWebkit extends Transform {
 		// possibly refactor to combine with viewScaleAtPoint
 		transform = transform.translate(px, py).scale(sx, sy).translate(-px, -py);
 	}
+	
+
+	@Override
+	public void skewXLocal(double angle) {
+		transform = transform.skewX(angle);
+	}
+
+	@Override
+	public void skewYLocal(double angle) {
+		transform = transform.skewY(angle);
+	}
 
 	@Override
 	public void translateLocal(double tx, double ty) {
@@ -108,6 +119,19 @@ public class TransformImplWebkit extends Transform {
 	@Override
 	public void translateView(double tx, double ty) {
 		WebKitCssMatrix trans = WebKitCssMatrix.newInstance().translate(tx, ty);
+		transform = transform.viewMultiply(trans);
+	}
+	
+
+	@Override
+	public void skewXView(double angle) {
+		WebKitCssMatrix trans = WebKitCssMatrix.newInstance().skewX(angle);
+		transform = transform.viewMultiply(trans);
+	}
+
+	@Override
+	public void skewYView(double angle) {
+		WebKitCssMatrix trans = WebKitCssMatrix.newInstance().skewY(angle);
 		transform = transform.viewMultiply(trans);
 	}
 
@@ -275,4 +299,5 @@ public class TransformImplWebkit extends Transform {
 	protected void setM44(double m44) {
 		transform.setM44(m44);
 	}
+
 }

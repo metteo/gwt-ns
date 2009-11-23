@@ -70,6 +70,33 @@ public class TransformImplDefault extends Transform {
 		Matrix4x4.translate(transform, tx, ty);
 	}
 
+
+	@Override
+	public void skewXLocal(double angle) {
+		Matrix4x4.skewX(transform, angle);
+	}
+
+	@Override
+	public void skewXView(double angle) {
+		Matrix4x4.identity(temp);
+		Matrix4x4.skewX(temp, angle);
+		
+		Matrix4x4.viewMultiply(transform, temp);
+	}
+
+	@Override
+	public void skewYLocal(double angle) {
+		Matrix4x4.skewY(transform, angle);
+	}
+
+	@Override
+	public void skewYView(double angle) {
+		Matrix4x4.identity(temp);
+		Matrix4x4.skewY(temp, angle);
+		
+		Matrix4x4.viewMultiply(transform, temp);
+	}
+	
 	@Override
 	public void rotateView(double angle) {
 		Matrix4x4.identity(temp);
