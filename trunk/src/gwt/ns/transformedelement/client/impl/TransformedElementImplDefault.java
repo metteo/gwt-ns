@@ -43,23 +43,23 @@ public class TransformedElementImplDefault extends TransformedElement {
 	}
 
 	@Override
-	public void rotateLocal(double angle) {
+	public void rotate(double angle) {
 	}
 
 	@Override
-	public void rotateAtPointLocal(double angle, double px, double py) {
+	public void rotateAtPoint(double angle, double px, double py) {
 	}
 
 	@Override
-	public void scaleLocal(double sx, double sy) {
+	public void scale(double sx, double sy) {
 	}
 
 	@Override
-	public void scaleAtPointLocal(double sx, double sy, double px, double py) {
+	public void scaleAtPoint(double sx, double sy, double px, double py) {
 	}
 
 	@Override
-	public void translateLocal(double tx, double ty) {
+	public void translate(double tx, double ty) {
 	}
 
 	@Override
@@ -87,11 +87,11 @@ public class TransformedElementImplDefault extends TransformedElement {
 	}
 
 	@Override
-	public void skewXLocal(double angle) {
+	public void skewX(double angle) {
 	}
 
 	@Override
-	public void skewYLocal(double angle) {
+	public void skewY(double angle) {
 	}
 	
 	@Override

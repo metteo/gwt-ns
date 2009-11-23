@@ -20,46 +20,56 @@ import gwt.ns.transforms.client.Transform;
 
 
 /**
- * Webkit Implementation of a CSS transformation.
- * Uses native functionality of Safari 4+ for matrix manipulations
- * see {@link WebKitCssMatrix} for further details
+ * Webkit Implementation of an affine transformation using native functionality
+ * of Safari 4+ and Chrome (v??) for matrix manipulations.
+ * See {@link WebKitCssMatrix} for further details.<br><br>
  * 
  * <em>Note:</em> WebKitCSSMatrix treats vectors as rows (sometimes called
  * row-major ordering), so this class adjusts where necessary to convert to
  * column major. This means local transforms happen on the left and view
- * transforms happen on the right. accessors (m11()) and setters (setM11())
- * access and set the transpose of what is implied by the method signature.
- * The result should be a column-major matrix to the user.
+ * transforms happen on the right. Accessors (e.g. m11()) and setters
+ * (setM11()) access and set the transpose of what is implied by the method
+ * signature.
+ * The result is a column-major matrix to the user, unifying
+ * transformations under what will hopefully be the future standard, based on
+ * the current SVG standard.<br><br>
+ * 
+ * The view vs. local choice has been made explicit in the method
+ * signatures: transforms are, by default, local transforms, unless the "view"
+ * variant is selected. If internal matrix entries are accessed,
+ * be aware that the translation vector can be found in the fourth column.
  *
  */
 public class TransformImplWebkit extends Transform {
+	// TODO: warning about memory? need to investigate efficiency of GC 
+	// for WebKitCssMatrix further.
 	private WebKitCssMatrix transform = WebKitCssMatrix.newInstance();
 	
 	/**
 	 * Construct a new 3D transform using webkit's native functionality,
-	 * set to identity
+	 * set to identity.
 	 */
 	public TransformImplWebkit() { }
 	
 	@Override
-	public void rotateLocal(double angle) {
+	public void rotate(double angle) {
 		transform = transform.rotate(angle);
 	}
 
 	@Override
-	public void rotateAtPointLocal(double angle, double px, double py) {
+	public void rotateAtPoint(double angle, double px, double py) {
 		// TODO: optimize this to reduce matrix creations and arithmetic.
 		// possibly refactor to combine with viewRotateAtPoint
 		transform = transform.translate(px, py).rotate(angle).translate(-px, -py);
 	}
 
 	@Override
-	public void scaleLocal(double sx, double sy) {
+	public void scale(double sx, double sy) {
 		transform = transform.scale(sx, sy);
 	}
 
 	@Override
-	public void scaleAtPointLocal(double sx, double sy, double px, double py) {
+	public void scaleAtPoint(double sx, double sy, double px, double py) {
 		// TODO: optimize this to reduce matrix creations and arithmetic,
 		// possibly refactor to combine with viewScaleAtPoint
 		transform = transform.translate(px, py).scale(sx, sy).translate(-px, -py);
@@ -67,17 +77,17 @@ public class TransformImplWebkit extends Transform {
 	
 
 	@Override
-	public void skewXLocal(double angle) {
+	public void skewX(double angle) {
 		transform = transform.skewX(angle);
 	}
 
 	@Override
-	public void skewYLocal(double angle) {
+	public void skewY(double angle) {
 		transform = transform.skewY(angle);
 	}
 
 	@Override
-	public void translateLocal(double tx, double ty) {
+	public void translate(double tx, double ty) {
 		transform = transform.translate(tx, ty);
 
 	}
@@ -85,54 +95,54 @@ public class TransformImplWebkit extends Transform {
 	@Override
 	public void rotateView(double angle) {
 		WebKitCssMatrix rot = WebKitCssMatrix.newInstance().rotate(angle);
-		transform = transform.viewMultiply(rot);
+		transform = transform.multiplyView(rot);
 	}
 
 	@Override
 	public void rotateAtPointView(double angle, double px, double py) {
 		// TODO: optimize this to reduce matrix creations and arithmetic.
 		// possibly refactor to combine with userRotateAtPoint
-		// TODO: check the order of ops on rot. should they be reversed?
+		// TODO: check the order of ops on rot.
 		WebKitCssMatrix rot = WebKitCssMatrix.newInstance();
 		rot = rot.translate(px, py).rotate(angle).translate(-px, -py);
 		
-		transform = transform.viewMultiply(rot);
+		transform = transform.multiplyView(rot);
 	}
 
 	@Override
 	public void scaleView(double sx, double sy) {
 		WebKitCssMatrix scale = WebKitCssMatrix.newInstance().scale(sx, sy);
-		transform = transform.viewMultiply(scale);
+		transform = transform.multiplyView(scale);
 	}
 
 	@Override
 	public void scaleAtPointView(double sx, double sy, double px, double py) {
 		// TODO: optimize this to reduce matrix creations and arithmetic,
 		// possibly refactor to combine with userScaleAtPoint
-		// TODO: check the order of ops on scale. should they be reversed?
+		// TODO: check the order of ops on scale.
 		WebKitCssMatrix scale = WebKitCssMatrix.newInstance();
 		scale = scale.translate(px, py).scale(sx, sy).translate(-px, -py);
 		
-		transform = transform.viewMultiply(scale);
+		transform = transform.multiplyView(scale);
 	}
 
 	@Override
 	public void translateView(double tx, double ty) {
 		WebKitCssMatrix trans = WebKitCssMatrix.newInstance().translate(tx, ty);
-		transform = transform.viewMultiply(trans);
+		transform = transform.multiplyView(trans);
 	}
 	
 
 	@Override
 	public void skewXView(double angle) {
 		WebKitCssMatrix trans = WebKitCssMatrix.newInstance().skewX(angle);
-		transform = transform.viewMultiply(trans);
+		transform = transform.multiplyView(trans);
 	}
 
 	@Override
 	public void skewYView(double angle) {
 		WebKitCssMatrix trans = WebKitCssMatrix.newInstance().skewY(angle);
-		transform = transform.viewMultiply(trans);
+		transform = transform.multiplyView(trans);
 	}
 
 	@Override

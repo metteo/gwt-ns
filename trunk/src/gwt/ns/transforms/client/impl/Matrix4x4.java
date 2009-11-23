@@ -17,27 +17,36 @@
 package gwt.ns.transforms.client.impl;
 
 /**
- * 4x4 matrix for representation of affine transformations
- * (in homogenous coordinates)
- * interfaces for 2d and 3d transformations, based on CSSMatrix
+ * 4x4 matrix for representation of affine transformations (in homogenous
+ * coordinates). Interfaces for 2d and 3d transformations based on CSSMatrix
+ * 
+ * Most transformation methods are static to allow user to manage
+ * memory usage (most methods on CSSMatrix return new matrices).
+ * Note that this, at least for now, precludes relying on e.g. webkit's native
+ * implementation, and thus hardware acceleration(?) on some platforms
+ * 
  * @see <a href="http://www.w3.org/TR/css3-2d-transforms/">W3C 2D Transforms Draft</a> 
  * @see <a href="http://www.w3.org/TR/css3-3d-transforms/">W3C 3D Transforms Draft</a>
- * 
- * most transformation methods are static to allow user to manage
- * memory usage (most methods on CSSMatrix return new matrices)
- * note that this, at least for now, precludes relying on e.g. safari's native
- * implementation, and thus hardware acceleration(?) on iphone
  *
  */
 public class Matrix4x4 {
-	// representation of matrix
-	// first number is row number, second is column num
-	public double m11, m21, m31, m41, m12, m22, m32, m42, m13, m23, m33, m43,
-					m14, m24, m34, m44;
+	/**
+	 * Internal representation of a matrix entry.
+	 * First number is row number, second is column number.
+	 */
+	protected double m11, m21, m31, m41, m12, m22, m32, m42, m13, m23, m33,
+					m43, m14, m24, m34, m44;
 	
-	// "scratch" matrices needed for multiplication and transformations
-	// declared static since we are single threaded
+	/**
+	 * "Scratch" matrix needed for multiplication. Declared static since we are
+	 * single threaded.
+	 */
 	private static Matrix4x4 multm = new Matrix4x4();
+	
+	/**
+	 * "Scratch" matrix needed for transformations. Declared static since we
+	 * are single threaded.
+	 */
 	private static Matrix4x4 tempm = new Matrix4x4();
 	
 	/**
@@ -48,14 +57,18 @@ public class Matrix4x4 {
 	}
 	
 	/**
-	 * Multiply matrix a by b, store result in dest:
-	 * dest = a*b
+	 * Multiplies matrix a by b and stores the result in dest.
+	 * dest can be any Matrix4x4, including a or b, which will be overwritten
+	 * if specified.
+	 * 
+	 * <pre>dest = a*b</pre>
 	 * 
 	 * @param a left-hand matrix
 	 * @param b right-hand matrix
-	 * @param dest result of multiplication, can be a or b, which will be overwritten
+	 * @param dest result of multiplication
 	 */
-	public static final void multiply(Matrix4x4 a, Matrix4x4 b, Matrix4x4 dest) {	
+	public static final void multiply(Matrix4x4 a, Matrix4x4 b, Matrix4x4 dest) {
+		// results stored in multm scratch matrix
 		multm.m11 = a.m11*b.m11 + a.m12*b.m21 + a.m13*b.m31 + a.m14*b.m41;
 		multm.m12 = a.m11*b.m12 + a.m12*b.m22 + a.m13*b.m32 + a.m14*b.m42;
 		multm.m13 = a.m11*b.m13 + a.m12*b.m23 + a.m13*b.m33 + a.m14*b.m43;
@@ -76,23 +89,23 @@ public class Matrix4x4 {
 		multm.m43 = a.m41*b.m13 + a.m42*b.m23 + a.m43*b.m33 + a.m44*b.m41;
 		multm.m44 = a.m41*b.m14 + a.m42*b.m24 + a.m43*b.m34 + a.m44*b.m44;
 		
-		// copy result to dest
+		// and copied to dest
 		copy(multm, dest);
 	}
 	
 	/**
-	 * Rotates matrix target by angle theta in user coordinates
+	 * Rotates matrix target by angle in <em>local</em> coordinates.<br><br>
 	 * 
-	 * Note: due to the implicit viewport transform (+y points down on the
-	 * screen), positive angles rotate clockwise.
+	 * <strong>Note:</strong> due to the implicit viewport transform (+y points
+	 * down on the screen), positive angles rotate clockwise.
 	 * 
-	 * @param angle The angle of rotation in degrees.
+	 * @param angle The angle of rotation, in degrees.
 	 * @param target The matrix that is to be rotated
 	 */
-	public static final void rotate(Matrix4x4 target, double theta) {
-		theta = Math.toRadians(theta);
-		double cos = Math.cos(theta);
-		double sin = Math.sin(theta);
+	public static final void rotate(Matrix4x4 target, double angle) {
+		angle = Math.toRadians(angle);
+		double cos = Math.cos(angle);
+		double sin = Math.sin(angle);
 		
 		identity(tempm);
 		tempm.m11 = cos;
@@ -100,56 +113,72 @@ public class Matrix4x4 {
 		tempm.m21 = sin;
 		tempm.m22 = cos;
 		
-		localMultiply(target, tempm);
+		multiplyLocal(target, tempm);
 	}
 	/**
-	 * Scales target matrix by the given vector in user coordinates
+	 * Scales target matrix by the given vector in <em>local</em> coordinates
 	 * 
-	 * @param scaleX The x component in the vector.
-	 * @param scaleY The y component in the vector.
-	 * @return A new matrix that is the result of scaling this matrix.
+	 * @param target The matrix that is to be scaled.
+	 * @param sx The x component in the scale vector.
+	 * @param sy The y component in the scale vector.
 	 */
 	public static final void scale(Matrix4x4 target, double sx, double sy) {
 		identity(tempm);
 		tempm.m11 = sx;
 		tempm.m22 = sy;
 		
-		localMultiply(target, tempm);
+		multiplyLocal(target, tempm);
 	}
 	
 	/**
-	 * Translates this matrix by a given vector in local coordinates.
+	 * Translates the target matrix by a given vector, in <em>local</em>
+	 * coordinates.
 	 * 
-	 * @param x The x component in the vector.
-	 * @param y The y component in the vector.
+	 * @param target The matrix that is to be translated.
+	 * @param tx The x component in the vector.
+	 * @param ty The y component in the vector.
 	 */
 	public static final void translate(Matrix4x4 target, double tx, double ty) {
 		identity(tempm);
 		tempm.m14 = tx;
 		tempm.m24 = ty;
 		
-		localMultiply(target, tempm);
+		multiplyLocal(target, tempm);
 	}
 	
+	/**
+	 * Skews the target matrix around the x-axis by the given angle, in
+	 * <em>local</em> coordinates.
+	 * 
+	 * @param target The matrix that is to be skewed.
+	 * @param angle The angle of the skew.
+	 */
 	public static final void skewX(Matrix4x4 target, double angle) {
 		identity(tempm);
 		tempm.m12 = Math.tan(Math.toRadians(angle));
 		
-		localMultiply(target, tempm);
+		multiplyLocal(target, tempm);
 	}
 	
+	/**
+	 * Skews the target matrix around the y-axis by the given angle, in
+	 * <em>local</em> coordinates.
+	 * 
+	 * @param target The matrix that is to be skewed.
+	 * @param angle The angle of the skew.
+	 */
 	public static final void skewY(Matrix4x4 target, double angle) {
 		identity(tempm);
 		tempm.m21 = Math.tan(Math.toRadians(angle));
 		
-		localMultiply(target, tempm);
+		multiplyLocal(target, tempm);
 	}
 	
 	/**
-	 * copies matrix data from src into dest
+	 * Copies matrix data from src into dest.
 	 * 
-	 * @param src the source matrix
-	 * @param dest the destination matrix
+	 * @param src The source matrix
+	 * @param dest The destination matrix
 	 */
 	public static final void copy(Matrix4x4 src, Matrix4x4 dest) {
 		dest.m11 = src.m11; dest.m12 = src.m12; dest.m13 = src.m13; dest.m14 = src.m14;
@@ -159,34 +188,34 @@ public class Matrix4x4 {
 	}
 	
 	/**
-	 * set an Matrix4x4 to the identity matrix
+	 * Set a Matrix4x4 to the identity matrix.
 	 * 
-	 * @param matrix the Matrix4x4 to alter
+	 * @param target The Matrix4x4 to reset.
 	 */
-	public static final void identity(Matrix4x4 matrix) {
-		matrix.m11 = 1; matrix.m12 = 0; matrix.m13 = 0; matrix.m14 = 0;
-		matrix.m21 = 0; matrix.m22 = 1; matrix.m23 = 0; matrix.m24 = 0;
-		matrix.m31 = 0; matrix.m32 = 0; matrix.m33 = 1; matrix.m34 = 0;
-		matrix.m41 = 0; matrix.m42 = 0; matrix.m43 = 0; matrix.m44 = 1;
+	public static final void identity(Matrix4x4 target) {
+		target.m11 = 1; target.m12 = 0; target.m13 = 0; target.m14 = 0;
+		target.m21 = 0; target.m22 = 1; target.m23 = 0; target.m24 = 0;
+		target.m31 = 0; target.m32 = 0; target.m33 = 1; target.m34 = 0;
+		target.m41 = 0; target.m42 = 0; target.m43 = 0; target.m44 = 1;
 	}
 	
 	/**
-	 * Applies a transform in local coordinates to the target matrix
+	 * Applies a transform in <em>local</em> coordinates to the target matrix.
 	 * 
-	 * @param target Matrix to apply the transform to, in local coordinates
-	 * @param transform The transform to apply
+	 * @param target The matrix to apply the transform to.
+	 * @param transform The transform to apply.
 	 */
-	public static final void localMultiply(Matrix4x4 target, Matrix4x4 transform) {
+	public static final void multiplyLocal(Matrix4x4 target, Matrix4x4 transform) {
 		multiply(target, transform, target);
 	}
 	
 	/**
-	 * Applies a transform in view coordinates to the target matrix
+	 * Applies a transform in <em>view</em> coordinates to the target matrix.
 	 * 
 	 * @param target Matrix to apply the transform to, in view coordinates
 	 * @param transform The transform to apply
 	 */
-	public static final void viewMultiply(Matrix4x4 target, Matrix4x4 transform) {
+	public static final void multiplyView(Matrix4x4 target, Matrix4x4 transform) {
 		multiply(transform, target, target);
 	}
 	

@@ -19,23 +19,29 @@ package gwt.ns.transforms.client.impl;
 import com.google.gwt.core.client.JavaScriptObject;
 
 /**
- * Overlay for Webkit's WebKitCSSMatrix object
- * allows use of native browser functionality where available (and
- * possibly hardware acceleration on iphone, etc)
- * This overlay will be very close to the future standardized CSSMatrix.
+ * Overlay for Webkit's WebKitCSSMatrix object. This class
+ * allows the use of native browser functionality where available (and
+ * possibly hardware acceleration on iphone, etc).
+ * This overlay will be very close to the future standardized CSSMatrix.<br><br>
  * 
- * Note that most methods return a new matrix and GC can be treacherous.
+ * Note that most methods return a new matrix object and GC can be
+ * treacherous.<br><br>
  * 
  * Note also that this code uses row vectors for points, which need to be
  * multiplied on the left. That also means that you must premultiply to make a
- * transform in local coordinates, postmultiply to make change in screen.
- * You will also find entries at the transpose of the positions found in many
- * graphics texts. e.g. translation in x is found in m41, not m14
+ * transform in local coordinates andpostmultiply to make change in view
+ * coordinates. You will also find entries at the transpose of the positions
+ * found in many graphics texts (unless you go back to the 70s).<br><br>
+ * 
+ * e.g. translation in x is found in m41, not m14.<br><br>
  * 
  * This does not seem to be what is implied in the W3C drafts, which refer to
- * the svg spec (see <http://www.w3.org/TR/SVG/coords.html#NestedTransformations>here</a>),
- * but is internally consistent. Should only be an issue if you construct a
- * matrix by setting individual matrix entries.
+ * the SVG spec (see <http://www.w3.org/TR/SVG/coords.html#NestedTransformations>here</a>),
+ * but webkit is internally consistent, and this is not the place for advocacy.
+ * The transpose nature of this matrix should only be an issue if you construct a
+ * matrix by setting individual matrix entries <em>via this class</em>.<br><br>
+ * 
+ * TODO: edit this javadoc entry down =)
  * 
  * @see <a href='http://www.w3.org/TR/css3-2d-transforms/#cssmatrix-interface>W3C draft specification of CSSMatrix</a>
  * @see <a href='http://svn.webkit.org/repository/webkit/trunk/WebCore/css/WebKitCSSMatrix.idl'>WebKitCSSMatrix idl</a>
@@ -45,24 +51,13 @@ public class WebKitCssMatrix extends JavaScriptObject {
 	protected WebKitCssMatrix() { }
 	
 	/**
-	 * Returns a new matrix, set to identity
+	 * Construct a new matrix, set to identity.
 	 * 
-	 * @return A new WebKitCssMatrix set to the identity
+	 * @return A new WebKitCssMatrix, set to the identity.
 	 */
 	public static final native WebKitCssMatrix newInstance() /*-{
 		return new WebKitCSSMatrix();
 	}-*/;
-	
-	/**
-	 * Return a copy of this matrix.
-	 * This matrix is not modified.
-	 * 
-	 * @return a copy of the current matrix.
-	 */
-	public final WebKitCssMatrix getCopy() {
-		// not a great method, but should be fast
-		return translate(0, 0);
-	}
 	
 	/**
 	 * Returns the inverse of this matrix. This matrix is not modified.
@@ -88,34 +83,35 @@ public class WebKitCssMatrix extends JavaScriptObject {
 	}-*/;
 	
 	/**
-	 * Applies a transform in view coordinates to this matrix and returns
-	 * the resulting matrix. This matrix is not modified by this method.
+	 * Applies a transformation to this matrix in <em>view</em> coordinates
+	 * and returns the resulting matrix. This matrix is not modified by this
+	 * method.
 	 * 
 	 * @param secondMatrix The transform to apply
-	 * @return the transformed matrix
+	 * @return The transformed matrix
 	 */
-	public final WebKitCssMatrix viewMultiply(WebKitCssMatrix secondMatrix) {
+	public final WebKitCssMatrix multiplyView(WebKitCssMatrix secondMatrix) {
 		return multiply(secondMatrix);
 	}
 	
 	/**
-	 * Applies a transform in local coordinates to this matrix and returns
-	 * the resulting matrix. This matrix is not modified by this method.
+	 * Applies a transformation to this matrix in <em>local</em> coordinates
+	 * and returns the resulting matrix. This matrix is not modified by this
+	 * method.
 	 * 
 	 * @param secondMatrix The transform to apply
-	 * @return the transformed matrix
+	 * @return The transformed matrix
 	 */
-	public final WebKitCssMatrix localMultiply(WebKitCssMatrix secondMatrix) {
+	public final WebKitCssMatrix multiplyLocal(WebKitCssMatrix secondMatrix) {
 		return secondMatrix.multiply(this);
 	}
 	
 	/**
-	 * The rotate method returns a new matrix which is this matrix post
-	 * multiplied by a rotation matrix. The rotation value is in degrees.
-	 * This matrix is not modified.
+	 * Returns a copy of this matrix rotated by angle in <em>local</em>
+	 * coordinates. This matrix is not modified by this method.<br><br>
 	 * 
-	 * Note: due to the implicit viewport transform (+y points down on the
-	 * screen), positive angles rotate clockwise.
+	 * <strong>Note:</strong> due to the implicit viewport transform (+y points
+	 * down on the screen), positive angles rotate clockwise.
 	 * 
 	 * @param angle The angle of rotation in degrees.
 	 * @return A matrix that is a rotation of this matrix by angle degrees
@@ -125,11 +121,12 @@ public class WebKitCssMatrix extends JavaScriptObject {
 	}-*/;
 	
 	/**
-	 * Returns the result of scaling this matrix by the given vector
+	 * Returns the result of scaling this matrix by the given vector in
+	 * <em>local</em> coordinates. 
 	 * This matrix is not modified by this method.
 	 * 
-	 * @param scaleX The x component in the vector.
-	 * @param scaleY The y component in the vector.
+	 * @param scaleX The x-component of the scaling vector.
+	 * @param scaleY The y-component of the scaling vector.
 	 * @return A new matrix that is the result of scaling this matrix.
 	 */
 	public final native WebKitCssMatrix scale(double scaleX, double scaleY) /*-{
@@ -138,11 +135,11 @@ public class WebKitCssMatrix extends JavaScriptObject {
 	
 	
 	/**
-	 * Replaces existing matrix with identity matrix
+	 * Reset this matrix to the identity matrix.
 	 */
 	public final native void setToIdentity()  /*-{
 		// ugly, but the only other option seems to be
-		// setMatrixValue('translate(0)'); or the like
+		// setMatrixValue('translate(0)') or the like
 		this.m11 = this.m22 = this.m33 = this.m44 = 1;
 		this.m21 = this.m31 = this.m41 = 0;
 		this.m12 = this.m32 = this.m42 = 0;
@@ -151,41 +148,41 @@ public class WebKitCssMatrix extends JavaScriptObject {
 	}-*/;
 	
 	/**
-	 * Returns the result of skewing this matrix around the X axis by the
-	 * given angle.
+	 * Returns the result of skewing this matrix around the x-axis by the
+	 * given angle, in local coordinates.
 	 * This matrix is not modified by this method.
 	 * 
-	 * @param angle
-	 * @return A new, skewed matrix
+	 * @param angle The angle of the skew
+	 * @return A new matrix that is the result of skewing this matrix.
 	 */
 	public final WebKitCssMatrix skewX(double angle) {
 		WebKitCssMatrix tmp = WebKitCssMatrix.newInstance();
 		tmp.setM21(Math.tan(Math.toRadians(angle)));
 		
-		return localMultiply(tmp);
+		return multiplyLocal(tmp);
 	}
 	
 	/**
-	 * Returns the result of skewing this matrix around the X axis by the
-	 * given angle.
+	 * Returns the result of skewing this matrix around the y-axis by the
+	 * given angle, in local coordinates.
 	 * This matrix is not modified by this method.
 	 * 
-	 * @param angle
-	 * @return A new, skewed matrix
+	 * @param angle The angle of the skew
+	 * @return A new matrix that is the result of skewing this matrix.
 	 */
 	public final WebKitCssMatrix skewY(double angle) {
 		WebKitCssMatrix tmp = WebKitCssMatrix.newInstance();
 		tmp.setM12(Math.tan(Math.toRadians(angle)));
 		
-		return localMultiply(tmp);
+		return multiplyLocal(tmp);
 	}
 	
 	/**
-	 * Returns the result of translating this matrix by a given vector.
-	 * This matrix is not modified by this method.
+	 * Returns the result of translating this matrix by a given vector, in
+	 * local coordinates. This matrix is not modified by this method.
 	 * 
-	 * @param x The x component in the vector.
-	 * @param y The y component in the vector.
+	 * @param x The x-component in the vector.
+	 * @param y The y-component in the vector.
 	 * @return A new matrix that is the result of translating this matrix.
 	 */
 	public final native WebKitCssMatrix translate(double x, double y) /*-{
@@ -206,7 +203,6 @@ public class WebKitCssMatrix extends JavaScriptObject {
 		return this.setMatrixValue(matString);
 	}-*/;
 	
-	// not ideal, but will have to do. gwt should inline everything
 	// access elements of the matrix
 	// note that WebKitCSSMatrix is in row-major ordering
 	public final native double m11() /*-{ return this.m11; }-*/;

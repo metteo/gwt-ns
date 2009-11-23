@@ -19,31 +19,41 @@ package gwt.ns.transforms.client.impl;
 import gwt.ns.transforms.client.Transform;
 
 /**
- * Java implementation of a 3d transformation using a 4x4 matrix.
+ * Java implementation of an affine transformation using a 4x4 matrix.<br><br>
  * 
  * <em>Note:</em> This implementation (for now) is column-major, per W3C SVG
- * specifications, so user transforms are done on the right, view transforms
- * are done on the left.
+ * specifications, so local transforms are done on the right, view transforms
+ * are done on the left. This choice has been made explicit in the method
+ * signatures: transforms are, by default, local transforms, unless the "view"
+ * variant is selected. If internal matrix entries are accessed, however,
+ * be aware that the translation vector can be found in the fourth column.
  *
  */
 public class TransformImplDefault extends Transform {
-	Matrix4x4 transform = new Matrix4x4();
+	/**
+	 * Representation of current transform
+	 */
+	protected Matrix4x4 transform = new Matrix4x4();
 	
+	/**
+	 * "Scratch" matrix needed for transformations.
+	 * TODO: Investigate making static to save memory.
+	 */
 	private Matrix4x4 temp = new Matrix4x4();
 	
 	
 	/**
-	 * Construct a new 3D transform, set to identity
+	 * Construct a new transform, set to identity
 	 */
 	public TransformImplDefault() { }
 	
 	@Override
-	public void rotateLocal(double angle) {
+	public void rotate(double angle) {
 		Matrix4x4.rotate(transform, angle);
 	}
 
 	@Override
-	public void rotateAtPointLocal(double angle, double px, double py) {
+	public void rotateAtPoint(double angle, double px, double py) {
 		// TODO: optimize this to reduce matrix operations.
 		// possibly refactor to combine with viewRotateAtPoint
 		Matrix4x4.translate(transform, px, py);
@@ -52,12 +62,12 @@ public class TransformImplDefault extends Transform {
 	}
 
 	@Override
-	public void scaleLocal(double sx, double sy) {
+	public void scale(double sx, double sy) {
 		Matrix4x4.scale(transform, sx, sy);
 	}
 
 	@Override
-	public void scaleAtPointLocal(double sx, double sy, double px, double py) {
+	public void scaleAtPoint(double sx, double sy, double px, double py) {
 		// TODO: optimize this to reduce matrix operations,
 		// possibly refactor to combine with viewScaleAtPoint
 		Matrix4x4.translate(transform, px, py);
@@ -66,13 +76,13 @@ public class TransformImplDefault extends Transform {
 	}
 
 	@Override
-	public void translateLocal(double tx, double ty) {
+	public void translate(double tx, double ty) {
 		Matrix4x4.translate(transform, tx, ty);
 	}
 
 
 	@Override
-	public void skewXLocal(double angle) {
+	public void skewX(double angle) {
 		Matrix4x4.skewX(transform, angle);
 	}
 
@@ -81,11 +91,9 @@ public class TransformImplDefault extends Transform {
 		Matrix4x4.identity(temp);
 		Matrix4x4.skewX(temp, angle);
 		
-		Matrix4x4.viewMultiply(transform, temp);
+		Matrix4x4.multiplyView(transform, temp);
 	}
-
-	@Override
-	public void skewYLocal(double angle) {
+	public void skewY(double angle) {
 		Matrix4x4.skewY(transform, angle);
 	}
 
@@ -94,7 +102,7 @@ public class TransformImplDefault extends Transform {
 		Matrix4x4.identity(temp);
 		Matrix4x4.skewY(temp, angle);
 		
-		Matrix4x4.viewMultiply(transform, temp);
+		Matrix4x4.multiplyView(transform, temp);
 	}
 	
 	@Override
@@ -102,7 +110,7 @@ public class TransformImplDefault extends Transform {
 		Matrix4x4.identity(temp);
 		Matrix4x4.rotate(temp, angle);
 		
-		Matrix4x4.viewMultiply(transform, temp);
+		Matrix4x4.multiplyView(transform, temp);
 	}
 
 	@Override
@@ -115,15 +123,15 @@ public class TransformImplDefault extends Transform {
 		Matrix4x4.rotate(temp, angle);
 		Matrix4x4.translate(temp, -px, -py);
 		
-		Matrix4x4.viewMultiply(transform, temp);
+		Matrix4x4.multiplyView(transform, temp);
 	}
-
+	
 	@Override
 	public void scaleView(double sx, double sy) {
 		Matrix4x4.identity(temp);
 		Matrix4x4.scale(temp, sx, sy);
 		
-		Matrix4x4.viewMultiply(transform, temp);
+		Matrix4x4.multiplyView(transform, temp);
 	}
 
 	@Override
@@ -136,15 +144,14 @@ public class TransformImplDefault extends Transform {
 		Matrix4x4.scale(temp, sx, sy);
 		Matrix4x4.translate(temp, -px, -py);
 		
-		Matrix4x4.viewMultiply(transform, temp);
+		Matrix4x4.multiplyView(transform, temp);
 	}
 
 	@Override
 	public void translateView(double tx, double ty) {
-		Matrix4x4.identity(temp);
-		Matrix4x4.translate(temp, tx, ty);
-		
-		Matrix4x4.viewMultiply(transform, temp);
+		// skip the extra matrix work
+		transform.m14 += tx;
+		transform.m24 += ty;
 	}
 
 	@Override

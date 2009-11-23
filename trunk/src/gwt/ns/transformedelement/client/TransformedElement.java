@@ -70,8 +70,8 @@ public abstract class TransformedElement implements Transformable {
 	 * Returns the 2 dimensional matrix transform function property per
 	 * CSS3 2D Transforms Draft<br><br>
 	 * 
-	 * Specifies the current 2D transformation in the form of a transformation
-	 * matrix of six values.<br><br>
+	 * Specifies the current 2D transformation in the form of an augmented
+	 * 2x2 transformation matrix and translation vector.<br><br>
 	 * 
 	 * It's not completely clear who will prevail on the subject of a length unit for
 	 * the translation vector. It makes sense in other contexts, but doesn't make
@@ -103,28 +103,28 @@ public abstract class TransformedElement implements Transformable {
 	}
 	
 	@Override
-	public void rotateLocal(double angle) {
-		transform.rotateLocal(angle);
+	public void rotate(double angle) {
+		transform.rotate(angle);
 	}
 
 	@Override
-	public void rotateAtPointLocal(double angle, double px, double py) {
-		transform.rotateAtPointLocal(angle, px, py);
+	public void rotateAtPoint(double angle, double px, double py) {
+		transform.rotateAtPoint(angle, px, py);
 	}
 
 	@Override
-	public void scaleLocal(double sx, double sy) {
-		transform.scaleLocal(sx, sy);
+	public void scale(double sx, double sy) {
+		transform.scale(sx, sy);
 	}
 
 	@Override
-	public void scaleAtPointLocal(double sx, double sy, double px, double py) {
-		transform.scaleAtPointLocal(sx, sy, px, py);
+	public void scaleAtPoint(double sx, double sy, double px, double py) {
+		transform.scaleAtPoint(sx, sy, px, py);
 	}
 
 	@Override
-	public void translateLocal(double tx, double ty) {
-		transform.translateLocal(tx, ty);
+	public void translate(double tx, double ty) {
+		transform.translate(tx, ty);
 	}
 
 	@Override
@@ -158,13 +158,13 @@ public abstract class TransformedElement implements Transformable {
 	}
 
 	@Override
-	public void skewXLocal(double angle) {
-		transform.skewXLocal(angle);
+	public void skewX(double angle) {
+		transform.skewX(angle);
 	}
 
 	@Override
-	public void skewYLocal(double angle) {
-		transform.skewYLocal(angle);
+	public void skewY(double angle) {
+		transform.skewY(angle);
 	}
 	
 	@Override
