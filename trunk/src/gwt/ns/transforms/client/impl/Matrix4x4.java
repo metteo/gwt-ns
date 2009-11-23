@@ -38,8 +38,6 @@ public class Matrix4x4 {
 	// "scratch" matrices needed for multiplication and transformations
 	// declared static since we are single threaded
 	private static Matrix4x4 multm = new Matrix4x4();
-	
-	
 	private static Matrix4x4 tempm = new Matrix4x4();
 	
 	/**
@@ -57,7 +55,7 @@ public class Matrix4x4 {
 	 * @param b right-hand matrix
 	 * @param dest result of multiplication, can be a or b, which will be overwritten
 	 */
-	public static final void multiply(Matrix4x4 a, Matrix4x4 b, Matrix4x4 dest) {		
+	public static final void multiply(Matrix4x4 a, Matrix4x4 b, Matrix4x4 dest) {	
 		multm.m11 = a.m11*b.m11 + a.m12*b.m21 + a.m13*b.m31 + a.m14*b.m41;
 		multm.m12 = a.m11*b.m12 + a.m12*b.m22 + a.m13*b.m32 + a.m14*b.m42;
 		multm.m13 = a.m11*b.m13 + a.m12*b.m23 + a.m13*b.m33 + a.m14*b.m43;
@@ -102,7 +100,7 @@ public class Matrix4x4 {
 		tempm.m21 = sin;
 		tempm.m22 = cos;
 		
-		userMultiply(target, tempm);
+		localMultiply(target, tempm);
 	}
 	/**
 	 * Scales target matrix by the given vector in user coordinates
@@ -116,23 +114,36 @@ public class Matrix4x4 {
 		tempm.m11 = sx;
 		tempm.m22 = sy;
 		
-		userMultiply(target, tempm);
+		localMultiply(target, tempm);
 	}
 	
 	/**
-	 * Translates this matrix by a given vector in user coordinates.
+	 * Translates this matrix by a given vector in local coordinates.
 	 * 
 	 * @param x The x component in the vector.
 	 * @param y The y component in the vector.
 	 */
 	public static final void translate(Matrix4x4 target, double tx, double ty) {
 		identity(tempm);
-		tempm.m13 = tx;
-		tempm.m23 = ty;
+		tempm.m14 = tx;
+		tempm.m24 = ty;
 		
-		userMultiply(target, tempm);
+		localMultiply(target, tempm);
 	}
 	
+	public static final void skewX(Matrix4x4 target, double angle) {
+		identity(tempm);
+		tempm.m12 = Math.tan(Math.toRadians(angle));
+		
+		localMultiply(target, tempm);
+	}
+	
+	public static final void skewY(Matrix4x4 target, double angle) {
+		identity(tempm);
+		tempm.m21 = Math.tan(Math.toRadians(angle));
+		
+		localMultiply(target, tempm);
+	}
 	
 	/**
 	 * copies matrix data from src into dest
@@ -156,16 +167,16 @@ public class Matrix4x4 {
 		matrix.m11 = 1; matrix.m12 = 0; matrix.m13 = 0; matrix.m14 = 0;
 		matrix.m21 = 0; matrix.m22 = 1; matrix.m23 = 0; matrix.m24 = 0;
 		matrix.m31 = 0; matrix.m32 = 0; matrix.m33 = 1; matrix.m34 = 0;
-		matrix.m41 = 0; matrix.m42 = 0; matrix.m43 = 1; matrix.m44 = 0;
+		matrix.m41 = 0; matrix.m42 = 0; matrix.m43 = 0; matrix.m44 = 1;
 	}
 	
 	/**
-	 * Applies a transform in user coordinates to the target matrix
+	 * Applies a transform in local coordinates to the target matrix
 	 * 
-	 * @param target Matrix to apply the transform to, in view coordinates
+	 * @param target Matrix to apply the transform to, in local coordinates
 	 * @param transform The transform to apply
 	 */
-	public static final void userMultiply(Matrix4x4 target, Matrix4x4 transform) {
+	public static final void localMultiply(Matrix4x4 target, Matrix4x4 transform) {
 		multiply(target, transform, target);
 	}
 	

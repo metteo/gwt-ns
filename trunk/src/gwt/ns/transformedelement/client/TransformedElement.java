@@ -36,6 +36,8 @@ public abstract class TransformedElement implements Transformable {
 	// TODO: setToIdentity vs reset to initial state? (see above)
 	
 	protected Transform transform;
+	
+	protected static final int STYLE_PRECISION = 10;
 	 
 	protected TransformedElement() { }
 	
@@ -65,26 +67,39 @@ public abstract class TransformedElement implements Transformable {
 	protected abstract void initElement(Element elem);
 	
 	/**
-	 * returns the 2 dimensional matrix transform function property per
-	 * CSS3 2D Transforms Draft
+	 * Returns the 2 dimensional matrix transform function property per
+	 * CSS3 2D Transforms Draft<br><br>
 	 * 
-	 * specifies the current 2D transformation in the form of a transformation
-	 * matrix of six values.
+	 * Specifies the current 2D transformation in the form of a transformation
+	 * matrix of six values.<br><br>
+	 * 
+	 * It's not completely clear who will prevail on the subject of a length unit for
+	 * the translation vector. It makes sense in other contexts, but doesn't make
+	 * complete sense in the midst of a bunch of other unitless numbers.<br><br>
+	 * 
+	 * Regardless, currently, firefox needs a unit, webkit does not.<br><br>
 	 * 
 	 * @see <a href="http://www.w3.org/TR/css3-2d-transforms/#transform-functions">CSS3 2D Transforms</a>
 	 * 
 	 * @return
 	 */
-	public String get2dCssString() {
-		StringBuffer tmp = new StringBuffer("matrix(");
-		tmp.append(transform.m11()).append(", ");
-		tmp.append(transform.m21()).append(", ");
-		tmp.append(transform.m12()).append(", ");
-		tmp.append(transform.m22()).append(", ");
-		tmp.append(transform.m14()).append(", ");
-		tmp.append(transform.m24()).append(")");
-		
-		return tmp.toString();
+	public abstract String get2dCssString();
+	
+	/**
+	 * not ideal, but lightweight. convert a floating point number to a string
+	 * with the specified number of digits after the decimal place (note:
+	 * that's not *total* digits)
+	 * 
+	 * @param value to round and convert
+	 * @param numDigits	number of digits after the decimal point
+	 * @return
+	 */
+	protected final native String toFixed(double value, int numDigits) /*-{
+		return value.toFixed(numDigits);
+	}-*/;
+	
+	protected String toFixed(double value) {
+		return toFixed(value, STYLE_PRECISION);
 	}
 	
 	@Override
@@ -140,5 +155,25 @@ public abstract class TransformedElement implements Transformable {
 	@Override
 	public void reset() {
 		transform.reset();
+	}
+
+	@Override
+	public void skewXLocal(double angle) {
+		transform.skewXLocal(angle);
+	}
+
+	@Override
+	public void skewYLocal(double angle) {
+		transform.skewYLocal(angle);
+	}
+	
+	@Override
+	public void skewXView(double angle) {
+		transform.skewXView(angle);
+	}
+
+	@Override
+	public void skewYView(double angle) {
+		transform.skewYView(angle);
 	}
 }

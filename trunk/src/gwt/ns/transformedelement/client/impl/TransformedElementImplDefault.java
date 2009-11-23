@@ -86,4 +86,20 @@ public class TransformedElementImplDefault extends TransformedElement {
 	public void translateView(double tx, double ty) {
 	}
 
+	@Override
+	public void skewXLocal(double angle) {
+	}
+
+	@Override
+	public void skewYLocal(double angle) {
+	}
+	
+	@Override
+	public void skewXView(double angle) {
+	}
+
+	@Override
+	public void skewYView(double angle) {
+	}
+
 }

@@ -151,6 +151,36 @@ public class WebKitCssMatrix extends JavaScriptObject {
 	}-*/;
 	
 	/**
+	 * Returns the result of skewing this matrix around the X axis by the
+	 * given angle.
+	 * This matrix is not modified by this method.
+	 * 
+	 * @param angle
+	 * @return A new, skewed matrix
+	 */
+	public final WebKitCssMatrix skewX(double angle) {
+		WebKitCssMatrix tmp = WebKitCssMatrix.newInstance();
+		tmp.setM21(Math.tan(Math.toRadians(angle)));
+		
+		return localMultiply(tmp);
+	}
+	
+	/**
+	 * Returns the result of skewing this matrix around the X axis by the
+	 * given angle.
+	 * This matrix is not modified by this method.
+	 * 
+	 * @param angle
+	 * @return A new, skewed matrix
+	 */
+	public final WebKitCssMatrix skewY(double angle) {
+		WebKitCssMatrix tmp = WebKitCssMatrix.newInstance();
+		tmp.setM12(Math.tan(Math.toRadians(angle)));
+		
+		return localMultiply(tmp);
+	}
+	
+	/**
 	 * Returns the result of translating this matrix by a given vector.
 	 * This matrix is not modified by this method.
 	 * 
