@@ -30,130 +30,135 @@ public interface Transformable {
 
 	/**
 	 * Rotation in <em>local</em> (transformed) coordinates by 
-	 * angle theta
+	 * angle theta.<br><br>
 	 * <strong>Note:</strong> due to definition of screen coordinates
 	 * (with positive y pointing down), positive values of theta rotate
-	 * <em>clockwise</em>
+	 * <em>clockwise</em>.
 	 * 
-	 * @param theta angle to rotate in degrees
+	 * @param angle The angle to rotate, in degrees
 	 */
-	public void rotateLocal(double angle);
+	public void rotate(double angle);
 
 	/**
-	 * rotate in local coordinates around point (px, py) by angle theta
+	 * Rotate in local coordinates around point (px, py) by angle theta.
 	 * 
-	 * @param theta angle to rotate in degrees
-	 * @param px x coordinate of origin of rotation in local coordinates
-	 * @param py y coordinate of origin of rotation in local coordinates
+	 * @param angle The angle to rotate in degrees
+	 * @param px The x-coordinate of origin of rotation, in local coordinatess
+	 * @param py The y-coordinate of origin of rotation, in local coordinates
 	 */
-	public void rotateAtPointLocal(double angle, double px, double py);
+	public void rotateAtPoint(double angle, double px, double py);
 
 	/**
-	 * Scale in <em>local</em> (transformed) coordinates by vector (sx, sy)
+	 * Scale in <em>local</em> (transformed) coordinates by vector (sx, sy).
 	 * 
-	 * @param sx scaling along local x-axis
-	 * @param sy scaling along local y-axis
+	 * @param sx The scaling along the local x-axis
+	 * @param sy The scaling along the local y-axis
 	 */
-	public void scaleLocal(double sx, double sy);
+	public void scale(double sx, double sy);
 
 	/**
-	 * scale in local coordinates expanding from point (px, py) by vector(sx, sy)
+	 * Scale in local coordinates, expanding from point (px, py) by
+	 * vector(sx, sy).
 	 * 
-	 * @param sx scaling along local x-axis
-	 * @param sy scaling along local y-axis
-	 * @param px x coordinate of origin of scaling in local coordinates
-	 * @param py y coordinate of origin of scaling in local coordinates
+	 * @param sx The scaling along the local x-axis
+	 * @param sy The scaling along the local y-axis
+	 * @param px The x-coordinate of origin of scaling, in local coordinates
+	 * @param py The y-coordinate of origin of scaling, in local coordinates
 	 */
-	public void scaleAtPointLocal(double sx, double sy, double px, double py);
+	public void scaleAtPoint(double sx, double sy, double px, double py);
 
 	/**
-	 * Translation in <em>local</em> (transformed) coordinates by vector (tx, ty)
+	 * Translation in <em>local</em> (transformed) coordinates by vector (tx, ty).
 	 * 
-	 * @param tx translation along local x-axis
-	 * @param ty translation along local y-axis
+	 * @param tx The translation along local x-axis
+	 * @param ty The translation along local y-axis
 	 */
-	public void translateLocal(double tx, double ty);
+	public void translate(double tx, double ty);
 
 	/**
-	 * Rotation in <em>view</em> coordinates by angle theta
+	 * Rotation in <em>view</em> coordinates by angle theta.<br><br>
 	 * <strong>Note:</strong> due to definition of screen coordinates
 	 * (with positive y pointing down), positive values of theta rotate
-	 * <em>clockwise</em>
+	 * <em>clockwise</em>.
 	 * 
-	 * @param theta angle to rotate in degrees
+	 * @param angle The angle to rotate in degrees
 	 */
 	public void rotateView(double angle);
 
 	/**
-	 * rotate in view coordinates around point (px, py) by angle theta
+	 * Rotate, in <em>view</em> coordinates, around point (px, py) by
+	 * angle theta.
 	 * 
-	 * @param theta angle to rotate in degrees
-	 * @param px x coordinate of origin of rotation in view coordinates
-	 * @param py y coordinate of origin of rotation in view coordinates
+	 * @param angle The angle to rotate in degrees
+	 * @param px The x-coordinate of origin of rotation in view coordinates
+	 * @param py The y-coordinate of origin of rotation in view coordinates
 	 */
 	public void rotateAtPointView(double angle, double px, double py);
 
 	/**
-	 * Scale in <em>view</em> coordinates by vector (sx, sy)
+	 * Scale in <em>view</em> coordinates by vector (sx, sy).
 	 * 
-	 * @param sx scaling along view x-axis
-	 * @param sy scaling along view y-axis
+	 * @param sx The scaling along view x-axis
+	 * @param sy The scaling along view y-axis
 	 */
 	public void scaleView(double sx, double sy);
 
 	/**
-	 * scale in view coordinates expanding from point (px, py) by vector(sx, sy)
+	 * Scale by vector(sx, sy), in <em>view</em> coordinates, expanding from
+	 * point (px, py).
 	 * 
-	 * @param sx scaling along view x-axis
-	 * @param sy scaling along view y-axis
-	 * @param px x coordinate of origin of scaling in view coordinates
-	 * @param py y coordinate of origin of scaling in view coordinates
+	 * @param sx The scaling along view x-axis
+	 * @param sy The scaling along view y-axis
+	 * @param px The x-coordinate of origin of scaling, in view coordinates
+	 * @param py The y-coordinate of origin of scaling, in view coordinates
 	 */
 	public void scaleAtPointView(double sx, double sy, double px, double py);
 
 	/**
-	 * Translation in <em>view</em> coordinates by vector (tx, ty)
+	 * Translation in <em>view</em> coordinates by vector (tx, ty).
 	 * 
-	 * @param tx translation along view x-axis
-	 * @param ty translation along view y-axis
+	 * @param tx The translation along view x-axis
+	 * @param ty The translation along view y-axis
 	 */
 	public void translateView(double tx, double ty);
 	
 	
 	/**
-	 * Reset object to original transformation
+	 * Reset object to original transformation.
 	 * <br>
-	 * currently resets to identity
-	 * could, for example, for CSS Tranforms, reset to whatever original
+	 * Currently resets to identity.<br>
+	 * Could, for e.g. CSS Tranforms, reset to whatever original
 	 * styling transform was
 	 */
 	public void reset();
 	
 	/**
-	 * Skews local coordinates around the X axis by the given angle
+	 * Skews <em>local</em> (transformed) coordinates around the x-axis by 
+	 * the given angle.
 	 * 
-	 * @param angle
+	 * @param angle The skew angle.
 	 */
-	public void skewXLocal(double angle);
+	public void skewX(double angle);
 	
 	/**
-	 * Skews local coordinates around the Y axis by the given angle
+	 * Skews <em>local</em> (transformed) coordinates around the y-axis by
+	 * the given angle.
 	 * 
-	 * @param angle
+	 * @param angle The skew angle.
 	 */
-	public void skewYLocal(double angle);
+	public void skewY(double angle);
 	
 	/**
-	 * Skews view coordinates around the X axis by the given angle
+	 * Skews <em>view</em> coordinates around the x-axis by the given angle.
 	 * 
-	 * @param angle
+	 * @param angle The skew angle.
 	 */
 	public void skewXView(double angle);
 	
 	/**
-	 * Skews view coordinates around the Y axis by the given angle
+	 * Skews <em>view</em> coordinates around the y-axis by the given angle.
 	 * 
-	 * @param angle
+	 * @param angle The skew angle.
 	 */
 	public void skewYView(double angle);
 
