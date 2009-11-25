@@ -59,8 +59,8 @@ public abstract class TransformedElement implements Transformable {
 	public abstract void setTransform();
 	
 	/**
-	 * set the element to transform and perform any necessary setup
-	 * implementations must create member variable transform.
+	 * Set the element to transform and perform any necessary setup.
+	 * Implementations must create member variable transform.
 	 * 
 	 * @param elem The Element to transform
 	 */
