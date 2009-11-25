@@ -160,8 +160,31 @@ public abstract class Transform implements Transformable {
 		// TODO: currently reset to identity. see javadoc comment for future
 		setToIdentity();
 	}
-
-
+	
+	/**
+	 * Returns the x-component of the image of the view-space point (x, y)
+	 * under the current transform.
+	 * 
+	 * @param x The x coordinate of point to transform
+	 * @param y The y coordinate of point to transform
+	 * @return The x component of the transformed point
+	 */
+	public double transformX(double x, double y) {
+		return x*m11() + y*m12() + 0.*m13() + m14();
+	}
+	
+	/**
+	 * Returns the y-component of the image of the view-space point (x, y)
+	 * under the current transform.
+	 * 
+	 * @param x The x coordinate of point to transform
+	 * @param y The y coordinate of point to transform
+	 * @return The y component of the transformed point
+	 */
+	public double transformY(double x, double y) {
+		return x*m21() + y*m22() + 0.*m23() + m24();
+	}
+	
 	/**
 	 * @return The matrix entry from the 1st row, 1st column.
 	 */
