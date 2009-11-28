@@ -20,87 +20,87 @@ import gwt.ns.transforms.client.Transform;
 import gwt.ns.transforms.client.Transformable;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
-
+import com.google.gwt.user.client.DOM;
 
 public abstract class TransformedElement implements Transformable {
-	// TODO transformable interface just convenience right now...might be unnecessary
-	// TODO: better class name to reflect functionality
 	// TODO: implement as concrete class implementing standard
 	// TODO: changeOrigin()?
 	// TODO: transition?
 	// TODO: units?? ems, px, cm allowed in firefox at least...
-	// TODO: set from current element? or from element being wrapped?
-		// this would allow to wrap an element that already has a transform
 	// TODO: setToIdentity vs reset to initial state? (see above)
-	
-	protected Transform transform;
+	/*
+	 * TODO: right now I think the ideal would be to extend a (platform-
+	 * specific, deferred-bound) Transform with an added Element target
+	 * and writeTransform() method. Much of the rest of this is just wrapper
+	 * boilerplate. This will require a generator, however, which can be
+	 * difficult to maintain for an api that's still in flux. I'm looking into
+	 * using GIN, but so far I don't see a big win over what follows.
+	 */
 	
 	protected static final int STYLE_PRECISION = 10;
-	 
-	protected TransformedElement() { }
-	
-	public static TransformedElement wrap(Element elem) {
-		// assert that the element is attached
-		assert Document.get().getBody().isOrHasChild(elem);
-		
-		// get a system appropriate implementation of TransformedElement
-		TransformedElement transElem = (TransformedElement) GWT.create(TransformedElement.class);
-		transElem.initElement(elem);
-		
-		return transElem;
-	}
+	protected Element target;
+	protected Transform transform;
 	
 	/**
 	 * apply the current transform to element
 	 * Note: this involves DOM access and style setting, so might be slow
 	 */
-	public abstract void setTransform();
+	public abstract void writeTransform();
 	
+	public static TransformedElement wrap(Element elem) {
+		// get a system appropriate implementation of TransformableElement
+		TransformedElement transElem = (TransformedElement) GWT.create(TransformedElement.class);
+		
+		// allow transforms module to handle binding
+		transElem.transform = (Transform) GWT.create(Transform.class);
+		
+		transElem.target = elem;
+		
+		// TODO: set transform from element being wrapped
+		// add Transform originalTranform.setTranform(css string)
+		// when reset is called, setTranform(originalTransform);
+		
+		return transElem;
+	}
+	
+	public static TransformedElement create() {
+		return wrap(DOM.createDiv());
+	}
+	
+	public Element getElement() {
+		return target;
+	}
+
 	/**
-	 * Set the element to transform and perform any necessary setup.
-	 * Implementations must create member variable transform.
-	 * 
-	 * @param elem The Element to transform
+	 * Reset object to original transformation.
+	 * <br><br>
+	 * Currently resets to identity.<br>
+	 * TODO: if target was originally wrapped, set transform to whatever
+	 * 	transform was originally set
 	 */
-	protected abstract void initElement(Element elem);
+	public void resetTranform() {
+		transform.setToIdentity();
+	}
 	
 	/**
-	 * Returns the 2 dimensional matrix transform function property per
-	 * CSS3 2D Transforms Draft<br><br>
-	 * 
-	 * Specifies the current 2D transformation in the form of an augmented
-	 * 2x2 transformation matrix and translation vector.<br><br>
-	 * 
-	 * It's not completely clear who will prevail on the subject of a length unit for
-	 * the translation vector. It makes sense in other contexts, but doesn't make
-	 * complete sense in the midst of a bunch of other unitless numbers.<br><br>
-	 * 
-	 * Regardless, currently, firefox needs a unit, webkit does not.<br><br>
-	 * 
-	 * @see <a href="http://www.w3.org/TR/css3-2d-transforms/#transform-functions">CSS3 2D Transforms</a>
-	 * 
-	 * @return
-	 */
-	public abstract String get2dCssString();
-	
-	/**
-	 * not ideal, but lightweight. convert a floating point number to a string
+	 * Not ideal, but lightweight. Convert a floating point number to a string
 	 * with the specified number of digits after the decimal place (note:
-	 * that's not *total* digits)
+	 * that is <em>not</em> total digits).
 	 * 
 	 * @param value to round and convert
 	 * @param numDigits	number of digits after the decimal point
 	 * @return
 	 */
-	protected final native String toFixed(double value, int numDigits) /*-{
+	public static final native String toFixed(double value, int numDigits) /*-{
 		return value.toFixed(numDigits);
 	}-*/;
 	
-	protected String toFixed(double value) {
+
+	public static final String toFixed(double value) {
 		return toFixed(value, STYLE_PRECISION);
 	}
+	
 	
 	@Override
 	public void rotate(double angle) {
@@ -110,6 +110,16 @@ public abstract class TransformedElement implements Transformable {
 	@Override
 	public void rotateAtPoint(double angle, double px, double py) {
 		transform.rotateAtPoint(angle, px, py);
+	}
+
+	@Override
+	public void rotateAtPointView(double angle, double px, double py) {
+		transform.rotateAtPointView(angle, px, py);
+	}
+
+	@Override
+	public void rotateView(double angle) {
+		transform.rotateView(angle);
 	}
 
 	@Override
@@ -123,18 +133,8 @@ public abstract class TransformedElement implements Transformable {
 	}
 
 	@Override
-	public void translate(double tx, double ty) {
-		transform.translate(tx, ty);
-	}
-
-	@Override
-	public void rotateView(double angle) {
-		transform.rotateView(angle);
-	}
-
-	@Override
-	public void rotateAtPointView(double angle, double px, double py) {
-		transform.rotateAtPointView(angle, px, py);
+	public void scaleAtPointView(double sx, double sy, double px, double py) {
+		transform.scaleAtPointView(sx, sy, px, py);
 	}
 
 	@Override
@@ -143,18 +143,23 @@ public abstract class TransformedElement implements Transformable {
 	}
 
 	@Override
-	public void scaleAtPointView(double sx, double sy, double px, double py) {
-		transform.scaleAtPointView(sx, sy, px, py);
+	public void setToIdentity() {
+		transform.setToIdentity();
 	}
 
 	@Override
-	public void translateView(double tx, double ty) {
-		transform.translateView(tx, ty);
+	public void setTransform(double t11, double t21, double t31, double t41,
+			double t12, double t22, double t32, double t42, double t13,
+			double t23, double t33, double t43, double t14, double t24,
+			double t34, double t44) {
+		
+		transform.setTransform(t11, t21, t31, t41, t12, t22, t32, t42, t13,
+				t23, t33, t43, t14, t24, t34, t44);
 	}
 
 	@Override
-	public void reset() {
-		transform.reset();
+	public void setTransform(Transform transfrom) {
+		transform.setTransform(transfrom);
 	}
 
 	@Override
@@ -163,17 +168,47 @@ public abstract class TransformedElement implements Transformable {
 	}
 
 	@Override
-	public void skewY(double angle) {
-		transform.skewY(angle);
-	}
-	
-	@Override
 	public void skewXView(double angle) {
 		transform.skewXView(angle);
 	}
 
 	@Override
+	public void skewY(double angle) {
+		transform.skewY(angle);
+	}
+
+	@Override
 	public void skewYView(double angle) {
 		transform.skewYView(angle);
+	}
+
+	@Override
+	public void transform(Transform transform) {
+		transform.transform(transform);	// this one is fun
+	}
+
+	@Override
+	public void transformView(Transform transform) {
+		transform.transformView(transform);
+	}
+
+	@Override
+	public double transformX(double x, double y) {
+		return transform.transformX(x, y);
+	}
+
+	@Override
+	public double transformY(double x, double y) {
+		return transform.transformY(x, y);
+	}
+
+	@Override
+	public void translate(double tx, double ty) {
+		transform.translate(tx, ty);
+	}
+
+	@Override
+	public void translateView(double tx, double ty) {
+		transform.translateView(tx, ty);
 	}
 }

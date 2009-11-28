@@ -17,7 +17,8 @@
 package gwt.ns.transforms.client;
 
 /**
- * this is the interface for Transform objects which internal use a matrix
+ * TODO: fix this up.<br>
+ * this is the abstract base class for Transform objects which internally use a matrix
  * Each entry in the 4x4 matrix is represented by m<row><column>.
  * For instance m12 represents the value in the 2nd column of the first row.
  * 
@@ -35,42 +36,8 @@ package gwt.ns.transforms.client;
  */
 public abstract class Transform implements Transformable {
 	
-	/*
-	 *	TODO:
-		inverse (why? maybe wait until use case comes up for designing api)
-		
-		units?? ems, px, cm allowed in firefox at least...
-		skew?
-		shear?
-		copy constructor? get copy at all?
-		set transform origin (will need to store somehow for when full xform output to string)
-		reset vs set to identity?
-	*/
-	
-	/**
-	 * Reset this transformation to the identity transform.
-	 */
-	public abstract void setToIdentity();
-	// not wild about that method signature, but got it from
-	// java.awt.geom.AffineTransform so good for now
-	
-	
-	/**
-	 * Set new values in the transformation matrix.
-	 * The order is very specific, with each parameter specified first by
-	 * row, then column. This is sometimes known as column-major ordering.
-	 * 
-	 * <pre>
-	 * [ m11, m12, m13, m14 ]		[ 1st, 5th,  9th, 13th ]
-	 * [ m21, m22, m23, m24 ]	->	[ 2nd, 6th, 10th, 14th ]
-	 * [ m21, m12, m23, m24 ]		[ 3rd, 7th, 11th, 15th ]
-	 * [ m21, m12, m23, m24 ]		[ 4th, 8th, 12th, 16th ]
-	 * </pre>
-	 * 
-	 * @param t11-t44 a new value. t[row][column] represents the
-	 * ([row],[column])th entry of the matrix
-	 */
-	public void set(double t11, double t21, double t31, double t41, double t12,
+	@Override
+	public void setTransform(double t11, double t21, double t31, double t41, double t12,
 					double t22, double t32, double t42, double t13, double t23,
 					double t33, double t43, double t14, double t24, double t34,
 					double t44) {
@@ -92,15 +59,16 @@ public abstract class Transform implements Transformable {
 		setM44(t44);
 	}
 	
-	/**
-	 * Apply a transformation to the current <em>local</em> coordinate system.
-	 * This is the slowest way to multiply (though for implementation in pure
-	 * java/js most of this should be inlined and the performance will be the
-	 * same). if you can do a multiply in a superclass (or natively), do so.
-	 * 
-	 * @param transform the transformation to apply
-	 */
-	public void multiply(Transform transform) {
+	@Override
+	public void setTransform(Transform t) {
+		setTransform(t.m11(), t.m21(), t.m31(), t.m41(), t.m12(), t.m22(),
+				t.m32(), t.m42(), t.m13(), t.m23(), t.m33(), t.m43(), t.m14(),
+				t.m24(), t.m34(), t.m44());
+	}
+	
+
+	@Override
+	public void transform(Transform transform) {
 		double t11 = transform.m11()*m11() + transform.m12()*m21() + transform.m13()*m31() + transform.m14()*m41();
 		double t12 = transform.m11()*m12() + transform.m12()*m22() + transform.m13()*m32() + transform.m14()*m42();
 		double t13 = transform.m11()*m13() + transform.m12()*m23() + transform.m13()*m33() + transform.m14()*m43();
@@ -121,17 +89,12 @@ public abstract class Transform implements Transformable {
 		double t43 = transform.m41()*m13() + transform.m42()*m23() + transform.m43()*m33() + transform.m44()*m41();
 		double t44 = transform.m41()*m14() + transform.m42()*m24() + transform.m43()*m34() + transform.m44()*m44();
 		
-		set(t11, t21, t31, t41, t12, t22, t32, t42, t13, t23, t33, t43, t14, t24, t34, t44);
+		setTransform(t11, t21, t31, t41, t12, t22, t32, t42, t13, t23, t33, t43, t14, t24, t34, t44);
 	}
 
-	/**
-	 * Apply a transformation to the current <em>view</em> coordinate system.
-	 * This is the slowest way to multiply. If you can do a multiply
-	 * in a superclass (or natively), do so.
-	 * 
-	 * @param transform the transformation to apply
-	 */
-	public void multiplyView(Transform transform) {
+
+	@Override
+	public void transformView(Transform transform) {
 		double t11 = m11()*transform.m11() + m12()*transform.m21() + m13()*transform.m31() + m14()*transform.m41();
 		double t12 = m11()*transform.m12() + m12()*transform.m22() + m13()*transform.m32() + m14()*transform.m42();
 		double t13 = m11()*transform.m13() + m12()*transform.m23() + m13()*transform.m33() + m14()*transform.m43();
@@ -152,39 +115,19 @@ public abstract class Transform implements Transformable {
 		double t43 = m41()*transform.m13() + m42()*transform.m23() + m43()*transform.m33() + m44()*transform.m41();
 		double t44 = m41()*transform.m14() + m42()*transform.m24() + m43()*transform.m34() + m44()*transform.m44();
 		
-		set(t11, t21, t31, t41, t12, t22, t32, t42, t13, t23, t33, t43, t14, t24, t34, t44);
-	}
-
-	@Override
-	public void reset() {
-		// TODO: currently reset to identity. see javadoc comment for future
-		setToIdentity();
+		setTransform(t11, t21, t31, t41, t12, t22, t32, t42, t13, t23, t33, t43, t14, t24, t34, t44);
 	}
 	
-	/**
-	 * Returns the x-component of the image of the view-space point (x, y)
-	 * under the current transform.
-	 * 
-	 * @param x The x coordinate of point to transform
-	 * @param y The y coordinate of point to transform
-	 * @return The x component of the transformed point
-	 */
+	@Override
 	public double transformX(double x, double y) {
 		return x*m11() + y*m12() + 0.*m13() + m14();
 	}
 	
-	/**
-	 * Returns the y-component of the image of the view-space point (x, y)
-	 * under the current transform.
-	 * 
-	 * @param x The x coordinate of point to transform
-	 * @param y The y coordinate of point to transform
-	 * @return The y component of the transformed point
-	 */
+	@Override
 	public double transformY(double x, double y) {
 		return x*m21() + y*m22() + 0.*m23() + m24();
 	}
-	
+
 	/**
 	 * @return The matrix entry from the 1st row, 1st column.
 	 */
@@ -344,4 +287,5 @@ public abstract class Transform implements Transformable {
 	 * @param m44 Set the matrix entry from the 4th row, 4th column.
 	 */
 	protected abstract void setM44(double m44);
+	
 }

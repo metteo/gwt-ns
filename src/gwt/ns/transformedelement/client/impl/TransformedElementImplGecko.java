@@ -17,43 +17,45 @@
 package gwt.ns.transformedelement.client.impl;
 
 import gwt.ns.transformedelement.client.TransformedElement;
-import gwt.ns.transforms.client.impl.TransformImplDefault;
-
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style;
 
 /**
  * Implementation of CSS transform for gecko browsers
  * will only work in 1.9.1 up to when standard is implemented
  */
 public class TransformedElementImplGecko extends TransformedElement {
-	protected Element target;
-	protected Style targetStyle;
 	
 	@Override
-	protected void initElement(Element elem) {
-		// we can directly instantiate default transform
-		transform = new TransformImplDefault();
-		target = elem;
-		targetStyle = target.getStyle();
+	public void writeTransform() {
+		target.getStyle().setProperty("MozTransform", get2dCssString());
 	}
 
-	@Override
-	public void setTransform() {
-		targetStyle.setProperty("MozTransform", get2dCssString());
-	}
-
-	@Override
+	/**
+	 * Returns the 2 dimensional matrix transform function property per
+	 * CSS3 2D Transforms Draft<br><br>
+	 * 
+	 * Specifies the current 2D transformation in the form of an augmented
+	 * 2x2 transformation matrix and translation vector.<br><br>
+	 * 
+	 * It's not completely clear who will prevail on the subject of a length unit for
+	 * the translation vector. It makes sense in other contexts, but doesn't make
+	 * complete sense in the midst of a bunch of other unitless numbers.<br><br>
+	 * 
+	 * Regardless, currently, firefox needs a unit, webkit does not.<br><br>
+	 * 
+	 * @see <a href="http://www.w3.org/TR/css3-2d-transforms/#transform-functions">CSS3 2D Transforms</a>
+	 * 
+	 * @return
+	 */
 	public String get2dCssString() {
-			StringBuilder tmp = new StringBuilder("matrix(");
-			tmp.append(toFixed(transform.m11())).append(", ");
-			tmp.append(toFixed(transform.m21())).append(", ");
-			tmp.append(toFixed(transform.m12())).append(", ");
-			tmp.append(toFixed(transform.m22())).append(", ");
-			tmp.append(toFixed(transform.m14())).append("px, ");
-			tmp.append(toFixed(transform.m24())).append("px)");
-			
-			return tmp.toString();
+		StringBuilder tmp = new StringBuilder("matrix(");
+		tmp.append(toFixed(transform.m11())).append(", ");
+		tmp.append(toFixed(transform.m21())).append(", ");
+		tmp.append(toFixed(transform.m12())).append(", ");
+		tmp.append(toFixed(transform.m22())).append(", ");
+		tmp.append(toFixed(transform.m14())).append("px, ");
+		tmp.append(toFixed(transform.m24())).append("px)");
+		
+		return tmp.toString();
 	}
 
 }

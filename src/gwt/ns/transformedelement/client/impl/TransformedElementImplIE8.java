@@ -17,48 +17,56 @@
 package gwt.ns.transformedelement.client.impl;
 
 import gwt.ns.transformedelement.client.TransformedElement;
-import gwt.ns.transforms.client.impl.TransformImplDefault;
 
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Document;
 
 /**
  * Implementation of CSS transform for IE
  */
 public class TransformedElementImplIE8 extends TransformedElement {
-	protected Element target;
-	protected Style targetStyle;
+	/*
+	 *  TODO: there are many pitfalls here:
+	 *  1. accurate translation relies on originalWidth/Height being set and
+	 *  	accurate which only happen when target is attached to the DOM and
+	 *  	not reattached in a way that changes its layout. currently this
+	 *  	class only lazily loads the original bounds once
+	 *  2. moreover, these are only loaded when writeTransform() is called
+	 *  	and the element is attached to the DOM. if not, lazy loading is
+	 *  	delayed to the next call, something the user might not be aware of.
+	 *  	Need to document this and/or change method calls to make more
+	 *  	apparent.
+	 *  3. Layout changes with relative positioning. Discussed elsewhere.
+	 *  	reliant on the user right now to deal with layout.
+	 */
+	
 	
 	/**
 	 * The size attributes of the original element before transformation
 	 */
 	protected double originalWidth, originalHeight;
 	
-	@Override
-	protected void initElement(Element elem) {
-		// we can directly instantiate default transform
-		transform = new TransformImplDefault();
-		target = elem;
-		targetStyle = target.getStyle();
-		
-		originalWidth = target.getOffsetWidth();
-		originalHeight = target.getOffsetHeight();
-		
-		// TODO: this removes element from document flow altogether
-		// possibly fill in dummy, hidden div to replace and add target 
-		// directly to body?
-		targetStyle.setProperty("position", "absolute");
-		targetStyle.setProperty("top", "0");
-		targetStyle.setProperty("left", "0");
-	}
+	
+	/**
+	 * MsFilter value string for an identity transform
+	 */
+	protected static final String IDENTITY_FILTER = "progid:DXImageTransform.Microsoft.Matrix("
+					+ "M11=1, M12=0, M21=0, M22=1, SizingMethod = 'auto expand')";
+	
+	
+	protected boolean elementInitialized = false;
 	
 	@Override
-	public void setTransform() {
-		// TODO: this blows out any current filter
+	public void writeTransform() {
+		// TODO: this blows out any other current filter (including opacity etc? not sure)
 		// consider: "filters.item('DXImageTransform.Microsoft.Matrix')"...
 		
+		// load all important untransformed dimensions if need we haven't
+		// already and target is in DOM (so actually has dimensions)
+		if (!elementInitialized && Document.get().getBody().isOrHasChild(target))
+			initElementLayout();
+		
 		// set linear transformation (2x2 matrix)
-		targetStyle.setProperty("filter", get2dFilterString());
+		target.getStyle().setProperty("filter", get2dFilterString());
 		
 		/* translation: 
 		 * need to keep origin unaffected by linear transformation, only moved
@@ -71,17 +79,17 @@ public class TransformedElementImplIE8 extends TransformedElement {
 		 * TODO: this is 1 of 2 places setTransformOrigin() would make its
 		 * change. other before get2dFilterString() to translate coords
 		 */
-		double wadj = (target.getOffsetWidth()/2.) - (originalWidth/2.);
-		double hadj = (target.getOffsetHeight()/2.) - (originalHeight/2.);
+		double wadj = (target.getOffsetWidth() - originalWidth) / 2.;
+		double hadj = (target.getOffsetHeight() - originalHeight) / 2.;
 		
 		// set translation
-		targetStyle.setProperty("left", toFixed(transform.m14() - wadj, 0) + "px");
-		targetStyle.setProperty("top", toFixed(transform.m24() - hadj, 0) + "px");
+		target.getStyle().setProperty("left", toFixed(transform.m14() - wadj, 0) + "px");
+		target.getStyle().setProperty("top", toFixed(transform.m24() - hadj, 0) + "px");
 	}
 	
 	/**
-	 * get the MsFilter string that will set the element to the current
-	 * transform
+	 * Get the MsFilter string that will set the element to the current
+	 * transform (2d linear transfrom only).
 	 * 
 	 * @return filter property string
 	 */
@@ -95,9 +103,22 @@ public class TransformedElementImplIE8 extends TransformedElement {
 		
 		return str.toString();
 	}
+	
+	
+	protected void initElementLayout() {
+		// explicitly set an identity transform
+		target.getStyle().setProperty("filter", IDENTITY_FILTER);
+		
+		// get untransfomed dimensions
+		originalWidth = target.getOffsetWidth();
+		originalHeight = target.getOffsetHeight();
 
-	@Override
-	public String get2dCssString() {
-		return "";
+		// allow to move freely within parent coord system
+		// TODO: this removes element from document flow altogether
+		// possibly fill in dummy, hidden div to replace and add target 
+		// to end of offsetParent?
+		target.getStyle().setProperty("position", "absolute");
+		target.getStyle().setProperty("top", "0");
+		target.getStyle().setProperty("left", "0");
 	}
 }
