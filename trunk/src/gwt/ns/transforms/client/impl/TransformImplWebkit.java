@@ -231,82 +231,82 @@ public class TransformImplWebkit extends Transform {
 	}
 
 	@Override
-	protected void setM11(double m11) {
+	public void setM11(double m11) {
 		transform.setM11(m11);
 	}
 
 	@Override
-	protected void setM12(double m12) {
+	public void setM12(double m12) {
 		transform.setM21(m12);
 	}
 
 	@Override
-	protected void setM13(double m13) {
+	public void setM13(double m13) {
 		transform.setM31(m13);
 	}
 
 	@Override
-	protected void setM14(double m14) {
+	public void setM14(double m14) {
 		transform.setM41(m14);
 	}
 
 	@Override
-	protected void setM21(double m21) {
+	public void setM21(double m21) {
 		transform.setM12(m21);
 	}
 
 	@Override
-	protected void setM22(double m22) {
+	public void setM22(double m22) {
 		transform.setM22(m22);
 	}
 
 	@Override
-	protected void setM23(double m23) {
+	public void setM23(double m23) {
 		transform.setM32(m23);
 	}
 
 	@Override
-	protected void setM24(double m24) {
+	public void setM24(double m24) {
 		transform.setM42(m24);
 	}
 
 	@Override
-	protected void setM31(double m31) {
+	public void setM31(double m31) {
 		transform.setM13(m31);
 	}
 
 	@Override
-	protected void setM32(double m32) {
+	public void setM32(double m32) {
 		transform.setM23(m32);
 	}
 
 	@Override
-	protected void setM33(double m33) {
+	public void setM33(double m33) {
 		transform.setM33(m33);
 	}
 
 	@Override
-	protected void setM34(double m34) {
+	public void setM34(double m34) {
 		transform.setM43(m34);
 	}
 
 	@Override
-	protected void setM41(double m41) {
+	public void setM41(double m41) {
 		transform.setM14(m41);
 	}
 
 	@Override
-	protected void setM42(double m42) {
+	public void setM42(double m42) {
 		transform.setM24(m42);
 	}
 
 	@Override
-	protected void setM43(double m43) {
+	public void setM43(double m43) {
 		transform.setM34(m43);
 	}
 
 	@Override
-	protected void setM44(double m44) {
+	public void setM44(double m44) {
 		transform.setM44(m44);
 	}
 

@@ -18,14 +18,14 @@ package gwt.ns.transforms.client;
 
 /*
  *	TODO:
+ 	javadocs
 	inverse (why? maybe wait until use case comes up for designing api)
-	
 	units?? ems, px, cm allowed in firefox at least...
 	shear?
-	copy constructor? get copy at all?
-	set transform origin (will need to store somehow for when full xform output to string)
+	get copy? need to think about differed binding for this
 	reset vs set to identity?
 */
+
 public interface Transformable {
 
 	/**
@@ -122,16 +122,6 @@ public interface Transformable {
 	 */
 	public void translateView(double tx, double ty);
 	
-	
-	/**
-	 * Reset object to original transformation.
-	 * <br>
-	 * Currently resets to identity.<br>
-	 * Could, for e.g. CSS Tranforms, reset to whatever original
-	 * styling transform was
-	 */
-	public void reset();
-	
 	/**
 	 * Skews <em>local</em> (transformed) coordinates around the x-axis by 
 	 * the given angle.
@@ -162,4 +152,77 @@ public interface Transformable {
 	 */
 	public void skewYView(double angle);
 
+	/**
+	 * Returns the x-component of the image of view-space point (x, y)
+	 * under the current transform.
+	 * 
+	 * @param x The x coordinate of point to transform
+	 * @param y The y coordinate of point to transform
+	 * @return The x component of the transformed point
+	 */
+	double transformX(double x, double y);
+
+	/**
+	 * Returns the y-component of the image of view-space point (x, y)
+	 * under the current transform.
+	 * 
+	 * @param x The x coordinate of point to transform
+	 * @param y The y coordinate of point to transform
+	 * @return The y component of the transformed point
+	 */
+	double transformY(double x, double y);
+
+	/**
+	 * Reset this transformation to the identity transform.
+	 */
+	void setToIdentity();
+	// TODO: not wild about that method signature, but got it from
+	// java.awt.geom.AffineTransform so good for now
+
+	/**
+	 * Set new values in the transformation matrix.
+	 * The order is very specific, with each parameter specified first by
+	 * row, then column. This is sometimes known as column-major ordering.
+	 * 
+	 * <pre>
+	 * [ m11, m12, m13, m14 ]		[ 1st, 5th,  9th, 13th ]
+	 * [ m21, m22, m23, m24 ]	->	[ 2nd, 6th, 10th, 14th ]
+	 * [ m21, m12, m23, m24 ]		[ 3rd, 7th, 11th, 15th ]
+	 * [ m21, m12, m23, m24 ]		[ 4th, 8th, 12th, 16th ]
+	 * </pre>
+	 * 
+	 * @param t11-t44 a new value. t[row][column] represents the
+	 * ([row],[column])th entry of the matrix
+	 */
+	void setTransform(double t11, double t21, double t31, double t41,
+			double t12, double t22, double t32, double t42, double t13,
+			double t23, double t33, double t43, double t14, double t24,
+			double t34, double t44);
+	
+	
+	/**
+	 * Set new values in the transformation matrix.
+	 * 
+	 * @param transfrom The new transform to copy into this one
+	 */
+	void setTransform(Transform transfrom);
+
+	/**
+	 * Apply a transformation to the current <em>local</em> coordinate system.
+	 * This is the slowest way to multiply (though for implementation in pure
+	 * java/js most of this should be inlined and the performance will be the
+	 * same). if you can do a multiply in a subclass (or natively), do so.
+	 * 
+	 * @param transform the transformation to apply
+	 */
+	void transform(Transform transform);
+
+	/**
+	 * Apply a transformation to the current <em>view</em> coordinate system.
+	 * This is the slowest way to multiply. If you can do a multiply
+	 * in a subclass (or natively), do so.
+	 * 
+	 * @param transform the transformation to apply
+	 */
+	void transformView(Transform transform);
 }

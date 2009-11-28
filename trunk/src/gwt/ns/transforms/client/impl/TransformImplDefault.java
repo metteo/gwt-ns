@@ -93,6 +93,8 @@ public class TransformImplDefault extends Transform {
 		
 		Matrix4x4.multiplyView(transform, temp);
 	}
+	
+	@Override
 	public void skewY(double angle) {
 		Matrix4x4.skewY(transform, angle);
 	}
@@ -240,82 +242,82 @@ public class TransformImplDefault extends Transform {
 	}
 
 	@Override
-	protected void setM11(double m11) {
+	public void setM11(double m11) {
 		transform.m11 = m11;
 	}
 
 	@Override
-	protected void setM12(double m12) {
+	public void setM12(double m12) {
 		transform.m12 = m12;
 	}
 
 	@Override
-	protected void setM13(double m13) {
+	public void setM13(double m13) {
 		transform.m13 = m13;
 	}
 
 	@Override
-	protected void setM14(double m14) {
+	public void setM14(double m14) {
 		transform.m14 = m14;
 	}
 
 	@Override
-	protected void setM21(double m21) {
+	public void setM21(double m21) {
 		transform.m21 = m21;
 	}
 
 	@Override
-	protected void setM22(double m22) {
+	public void setM22(double m22) {
 		transform.m22 = m22;
 	}
 
 	@Override
-	protected void setM23(double m23) {
+	public void setM23(double m23) {
 		transform.m23 = m23;
 	}
 
 	@Override
-	protected void setM24(double m24) {
+	public void setM24(double m24) {
 		transform.m24 = m24;
 	}
 
 	@Override
-	protected void setM31(double m31) {
+	public void setM31(double m31) {
 		transform.m31 = m31;
 	}
 
 	@Override
-	protected void setM32(double m32) {
+	public void setM32(double m32) {
 		transform.m32 = m32;
 	}
 
 	@Override
-	protected void setM33(double m33) {
+	public void setM33(double m33) {
 		transform.m33 = m33;
 	}
 
 	@Override
-	protected void setM34(double m34) {
+	public void setM34(double m34) {
 		transform.m34 = m34;
 	}
 
 	@Override
-	protected void setM41(double m41) {
+	public void setM41(double m41) {
 		transform.m41 = m41;
 	}
 
 	@Override
-	protected void setM42(double m42) {
+	public void setM42(double m42) {
 		transform.m42 = m42;
 	}
 
 	@Override
-	protected void setM43(double m43) {
+	public void setM43(double m43) {
 		transform.m43 = m43;
 	}
 
 	@Override
-	protected void setM44(double m44) {
+	public void setM44(double m44) {
 		transform.m44 = m44;
 	}
 }
