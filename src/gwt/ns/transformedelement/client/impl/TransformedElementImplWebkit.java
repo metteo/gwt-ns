@@ -25,7 +25,7 @@ import gwt.ns.transformedelement.client.TransformedElement;
 public class TransformedElementImplWebkit extends TransformedElement {
 
 	@Override
-	public void writeTransform() {
+	public void commitTransform() {
 		target.getStyle().setProperty("WebkitTransform", get2dCssString());
 	}
 	

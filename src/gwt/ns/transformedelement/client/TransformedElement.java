@@ -43,10 +43,11 @@ public abstract class TransformedElement implements Transformable {
 	protected Transform transform;
 	
 	/**
-	 * apply the current transform to element
-	 * Note: this involves DOM access and style setting, so might be slow
+	 * Apply the current transform to this Element.
+	 * Note: this involves DOM access and style setting, so might be slow.
+	 * TODO: investigate string creation on each platform as this is a hotspot
 	 */
-	public abstract void writeTransform();
+	public abstract void commitTransform();
 	
 	public static TransformedElement wrap(Element elem) {
 		// get a system appropriate implementation of TransformableElement
@@ -84,13 +85,17 @@ public abstract class TransformedElement implements Transformable {
 	}
 	
 	/**
-	 * Not ideal, but lightweight. Convert a floating point number to a string
-	 * with the specified number of digits after the decimal place (note:
-	 * that is <em>not</em> total digits).
+	 * Not ideal, but lightweight. All the transform implementations but IE's
+	 * won't take exponent notation, so this seems like the fastest way to
+	 * format the matrix entries in decimal form.<br><br>
+	 * 
+	 * Convert a floating point number to a string with the specified number
+	 * of digits after the decimal place (note: that is <em>not</em> total
+	 * digits).
 	 * 
 	 * @param value to round and convert
 	 * @param numDigits	number of digits after the decimal point
-	 * @return
+	 * @return String representation of value
 	 */
 	public static final native String toFixed(double value, int numDigits) /*-{
 		return value.toFixed(numDigits);
@@ -113,8 +118,8 @@ public abstract class TransformedElement implements Transformable {
 	}
 
 	@Override
-	public void rotateAtPointView(double angle, double px, double py) {
-		transform.rotateAtPointView(angle, px, py);
+	public void rotateViewAtPoint(double angle, double px, double py) {
+		transform.rotateViewAtPoint(angle, px, py);
 	}
 
 	@Override
@@ -133,8 +138,8 @@ public abstract class TransformedElement implements Transformable {
 	}
 
 	@Override
-	public void scaleAtPointView(double sx, double sy, double px, double py) {
-		transform.scaleAtPointView(sx, sy, px, py);
+	public void scaleViewAtPoint(double sx, double sy, double px, double py) {
+		transform.scaleViewAtPoint(sx, sy, px, py);
 	}
 
 	@Override
@@ -159,7 +164,7 @@ public abstract class TransformedElement implements Transformable {
 
 	@Override
 	public void setTransform(Transform transfrom) {
-		transform.setTransform(transfrom);
+		this.transform.setTransform(transfrom);
 	}
 
 	@Override
@@ -184,12 +189,12 @@ public abstract class TransformedElement implements Transformable {
 
 	@Override
 	public void transform(Transform transform) {
-		transform.transform(transform);	// this one is fun
+		this.transform.transform(transform);	// I need a thesaurus
 	}
 
 	@Override
 	public void transformView(Transform transform) {
-		transform.transformView(transform);
+		this.transform.transformView(transform);
 	}
 
 	@Override

@@ -45,6 +45,8 @@ public class TransformedElementImplIE8 extends TransformedElement {
 	 */
 	protected double originalWidth, originalHeight;
 	
+	protected double originalLeft, originalTop;
+	
 	
 	/**
 	 * MsFilter value string for an identity transform
@@ -55,8 +57,14 @@ public class TransformedElementImplIE8 extends TransformedElement {
 	
 	protected boolean elementInitialized = false;
 	
+	
+	/**
+	 * string builder for filter string
+	 */
+	protected StringBuilder str = new StringBuilder();
+	
 	@Override
-	public void writeTransform() {
+	public void commitTransform() {
 		// TODO: this blows out any other current filter (including opacity etc? not sure)
 		// consider: "filters.item('DXImageTransform.Microsoft.Matrix')"...
 		
@@ -79,12 +87,20 @@ public class TransformedElementImplIE8 extends TransformedElement {
 		 * TODO: this is 1 of 2 places setTransformOrigin() would make its
 		 * change. other before get2dFilterString() to translate coords
 		 */
-		double wadj = (target.getOffsetWidth() - originalWidth) / 2.;
-		double hadj = (target.getOffsetHeight() - originalHeight) / 2.;
+		// TODO: also further investigate this bug, when no offsetW/H, cumulative
+		// 		transformations go wild
+		double wadj = 0.;
+		if (target.getOffsetWidth() > 0)
+			wadj = (target.getOffsetWidth() - originalWidth) / 2.;
 		
-		// set translation
-		target.getStyle().setProperty("left", toFixed(transform.m14() - wadj, 0) + "px");
-		target.getStyle().setProperty("top", toFixed(transform.m24() - hadj, 0) + "px");
+		double hadj = 0.;
+		if (target.getOffsetHeight() > 0)
+			hadj = (target.getOffsetHeight() - originalHeight) / 2.;
+		
+		// set translation from original position(overruled by inline style) + transform - adjustment
+		// TODO: need to find a clearer flow here
+		target.getStyle().setProperty("left", toFixed(originalLeft + transform.m14() - wadj, 0) + "px");
+		target.getStyle().setProperty("top", toFixed(originalTop + transform.m24() - hadj, 0) + "px");
 	}
 	
 	/**
@@ -94,7 +110,8 @@ public class TransformedElementImplIE8 extends TransformedElement {
 	 * @return filter property string
 	 */
 	protected String get2dFilterString() {
-		StringBuilder str = new StringBuilder("progid:DXImageTransform.Microsoft.Matrix(");
+		str.delete(0, str.length());
+		str.append("progid:DXImageTransform.Microsoft.Matrix(");
 		str.append(  "M11=").append(transform.m11());
 		str.append(", M12=").append(transform.m12());
 		str.append(", M21=").append(transform.m21());
@@ -112,6 +129,9 @@ public class TransformedElementImplIE8 extends TransformedElement {
 		// get untransfomed dimensions
 		originalWidth = target.getOffsetWidth();
 		originalHeight = target.getOffsetHeight();
+		
+		originalLeft = target.getOffsetLeft();
+		originalTop = target.getOffsetTop();
 
 		// allow to move freely within parent coord system
 		// TODO: this removes element from document flow altogether
@@ -120,5 +140,7 @@ public class TransformedElementImplIE8 extends TransformedElement {
 		target.getStyle().setProperty("position", "absolute");
 		target.getStyle().setProperty("top", "0");
 		target.getStyle().setProperty("left", "0");
+		
+		elementInitialized = true;
 	}
 }

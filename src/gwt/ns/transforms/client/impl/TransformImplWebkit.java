@@ -99,7 +99,7 @@ public class TransformImplWebkit extends Transform {
 	}
 
 	@Override
-	public void rotateAtPointView(double angle, double px, double py) {
+	public void rotateViewAtPoint(double angle, double px, double py) {
 		// TODO: optimize this to reduce matrix creations and arithmetic.
 		// possibly refactor to combine with userRotateAtPoint
 		// TODO: check the order of ops on rot.
@@ -116,7 +116,7 @@ public class TransformImplWebkit extends Transform {
 	}
 
 	@Override
-	public void scaleAtPointView(double sx, double sy, double px, double py) {
+	public void scaleViewAtPoint(double sx, double sy, double px, double py) {
 		// TODO: optimize this to reduce matrix creations and arithmetic,
 		// possibly refactor to combine with userScaleAtPoint
 		// TODO: check the order of ops on scale.

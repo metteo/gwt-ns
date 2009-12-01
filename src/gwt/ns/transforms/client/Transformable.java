@@ -24,6 +24,7 @@ package gwt.ns.transforms.client;
 	shear?
 	get copy? need to think about differed binding for this
 	reset vs set to identity?
+	push/pop()?
 */
 
 public interface Transformable {
@@ -93,7 +94,7 @@ public interface Transformable {
 	 * @param px The x-coordinate of origin of rotation in view coordinates
 	 * @param py The y-coordinate of origin of rotation in view coordinates
 	 */
-	public void rotateAtPointView(double angle, double px, double py);
+	public void rotateViewAtPoint(double angle, double px, double py);
 
 	/**
 	 * Scale in <em>view</em> coordinates by vector (sx, sy).
@@ -112,7 +113,7 @@ public interface Transformable {
 	 * @param px The x-coordinate of origin of scaling, in view coordinates
 	 * @param py The y-coordinate of origin of scaling, in view coordinates
 	 */
-	public void scaleAtPointView(double sx, double sy, double px, double py);
+	public void scaleViewAtPoint(double sx, double sy, double px, double py);
 
 	/**
 	 * Translation in <em>view</em> coordinates by vector (tx, ty).

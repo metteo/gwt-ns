@@ -27,7 +27,7 @@ import gwt.ns.transforms.client.Transform;
 public class TransformedElementImplDefault extends TransformedElement {
 
 	@Override
-	public void writeTransform() { }
+	public void commitTransform() { }
 	
 	// save some cycles by really doing nothing
 	@Override
@@ -40,7 +40,7 @@ public class TransformedElementImplDefault extends TransformedElement {
 	public void rotateAtPoint(double angle, double px, double py) { }
 
 	@Override
-	public void rotateAtPointView(double angle, double px, double py) { }
+	public void rotateViewAtPoint(double angle, double px, double py) { }
 	
 	@Override
 	public void rotateView(double angle) { }
@@ -52,7 +52,7 @@ public class TransformedElementImplDefault extends TransformedElement {
 	public void scaleAtPoint(double sx, double sy, double px, double py) { }
 
 	@Override
-	public void scaleAtPointView(double sx, double sy, double px, double py) { }
+	public void scaleViewAtPoint(double sx, double sy, double px, double py) { }
 
 	@Override
 	public void scaleView(double sx, double sy) { }

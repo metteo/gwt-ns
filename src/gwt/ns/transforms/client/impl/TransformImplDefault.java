@@ -116,7 +116,7 @@ public class TransformImplDefault extends Transform {
 	}
 
 	@Override
-	public void rotateAtPointView(double angle, double px, double py) {
+	public void rotateViewAtPoint(double angle, double px, double py) {
 		// TODO: optimize this to reduce matrix operations.
 		// possibly refactor to combine with userRotateAtPoint
 		// TODO: check order of ops
@@ -137,7 +137,7 @@ public class TransformImplDefault extends Transform {
 	}
 
 	@Override
-	public void scaleAtPointView(double sx, double sy, double px, double py) {
+	public void scaleViewAtPoint(double sx, double sy, double px, double py) {
 		// TODO: optimize this to reduce matrix operations,
 		// possibly refactor to combine with userScaleAtPoint
 		// TODO: check order of ops
