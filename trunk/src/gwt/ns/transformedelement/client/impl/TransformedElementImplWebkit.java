@@ -16,7 +16,11 @@
 
 package gwt.ns.transformedelement.client.impl;
 
+import com.google.gwt.dom.client.Style;
 import gwt.ns.transformedelement.client.TransformedElement;
+import gwt.ns.transforms.client.Transform;
+import gwt.ns.transforms.client.impl.TransformImplWebkit;
+import gwt.ns.transforms.client.impl.WebKitCssMatrix;
 
 /**
  * Implementation of CSS transform for webkit based browsers
@@ -26,35 +30,17 @@ public class TransformedElementImplWebkit extends TransformedElement {
 
 	@Override
 	public void commitTransform() {
-		target.getStyle().setProperty("WebkitTransform", get2dCssString());
+		webkitCommit(target.getStyle(), ((TransformImplWebkit)transform).transform);
 	}
 	
-	/**
-	 * Returns the 2 dimensional matrix transform function property per
-	 * CSS3 2D Transforms Draft<br><br>
-	 * 
-	 * Specifies the current 2D transformation in the form of an augmented
-	 * 2x2 transformation matrix and translation vector.<br><br>
-	 * 
-	 * It's not completely clear who will prevail on the subject of a length unit for
-	 * the translation vector. It makes sense in other contexts, but doesn't make
-	 * complete sense in the midst of a bunch of other unitless numbers.<br><br>
-	 * 
-	 * Regardless, currently, firefox needs a unit, webkit does not.<br><br>
-	 * 
-	 * @see <a href="http://www.w3.org/TR/css3-2d-transforms/#transform-functions">CSS3 2D Transforms</a>
-	 * 
-	 * @return
-	 */
-	public String get2dCssString() {
-		StringBuilder tmp = new StringBuilder("matrix(");
-		tmp.append(toFixed(transform.m11())).append(", ");
-		tmp.append(toFixed(transform.m21())).append(", ");
-		tmp.append(toFixed(transform.m12())).append(", ");
-		tmp.append(toFixed(transform.m22())).append(", ");
-		tmp.append(toFixed(transform.m14())).append(", ");
-		tmp.append(toFixed(transform.m24())).append(")");
-		
-		return tmp.toString();
+	@Override
+	protected Transform createTransform() {
+		// this overrules transform module's deferred binding, but allows
+		// us to have superfast dom writes by skipping string property building
+		return new TransformImplWebkit();
 	}
+	
+	public static final native void webkitCommit(Style style, WebKitCssMatrix matrix) /*-{
+		style.WebkitTransform = matrix;
+	}-*/;
 }
