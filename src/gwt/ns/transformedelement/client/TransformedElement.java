@@ -54,7 +54,7 @@ public abstract class TransformedElement implements Transformable {
 		TransformedElement transElem = (TransformedElement) GWT.create(TransformedElement.class);
 		
 		// allow transforms module to handle binding
-		transElem.transform = (Transform) GWT.create(Transform.class);
+		transElem.transform = transElem.createTransform();
 		
 		transElem.target = elem;
 		
@@ -63,6 +63,11 @@ public abstract class TransformedElement implements Transformable {
 		// when reset is called, setTranform(originalTransform);
 		
 		return transElem;
+	}
+	
+	protected Transform createTransform() {
+		// allow transforms module to handle binding
+		return (Transform) GWT.create(Transform.class);
 	}
 	
 	public static TransformedElement create() {

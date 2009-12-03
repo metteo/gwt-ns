@@ -41,9 +41,7 @@ import gwt.ns.transforms.client.Transform;
  *
  */
 public class TransformImplWebkit extends Transform {
-	// TODO: warning about memory? need to investigate efficiency of GC 
-	// for WebKitCssMatrix further.
-	private WebKitCssMatrix transform = WebKitCssMatrix.newInstance();
+	public WebKitCssMatrix transform = WebKitCssMatrix.newInstance();
 	
 	/**
 	 * Construct a new 3D transform using webkit's native functionality,
