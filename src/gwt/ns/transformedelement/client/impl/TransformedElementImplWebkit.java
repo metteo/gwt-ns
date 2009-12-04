@@ -30,7 +30,7 @@ public class TransformedElementImplWebkit extends TransformedElement {
 
 	@Override
 	public void commitTransform() {
-		webkitCommit(target.getStyle(), ((TransformImplWebkit)transform).transform);
+		webkitCommit(target.getStyle(), ((TransformImplWebkit)transform).getJsoMatrix());
 	}
 	
 	@Override
@@ -40,7 +40,7 @@ public class TransformedElementImplWebkit extends TransformedElement {
 		return new TransformImplWebkit();
 	}
 	
-	public static final native void webkitCommit(Style style, WebKitCssMatrix matrix) /*-{
+	protected static final native void webkitCommit(Style style, WebKitCssMatrix matrix) /*-{
 		style.WebkitTransform = matrix;
 	}-*/;
 }

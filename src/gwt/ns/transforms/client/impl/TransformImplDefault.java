@@ -130,10 +130,15 @@ public class TransformImplDefault extends Transform {
 	
 	@Override
 	public void scaleView(double sx, double sy) {
-		Matrix4x4.identity(temp);
-		Matrix4x4.scale(temp, sx, sy);
+		transform.m11 *= sx;
+		transform.m12 *= sx;
+		transform.m13 *= sx;
+		transform.m14 *= sx;
 		
-		Matrix4x4.multiplyView(transform, temp);
+		transform.m21 *= sy;
+		transform.m22 *= sy;
+		transform.m23 *= sy;
+		transform.m24 *= sy;
 	}
 
 	@Override
