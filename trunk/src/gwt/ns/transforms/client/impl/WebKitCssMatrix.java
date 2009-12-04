@@ -55,7 +55,7 @@ public class WebKitCssMatrix extends JavaScriptObject {
 	 * 
 	 * @return A new WebKitCssMatrix, set to the identity.
 	 */
-	public static final native WebKitCssMatrix newInstance() /*-{
+	public static final native WebKitCssMatrix create() /*-{
 		return new WebKitCSSMatrix();
 	}-*/;
 	
@@ -133,20 +133,6 @@ public class WebKitCssMatrix extends JavaScriptObject {
 		return this.scale(scaleX, scaleY);
 	}-*/;
 	
-	
-	/**
-	 * Reset this matrix to the identity matrix.
-	 */
-	public final native void setToIdentity()  /*-{
-		// ugly, but the only other option seems to be
-		// setMatrixValue('translate(0)') or the like
-		this.m11 = this.m22 = this.m33 = this.m44 = 1;
-		this.m21 = this.m31 = this.m41 = 0;
-		this.m12 = this.m32 = this.m42 = 0;
-		this.m13 = this.m23 = this.m43 = 0;
-		this.m14 = this.m24 = this.m34 = 0;
-	}-*/;
-	
 	/**
 	 * Returns the result of skewing this matrix around the x-axis by the
 	 * given angle, in local coordinates.
@@ -156,7 +142,7 @@ public class WebKitCssMatrix extends JavaScriptObject {
 	 * @return A new matrix that is the result of skewing this matrix.
 	 */
 	public final WebKitCssMatrix skewX(double angle) {
-		WebKitCssMatrix tmp = WebKitCssMatrix.newInstance();
+		WebKitCssMatrix tmp = WebKitCssMatrix.create();
 		tmp.setM21(Math.tan(Math.toRadians(angle)));
 		
 		return multiplyLocal(tmp);
@@ -171,7 +157,7 @@ public class WebKitCssMatrix extends JavaScriptObject {
 	 * @return A new matrix that is the result of skewing this matrix.
 	 */
 	public final WebKitCssMatrix skewY(double angle) {
-		WebKitCssMatrix tmp = WebKitCssMatrix.newInstance();
+		WebKitCssMatrix tmp = WebKitCssMatrix.create();
 		tmp.setM12(Math.tan(Math.toRadians(angle)));
 		
 		return multiplyLocal(tmp);

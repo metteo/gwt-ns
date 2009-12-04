@@ -44,7 +44,11 @@ public abstract class TransformedElement implements Transformable {
 	
 	/**
 	 * Apply the current transform to this Element.
-	 * Note: this involves DOM access and style setting, so might be slow.
+	 * This method involves DOM access and style setting, so will be slow.<br>
+	 * <br><em>Note:</em> if a transform is applied before the element is
+	 * attached to the DOM, commitTranform() must at least be called once after
+	 * attachment for proper positioning.<br><br>
+	 * 
 	 * TODO: investigate string creation on each platform as this is a hotspot
 	 */
 	public abstract void commitTransform();

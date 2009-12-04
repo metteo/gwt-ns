@@ -41,13 +41,22 @@ import gwt.ns.transforms.client.Transform;
  *
  */
 public class TransformImplWebkit extends Transform {
-	public WebKitCssMatrix transform = WebKitCssMatrix.newInstance();
+	protected WebKitCssMatrix transform = WebKitCssMatrix.create();
 	
 	/**
 	 * Construct a new 3D transform using webkit's native functionality,
 	 * set to identity.
 	 */
 	public TransformImplWebkit() { }
+	
+	/**
+	 * Get a copy of the underlying javascript matrix
+	 * 
+	 * @return A WebKitCssMatrix javascript overlay
+	 */
+	public WebKitCssMatrix getJsoMatrix() {
+		return WebKitCssMatrix.create().multiply(transform);
+	}
 	
 	@Override
 	public void rotate(double angle) {
@@ -92,7 +101,7 @@ public class TransformImplWebkit extends Transform {
 
 	@Override
 	public void rotateView(double angle) {
-		WebKitCssMatrix rot = WebKitCssMatrix.newInstance().rotate(angle);
+		WebKitCssMatrix rot = WebKitCssMatrix.create().rotate(angle);
 		transform = transform.multiplyView(rot);
 	}
 
@@ -101,7 +110,7 @@ public class TransformImplWebkit extends Transform {
 		// TODO: optimize this to reduce matrix creations and arithmetic.
 		// possibly refactor to combine with userRotateAtPoint
 		// TODO: check the order of ops on rot.
-		WebKitCssMatrix rot = WebKitCssMatrix.newInstance();
+		WebKitCssMatrix rot = WebKitCssMatrix.create();
 		rot = rot.translate(px, py).rotate(angle).translate(-px, -py);
 		
 		transform = transform.multiplyView(rot);
@@ -109,7 +118,7 @@ public class TransformImplWebkit extends Transform {
 
 	@Override
 	public void scaleView(double sx, double sy) {
-		WebKitCssMatrix scale = WebKitCssMatrix.newInstance().scale(sx, sy);
+		WebKitCssMatrix scale = WebKitCssMatrix.create().scale(sx, sy);
 		transform = transform.multiplyView(scale);
 	}
 
@@ -118,7 +127,7 @@ public class TransformImplWebkit extends Transform {
 		// TODO: optimize this to reduce matrix creations and arithmetic,
 		// possibly refactor to combine with userScaleAtPoint
 		// TODO: check the order of ops on scale.
-		WebKitCssMatrix scale = WebKitCssMatrix.newInstance();
+		WebKitCssMatrix scale = WebKitCssMatrix.create();
 		scale = scale.translate(px, py).scale(sx, sy).translate(-px, -py);
 		
 		transform = transform.multiplyView(scale);
@@ -126,26 +135,26 @@ public class TransformImplWebkit extends Transform {
 
 	@Override
 	public void translateView(double tx, double ty) {
-		WebKitCssMatrix trans = WebKitCssMatrix.newInstance().translate(tx, ty);
+		WebKitCssMatrix trans = WebKitCssMatrix.create().translate(tx, ty);
 		transform = transform.multiplyView(trans);
 	}
 	
 
 	@Override
 	public void skewXView(double angle) {
-		WebKitCssMatrix trans = WebKitCssMatrix.newInstance().skewX(angle);
+		WebKitCssMatrix trans = WebKitCssMatrix.create().skewX(angle);
 		transform = transform.multiplyView(trans);
 	}
 
 	@Override
 	public void skewYView(double angle) {
-		WebKitCssMatrix trans = WebKitCssMatrix.newInstance().skewY(angle);
+		WebKitCssMatrix trans = WebKitCssMatrix.create().skewY(angle);
 		transform = transform.multiplyView(trans);
 	}
 
 	@Override
 	public void setToIdentity() {
-		transform.setToIdentity();
+		transform = WebKitCssMatrix.create();
 	}
 	
 	@Override
