@@ -19,6 +19,7 @@ package gwt.ns.transformedelement.client.impl;
 import gwt.ns.transformedelement.client.TransformedElement;
 
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Style.Unit;
 
 /**
  * Implementation of CSS transform for IE
@@ -92,11 +93,12 @@ public class TransformedElementImplIE8 extends TransformedElement {
 		hAdj = hAdj > 0 ? (hAdj - originalHeight) / 2. : 0;
 		
 		// set translation from original position, transform and adjustment
-		String left = toFixed(originalLeft + transform.m14() - wAdj, 0) + "px";
-		String top = toFixed(originalTop + transform.m24() - hAdj, 0) + "px";
-		target.getStyle().setProperty("left", left);
-		target.getStyle().setProperty("top", top);
-		
+		//String left = toFixed(originalLeft + transform.m14() - wAdj, 0) + "px";
+		//String top = toFixed(originalTop + transform.m24() - hAdj, 0) + "px";
+		//target.getStyle().setProperty("left", left);
+		//target.getStyle().setProperty("top", top);
+		target.getStyle().setLeft(originalLeft + transform.m14() - wAdj, Unit.PX);
+		target.getStyle().setTop(originalTop + transform.m24() - hAdj, Unit.PX);
 	}
 
 	/**
@@ -132,9 +134,12 @@ public class TransformedElementImplIE8 extends TransformedElement {
 		originalTop = target.getOffsetTop();
 
 		// allow to move freely within parent coord system
-		target.getStyle().setProperty("position", "absolute");
-		target.getStyle().setProperty("top", "0");
-		target.getStyle().setProperty("left", "0");
+		//target.getStyle().setProperty("position", "absolute");
+		//target.getStyle().setProperty("top", "0");
+		//target.getStyle().setProperty("left", "0");
+		//target.getStyle().setPosition(Position.ABSOLUTE);
+		target.getStyle().setLeft(0, Unit.PX);
+		target.getStyle().setTop(0, Unit.PX);
 			
 		elementInitialized = true;
 	}

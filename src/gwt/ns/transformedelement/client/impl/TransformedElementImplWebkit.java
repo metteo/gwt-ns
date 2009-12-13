@@ -24,7 +24,7 @@ import gwt.ns.transforms.client.impl.WebKitCssMatrix;
 
 /**
  * Implementation of CSS transform for webkit based browsers
- * will only work in safari 4 up to when standard is implemented
+ * for safari 4 until standard is implemented
  */
 public class TransformedElementImplWebkit extends TransformedElement {
 

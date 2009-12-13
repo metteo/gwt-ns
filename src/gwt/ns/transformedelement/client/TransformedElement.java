@@ -20,6 +20,8 @@ import gwt.ns.transforms.client.Transform;
 import gwt.ns.transforms.client.Transformable;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.DOM;
 
@@ -42,19 +44,38 @@ public abstract class TransformedElement implements Transformable {
 	protected Element target;
 	protected Transform transform;
 	
+	// scheduleFinally() plumbing
+	protected boolean uncommitted = false;
+	protected ScheduledCommand flusher = new ScheduledCommand() {
+		public void execute() {
+			if (uncommitted)
+				commitTransform();
+			uncommitted = false;
+		}
+	};
+	
 	/**
-	 * Apply the current transform to this Element.
-	 * This method involves DOM access and style setting, so will be slow.<br>
-	 * <br><em>Note:</em> if a transform is applied before the element is
-	 * attached to the DOM, commitTranform() must at least be called once after
+	 * Manually apply the current transform to this Element.
+	 * This method involves DOM access and style setting, so will be slow.
+	 * Whenever a transform is made, a commit is automatically scheduled using
+	 * {@link Scheduler#scheduleFinally}, so call this method only if forcing a
+	 * commit is necessary.<br><br>
+	 * 
+	 * <em>Note:</em> if a transform is applied before the element is
+	 * attached to the DOM, commitTranform() must be called at least once after
 	 * attachment for proper positioning.<br><br>
 	 * 
 	 * TODO: investigate string creation on each platform as this is a hotspot
 	 */
 	public abstract void commitTransform();
 	
+	/**
+	 * Create an affine transform handle for DOM element elem.
+	 * 
+	 * @param elem The element to Transform
+	 */
 	public static TransformedElement wrap(Element elem) {
-		// get a system appropriate implementation of TransformableElement
+		// get a system appropriate implementation of TransformedElement
 		TransformedElement transElem = (TransformedElement) GWT.create(TransformedElement.class);
 		
 		// allow transforms module to handle binding
@@ -74,14 +95,31 @@ public abstract class TransformedElement implements Transformable {
 		return (Transform) GWT.create(Transform.class);
 	}
 	
+	/**
+	 * Create a new DOM element and return an affine transform handle to it.
+	 */
 	public static TransformedElement create() {
 		return wrap(DOM.createDiv());
 	}
 	
+	/**
+	 * Returns a handle to the DOM element being tranformed.
+	 */
 	public Element getElement() {
 		return target;
 	}
-
+	
+	/**
+	 * Schedule a call to commitTransform() so that any transform changes will
+	 * be written to the element's style.
+	 */
+	protected void scheduleCommit() {
+		if (!uncommitted) {
+			uncommitted = true;
+			Scheduler.get().scheduleFinally(flusher);
+		}
+	}
+	
 	/**
 	 * Reset object to original transformation.
 	 * <br><br>
@@ -90,14 +128,10 @@ public abstract class TransformedElement implements Transformable {
 	 * 	transform was originally set
 	 */
 	public void resetTranform() {
-		transform.setToIdentity();
+		setToIdentity();
 	}
 	
 	/**
-	 * Not ideal, but lightweight. All the transform implementations but IE's
-	 * won't take exponent notation, so this seems like the fastest way to
-	 * format the matrix entries in decimal form.<br><br>
-	 * 
 	 * Convert a floating point number to a string with the specified number
 	 * of digits after the decimal place (note: that is <em>not</em> total
 	 * digits).
@@ -106,12 +140,18 @@ public abstract class TransformedElement implements Transformable {
 	 * @param numDigits	number of digits after the decimal point
 	 * @return String representation of value
 	 */
-	public static final native String toFixed(double value, int numDigits) /*-{
+	protected static final native String toFixed(double value, int numDigits) /*-{
 		return value.toFixed(numDigits);
 	}-*/;
-	
 
-	public static final String toFixed(double value) {
+	/**
+	 * Convert a floating point number to a string with the default number
+	 * of digits after the decimal place.
+	 * 
+	 * @param value to round and convert
+	 * @return String representation of value
+	 */
+	protected static final String toFixed(double value) {
 		return toFixed(value, STYLE_PRECISION);
 	}
 	
@@ -119,46 +159,55 @@ public abstract class TransformedElement implements Transformable {
 	@Override
 	public void rotate(double angle) {
 		transform.rotate(angle);
+		scheduleCommit();
 	}
 
 	@Override
 	public void rotateAtPoint(double angle, double px, double py) {
 		transform.rotateAtPoint(angle, px, py);
+		scheduleCommit();
 	}
 
 	@Override
 	public void rotateViewAtPoint(double angle, double px, double py) {
 		transform.rotateViewAtPoint(angle, px, py);
+		scheduleCommit();
 	}
 
 	@Override
 	public void rotateView(double angle) {
 		transform.rotateView(angle);
+		scheduleCommit();
 	}
 
 	@Override
 	public void scale(double sx, double sy) {
 		transform.scale(sx, sy);
+		scheduleCommit();
 	}
 
 	@Override
 	public void scaleAtPoint(double sx, double sy, double px, double py) {
 		transform.scaleAtPoint(sx, sy, px, py);
+		scheduleCommit();
 	}
 
 	@Override
 	public void scaleViewAtPoint(double sx, double sy, double px, double py) {
 		transform.scaleViewAtPoint(sx, sy, px, py);
+		scheduleCommit();
 	}
 
 	@Override
 	public void scaleView(double sx, double sy) {
 		transform.scaleView(sx, sy);
+		scheduleCommit();
 	}
 
 	@Override
 	public void setToIdentity() {
 		transform.setToIdentity();
+		scheduleCommit();
 	}
 
 	@Override
@@ -169,41 +218,49 @@ public abstract class TransformedElement implements Transformable {
 		
 		transform.setTransform(t11, t21, t31, t41, t12, t22, t32, t42, t13,
 				t23, t33, t43, t14, t24, t34, t44);
+		scheduleCommit();
 	}
 
 	@Override
 	public void setTransform(Transform transfrom) {
 		this.transform.setTransform(transfrom);
+		scheduleCommit();
 	}
 
 	@Override
 	public void skewX(double angle) {
 		transform.skewX(angle);
+		scheduleCommit();
 	}
 
 	@Override
 	public void skewXView(double angle) {
 		transform.skewXView(angle);
+		scheduleCommit();
 	}
 
 	@Override
 	public void skewY(double angle) {
 		transform.skewY(angle);
+		scheduleCommit();
 	}
 
 	@Override
 	public void skewYView(double angle) {
 		transform.skewYView(angle);
+		scheduleCommit();
 	}
 
 	@Override
 	public void transform(Transform transform) {
 		this.transform.transform(transform);	// I need a thesaurus
+		scheduleCommit();
 	}
 
 	@Override
 	public void transformView(Transform transform) {
 		this.transform.transformView(transform);
+		scheduleCommit();
 	}
 
 	@Override
@@ -219,10 +276,12 @@ public abstract class TransformedElement implements Transformable {
 	@Override
 	public void translate(double tx, double ty) {
 		transform.translate(tx, ty);
+		scheduleCommit();
 	}
 
 	@Override
 	public void translateView(double tx, double ty) {
 		transform.translateView(tx, ty);
+		scheduleCommit();
 	}
 }
