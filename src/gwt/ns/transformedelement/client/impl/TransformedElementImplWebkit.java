@@ -17,6 +17,7 @@
 package gwt.ns.transformedelement.client.impl;
 
 import com.google.gwt.dom.client.Style;
+
 import gwt.ns.transformedelement.client.TransformedElement;
 import gwt.ns.transforms.client.Transform;
 import gwt.ns.transforms.client.impl.TransformImplWebkit;
@@ -43,4 +44,11 @@ public class TransformedElementImplWebkit extends TransformedElement {
 	protected static final native void webkitCommit(Style style, WebKitCssMatrix matrix) /*-{
 		style.WebkitTransform = matrix;
 	}-*/;
+	
+
+	@Override
+	public void setOrigin(double ox, double oy) {
+		String origin = toFixed(ox, 0) + "px " + toFixed(oy, 0) + "px";
+		target.getStyle().setProperty("WebkitTransformOrigin", origin);
+	}
 }

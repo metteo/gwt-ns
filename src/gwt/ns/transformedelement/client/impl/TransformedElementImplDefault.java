@@ -22,14 +22,18 @@ import gwt.ns.transforms.client.Transform;
 /**
  * Implementation of TransformableElement for browsers with no 2d css transforms
  * For now, do nothing.
- * TODO: maybe add translations with method similar to IE?
+ * TODO: maybe add translations with method similar to IEImpl?
  */
 public class TransformedElementImplDefault extends TransformedElement {
 
+	// save some cycles by really doing nothing
 	@Override
 	public void commitTransform() { }
 	
-	// save some cycles by really doing nothing
+
+	@Override
+	public void setOrigin(double ox, double oy) { }
+
 	@Override
 	public void resetTranform() { }
 	
