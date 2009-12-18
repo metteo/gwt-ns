@@ -27,7 +27,6 @@ import com.google.gwt.user.client.DOM;
 
 public abstract class TransformedElement implements Transformable {
 	// TODO: implement as concrete class implementing standard
-	// TODO: changeOrigin()?
 	// TODO: transition?
 	// TODO: units?? ems, px, cm allowed in firefox at least...
 	// TODO: setToIdentity vs reset to initial state? (see above)
@@ -70,6 +69,19 @@ public abstract class TransformedElement implements Transformable {
 	public abstract void commitTransform();
 	
 	/**
+	 * Set the origin of the transformation. In other words, this point will be
+	 * affected by translations only. All other transformations will leave this
+	 * (and only this) point in the same position.<br><br>
+	 * 
+	 * Currently only accepts lengths in pixel units.
+	 * TODO: expand support for all acceptable units.
+	 * 
+	 * @param ox The x-coordinate of the new origin in pixels
+	 * @param oy The y-coordinate of the new origin in pixels
+	 */
+	public abstract void setOrigin(double ox, double oy);
+	
+	/**
 	 * Create an affine transform handle for DOM element elem.
 	 * 
 	 * @param elem The element to Transform
@@ -94,6 +106,7 @@ public abstract class TransformedElement implements Transformable {
 		// allow transforms module to handle binding
 		return (Transform) GWT.create(Transform.class);
 	}
+	
 	
 	/**
 	 * Create a new DOM element and return an affine transform handle to it.

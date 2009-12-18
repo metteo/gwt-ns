@@ -17,8 +17,10 @@
 package gwt.ns.transformedelement.client.impl;
 
 import gwt.ns.transformedelement.client.TransformedElement;
+import gwt.ns.transforms.client.Transform;
 
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 
 /**
@@ -64,6 +66,13 @@ public class TransformedElementImplIE8 extends TransformedElement {
 	 * true if original* variables, above, are initialized
 	 */
 	protected boolean elementInitialized = false;
+
+	private boolean originChanged = false;
+	private double originX, originY;
+	
+	// may refer to transform, so change this at your peril
+	private Transform originCorrected;
+	private Transform originTemp;
 	
 	@Override
 	public void commitTransform() {
@@ -71,6 +80,9 @@ public class TransformedElementImplIE8 extends TransformedElement {
 		// element must be attached to document to have dimensions
 		if (!elementInitialized && Document.get().getBody().isOrHasChild(target))
 			initElementLayout();
+		
+		// correct for origin change. corrected (or not) now in originCorrected
+		setOriginCorrectedTransform();
 		
 		// set linear part of transformation (2x2 matrix)
 		target.getStyle().setProperty("filter", get2dFilterString());
@@ -82,25 +94,63 @@ public class TransformedElementImplIE8 extends TransformedElement {
 		 * Find offset between where the origin (currently middle of element)
 		 * should be and where it is, then subtract it from its new, translated
 		 * position.
-		 * 
-		 * TODO: this is 1 of 2 places setTransformOrigin() would make its
-		 * change. other before get2dFilterString() to translate coords
 		 */
-		double wAdj = target.getOffsetWidth();
-		wAdj = wAdj > 0 ? (wAdj - originalWidth) / 2. : 0;
+		// correct for bounding box repositioning (recenter midpoint)
+		double xAdj = target.getOffsetWidth();
+		xAdj = xAdj > 0 ? (xAdj - originalWidth) / 2. : 0;
+		double yAdj = target.getOffsetHeight();
+		yAdj = yAdj > 0 ? (yAdj - originalHeight) / 2. : 0;
 		
-		double hAdj = target.getOffsetHeight();
-		hAdj = hAdj > 0 ? (hAdj - originalHeight) / 2. : 0;
-		
+		if (!originChanged) {
+			// if origin is midpoint, just adjust for translation
+			xAdj -= originCorrected.m14();
+			yAdj -= originCorrected.m24();
+			
+		} else {
+			// reposition transformed origin to origin + translation
+			double ox = originX - originalWidth/2.;
+			double oy = originY - originalHeight/2.;
+			double tox = originCorrected.transformX(ox, oy);
+			double toy = originCorrected.transformY(ox, oy);
+			
+			tox += target.getOffsetWidth()/2.;
+			toy += target.getOffsetHeight()/2.;
+			xAdj = tox - 2*originCorrected.m14();
+			yAdj = toy - 2*originCorrected.m21();
+		}
+
 		// set translation from original position, transform and adjustment
-		//String left = toFixed(originalLeft + transform.m14() - wAdj, 0) + "px";
-		//String top = toFixed(originalTop + transform.m24() - hAdj, 0) + "px";
-		//target.getStyle().setProperty("left", left);
-		//target.getStyle().setProperty("top", top);
-		target.getStyle().setLeft(originalLeft + transform.m14() - wAdj, Unit.PX);
-		target.getStyle().setTop(originalTop + transform.m24() - hAdj, Unit.PX);
+		target.getStyle().setLeft(originalLeft - xAdj, Unit.PX);
+		target.getStyle().setTop(originalTop - yAdj, Unit.PX);
 	}
 
+
+	@Override
+	public void setOrigin(double ox, double oy) {
+		originChanged  = true;
+		originX = ox;
+		originY = oy;
+	}
+	
+	/**
+	 * set originCorrected to current transform corrected for a change in origin
+	 */
+	protected void setOriginCorrectedTransform() {
+		if (!originChanged) {
+			originCorrected = transform;
+			
+		} else {
+			double xadj = originX - originalWidth/2;
+			double yadj = originY - originalHeight/2;
+			
+			originTemp.setToIdentity();
+			originTemp.translateView(xadj, yadj); // view is faster
+			originTemp.transform(transform);
+			originTemp.translate(-xadj, -yadj);
+			originCorrected = originTemp;
+		}
+	}
+	
 	/**
 	 * Get the MsFilter string that will set the element to the current
 	 * transform (2d linear transform only).
@@ -109,10 +159,10 @@ public class TransformedElementImplIE8 extends TransformedElement {
 	 */
 	protected String get2dFilterString() {
 		String filt = "progid:DXImageTransform.Microsoft.Matrix(M11=";
-		filt +=	transform.m11();
-		filt += ", M12=" + transform.m12();
-		filt += ", M21=" + transform.m21();
-		filt += ", M22=" + transform.m22();
+		filt +=	originCorrected.m11();
+		filt += ", M12=" + originCorrected.m12();
+		filt += ", M21=" + originCorrected.m21();
+		filt += ", M22=" + originCorrected.m22();
 		filt += ", SizingMethod = 'auto expand')";
 		
 		return filt;
@@ -134,13 +184,12 @@ public class TransformedElementImplIE8 extends TransformedElement {
 		originalTop = target.getOffsetTop();
 
 		// allow to move freely within parent coord system
-		//target.getStyle().setProperty("position", "absolute");
-		//target.getStyle().setProperty("top", "0");
-		//target.getStyle().setProperty("left", "0");
 		//target.getStyle().setPosition(Position.ABSOLUTE);
 		target.getStyle().setLeft(0, Unit.PX);
 		target.getStyle().setTop(0, Unit.PX);
+		target.getStyle().setPosition(Position.ABSOLUTE);
 			
 		elementInitialized = true;
+		originTemp = this.createTransform();
 	}
 }

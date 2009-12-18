@@ -71,4 +71,9 @@ public class TransformedElementImplGecko extends TransformedElement {
 		return tmp;
 	}
 
+	@Override
+	public void setOrigin(double ox, double oy) {
+		String origin = toFixed(ox, 0) + "px " + toFixed(oy, 0) + "px";
+		target.getStyle().setProperty("MozTransformOrigin", origin);
+	}
 }
