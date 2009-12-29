@@ -37,7 +37,7 @@ public class Worker extends JavaScriptObject {
 	 * @return The created worker
 	 */
 	public static native Worker create(String url) /*-{
-    	return new Worker(url);
+		return new Worker(url);
   	}-*/;
 
 	/**
