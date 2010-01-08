@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Brendan Kenny
+ * Copyright 2010 Brendan Kenny
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,62 +20,56 @@ import com.google.gwt.user.client.Timer;
 
 /**
  * Entry point class for an incremental Worker.
- * onWorkerLoad() is called when worker is first initialized, then update() is
- * called every getDelay() milliseconds until the worker calls close(), is
- * terminated, or flags itself as complete with isComplete().
+ * onWorkerLoad() is called when worker is first initialized, then execute() is
+ * called as long as a positive integer delay is returned, until the worker
+ * calls close(), is terminated, or returns a non-positive number from execute().
  */
 public abstract class IncrementalWorkerEntryPoint extends DedicatedWorkerEntryPoint {
 	private Timer t;
-	private final int DEFAULT_DELAY = 25;
-	private int updateDelay = DEFAULT_DELAY;
 	
 	/**
-	 * This method is repeatedly called until worker is closed or terminated or
-	 * method returns false.
-	 * Work done within execute(), unless known with certainty to be within a
-	 * Web Worker, should be limited in duration so platforms that do not
-	 * support Web Workers natively stay responsive.
+	 * This method is called repeatedly until worker is closed, terminated, or
+	 * method returns a negative int. System will schedule (though not
+	 * necessarily execute) the next call to execute() in returned number of
+	 * milliseconds.<br><br>
 	 * 
-	 * @return True if work remains to be done, false if complete
+	 * Next call will be scheduled in a minimum of 1 millisecond (for IE) or
+	 * in the number of milliseconds returned. If a negative number is
+	 * returned, execution is completed and Worker is close()d.<br><br>
+	 * 
+	 * Work done within execute() will not be performed in a Web Worker on
+	 * platforms that don't offer that feature. Execution time should therefore
+	 * be limited in duration so the application stays responsive.
+	 * 
+	 * @return The number of milliseconds in which to call execute() again, -1
+	 * if finished.
 	 */
-	public abstract boolean execute();
-	
-	/**
-	 * @return The current delay, in milliseconds, between successive calls of
-	 * {@link #execute()}.
-	 */
-	public int getDelay() {
-		return updateDelay;
-	}
+	public abstract int execute();
 	
 	@Override
 	public void onModuleLoad() {
 		super.onModuleLoad();
 		
 		// TODO: something more lightweight than Timer? what overhead
-		// does it bring?
+		// does it bring? (cancel() each time newly scheduled, etc)
 		// TODO: investigate close() behavior. According to spec, should have
 		// the same behavior (wait until execution of current task complete
 		// before closing Worker) as conditional gives here
 		t = new Timer() {
 			@Override
 			public void run() {
-				if (execute())
-					t.schedule(updateDelay);
-				else
-					close();
+				int newdelay = execute();
+				
+				// must be at least 1 for IE
+				newdelay = (newdelay == 0) ? 1 : newdelay;
+				
+				if (newdelay > 0) {
+					t.schedule(newdelay);
+				} else {
+					close();	// finished
+				}
 			}
 		};
-		t.schedule(updateDelay);
-	}
-	
-	/**
-	 * Set the delay between successive calls of {@link #execute()}.
-	 * 
-	 * @param delayMillis The delay in milliseconds
-	 */
-	public void setDelay(int delayMillis) {
-		if (delayMillis >= 0)
-			updateDelay = delayMillis;
+		t.schedule(1);
 	}
 }

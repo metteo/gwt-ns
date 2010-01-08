@@ -76,8 +76,8 @@ public abstract class DedicatedWorkerEntryPoint implements EntryPoint {
 	}
 
 	/**
-	 * The entry point of execution for DedicatedWorkers. Override this method
-	 * (not {@link #onModuleLoad()}) in subclasses.
+	 * The entry point of execution for DedicatedWorkers. Subclasses will
+	 * generally override this method (not {@link #onModuleLoad()}).
 	 */
 	public abstract void onWorkerLoad();
 	
