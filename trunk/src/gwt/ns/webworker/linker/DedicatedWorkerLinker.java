@@ -32,6 +32,7 @@ import com.google.gwt.core.ext.linker.LinkerOrder.Order;
 import com.google.gwt.core.ext.linker.impl.SelectionScriptLinker;
 import com.google.gwt.dev.About;
 import com.google.gwt.dev.util.DefaultTextOutput;
+import com.google.gwt.dev.util.Util;
 
 import java.util.Collection;
 import java.util.Set;
@@ -79,7 +80,7 @@ public class DedicatedWorkerLinker extends SelectionScriptLinker {
       throws UnableToCompleteException {
 
     DefaultTextOutput out = new DefaultTextOutput(true);
-
+    
     // Emit the selection script from template
     String bootstrap = generateSelectionScript(logger, context, artifacts);
     bootstrap = context.optimizeJavaScript(logger, bootstrap);
@@ -116,6 +117,7 @@ public class DedicatedWorkerLinker extends SelectionScriptLinker {
           "The module must have exactly one distinct"
               + " permutation when using the " + getDescription() + " Linker.",
           null);
+      // give a hint to reason for failure
       logPermutationProperties(logger, context.getProperties());
       throw new UnableToCompleteException();
     }
@@ -143,8 +145,10 @@ public class DedicatedWorkerLinker extends SelectionScriptLinker {
     out.newlineOpt();
 
     // TODO: what's the best naming scheme?
+    // get new strong name for bootstrap + compilation result
+    String newStrongName =  Util.computeStrongName(Util.getBytes(out.toString()));
     return emitString(logger, out.toString(), context.getModuleName()
-        + "." + result.getStrongName() + ".cache.js");
+        + "." + newStrongName + ".cache.js");
   }
 
   /**
