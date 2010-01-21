@@ -32,7 +32,6 @@ import com.google.gwt.core.ext.linker.LinkerOrder.Order;
 import com.google.gwt.core.ext.linker.impl.SelectionScriptLinker;
 import com.google.gwt.dev.About;
 import com.google.gwt.dev.util.DefaultTextOutput;
-import com.google.gwt.dev.util.Util;
 
 import java.util.Collection;
 import java.util.Set;
@@ -93,9 +92,11 @@ public class DedicatedWorkerLinker extends SelectionScriptLinker {
     out.print("var $gwt_version = \"" + About.getGwtVersionNum() + "\";");
     out.newlineOpt();
     
-    // Point $wnd and $doc to worker global scope. Shouldn't be used, but there
-    // in case preexisting code uses either as a generic global variable
-    // many uses of $wnd and $doc will be broken, per Worker spec
+    /* Point $wnd and $doc to worker global scope. Shouldn't be used, but there
+     * in case preexisting code uses either as a generic global variable
+     * normal access of $wnd and $doc attributes and methods will be broken,
+     * per Worker spec
+     */
     out.print("var $self = self;");
     out.newlineOpt();
     out.print("var $wnd = self;");
@@ -122,6 +123,8 @@ public class DedicatedWorkerLinker extends SelectionScriptLinker {
       throw new UnableToCompleteException();
     }
     CompilationResult result = results.iterator().next();
+    
+    // TODO: this is now the WRONG strongName because of end of this method
     out.print("var $strongName = '" + result.getStrongName() + "';");
     out.newlineOpt();
 
@@ -145,10 +148,8 @@ public class DedicatedWorkerLinker extends SelectionScriptLinker {
     out.newlineOpt();
 
     // TODO: what's the best naming scheme?
-    // get new strong name for bootstrap + compilation result
-    String newStrongName =  Util.computeStrongName(Util.getBytes(out.toString()));
     return emitString(logger, out.toString(), context.getModuleName()
-        + "." + newStrongName + ".cache.js");
+        + "." + result.getStrongName() + ".cache.js");
   }
 
   /**
@@ -160,19 +161,19 @@ public class DedicatedWorkerLinker extends SelectionScriptLinker {
    */
   private void logPermutationProperties(TreeLogger logger,
       SortedSet<SelectionProperty> properties) {
-	logger.log(TreeLogger.INFO, "Deferred binding properties of current " +
-  	    "module:");
+    logger.log(TreeLogger.INFO, "Deferred binding properties of current " +
+      "module:");
     for (SelectionProperty property : properties) {
-    	String name = property.getName();
-    	String value = property.tryGetValue();
-    	if (value == null) {
-    		value = "**Varies. Probable cause of multiple permutations.**";
-    	} else {
-    		value = value + ". (constant)";
-    	}
-    			
-    	logger.log(TreeLogger.INFO, "Property Name: " + name);
-    	logger.log(TreeLogger.INFO, "        Value: " + value);
+      String name = property.getName();
+      String value = property.tryGetValue();
+      if (value == null) {
+        value = "**Varies. Probable cause of multiple permutations.**";
+      } else {
+        value = value + ". (constant)";
+      }
+
+      logger.log(TreeLogger.INFO, "Property Name: " + name);
+      logger.log(TreeLogger.INFO, "        Value: " + value);
     }
   }
 
