@@ -23,9 +23,6 @@ import com.google.gwt.core.client.JavaScriptObject;
  * decomposition IDL attributes, protocol, host, port, hostname, pathname,
  * search, and hash.
  * 
- * Runs inside the webworker, so this class cannot assume that Window or
- * Document exists.
- * 
  * @see <a href='http://www.whatwg.org/specs/web-workers/current-work/#workerlocation'>WorkerLocation Specification</a>
  */
 public class WorkerLocation extends JavaScriptObject {

@@ -14,18 +14,27 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
+// This code originated in code from SpeedTracer, r3
+// http://code.google.com/p/speedtracer/source/detail?r=3
+
 package gwt.ns.webworker.client;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
 /**
  * Event structure returned whenever an uncaught runtime script error occurs in
- * one of the worker's scripts. See {@link ErrorHandler}
+ * one of the insideWorker's scripts. See {@link ErrorHandler}
  * 
- * @see <a href='http://www.whatwg.org/specs/web-workers/current-work/#fire-a-worker-error-event'>Web Worker ErrorEvent Specification</a>
+ * @see <a href='http://www.whatwg.org/specs/web-workers/current-work/#fire-a-insideWorker-error-event'>Web Worker ErrorEvent Specification</a>
  */
 public class ErrorEvent extends JavaScriptObject {
-
+	/*
+	 * Note: since currently errors do nothing in emulated Workers, ErrorEvents
+	 * are found only as JSO representations of native events
+	 */
+	
+	
 	protected ErrorEvent() {
 		// constructors must be protected in JavaScriptObject overlays.
 	}

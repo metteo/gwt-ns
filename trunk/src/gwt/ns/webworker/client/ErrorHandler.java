@@ -14,17 +14,21 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
+// This code originated in code from SpeedTracer, r3
+// http://code.google.com/p/speedtracer/source/detail?r=3
+
 package gwt.ns.webworker.client;
 
 /**
  * Worker error handling interface.
  * 
- *  @see <a href='http://www.whatwg.org/specs/web-workers/current-work/#fire-a-worker-error-event'>Web Worker ErrorEvent Specification</a>
+ *  @see <a href='http://www.whatwg.org/specs/web-workers/current-work/#fire-a-insideWorker-error-event'>Web Worker ErrorEvent Specification</a>
  */
 public interface ErrorHandler {
 	/**
 	 * An event handler method that is called whenever an ErrorEvent with type
-	 * error bubbles through the worker.
+	 * error bubbles through the insideWorker.
 	 */
 	void onError(ErrorEvent event);
 }
