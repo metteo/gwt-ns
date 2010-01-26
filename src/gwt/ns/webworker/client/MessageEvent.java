@@ -1,35 +1,50 @@
 /*
- * Copyright 2009 Brendan Kenny
- * Copyright 2009 Google Inc.
+ * Copyright 2010 Brendan Kenny
  * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
+// This code originated in part from code from SpeedTracer, r3
+// http://code.google.com/p/speedtracer/source/detail?r=3
+
 package gwt.ns.webworker.client;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
 /**
- * General HTML 5 Message event.
+ * An event used for message passing with a Web Worker. Contents of message
+ * can be accessed by {@link #getData()}.
  */
 public class MessageEvent extends JavaScriptObject {
 	protected MessageEvent() {
 		// required protected constructor for JavaScriptObject
 	}
-
+	
 	/**
-	 * Retrieve the data stored within the message. Use
-	 * {@link gwt.ns.json.client.Json} to recover any encoded subclasses of
-	 * {@link JavaScriptObject}.
+	 * Create a simple emulated "MessageEvent" that will work with this
+	 * overlay.
+	 * 
+	 * TODO: need full emulated implementation of MessageEvent
+	 * 
+	 * @param message Payload of event
+	 * @return New emulated MessageEvent
+	 */
+	public final static native MessageEvent createEmulated(String message) /*-{
+		return { "data" : message };
+	}-*/;
+	
+	/**
+	 * @see {@link Worker#postMessage(String)}
 	 * 
 	 * @return The passed message
 	 */
