@@ -14,15 +14,10 @@
  * the License.
  */
 
-package gwt.ns.webworker.client.impl;
+package gwt.ns.webworker.client;
 
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 
-import gwt.ns.webworker.client.ErrorHandler;
-import gwt.ns.webworker.client.IncrementalWorkerEntryPoint;
-import gwt.ns.webworker.client.MessageEvent;
-import gwt.ns.webworker.client.MessageHandler;
-import gwt.ns.webworker.client.Worker;
 
 /**
  * A class to act as proxy between the Worker interface and an emulated Web
@@ -41,10 +36,7 @@ public class WorkerImplProxy implements Worker {
 	MessageHandler outsideMessageHandler;
 	
 	private boolean terminated = false;
-	
-	// TODO: is there a need for or even a source of error events?
-	// TODO: refactor.
-	// TODO: Message Events as true GwtEvents?
+	private boolean started = false;
 	
 	/**
 	 * A command to pass a message from Worker's scope to the 
@@ -87,16 +79,30 @@ public class WorkerImplProxy implements Worker {
 	}
 	
 	/**
-	 * Create a proxy from a class extending IncrementalWorkerEntryPoint. Cast
-	 * to Worker interface to approximate a native Worker.
-	 * 
-	 * @param entryPoint EntryPoint of Worker
+	 * Asynchronously start the worker
+	 */
+	class RunWorkerCommand implements ScheduledCommand {
+		IncrementalWorkerEntryPoint entryPoint;
+		
+		public RunWorkerCommand(IncrementalWorkerEntryPoint entryPoint) {
+			this.entryPoint = entryPoint;
+		}
+		
+		@Override
+		public void execute() {
+			entryPoint.onModuleLoad();
+		}
+	}
+	
+	/**
+	 * Create a Worker proxy 
 	 */
 	public WorkerImplProxy(IncrementalWorkerEntryPoint entryPoint) {
-		// TODO: need a more elegant initialization.
-		// reliant on GWT.create() call in IncrementalWorkerEntryPoint
-		workerScope = (WorkerGlobalScopeImplEmulated) entryPoint.getGlobalScope();
-		workerScope.setProxy(this);
+		workerScope = new WorkerGlobalScopeImplEmulated(this);
+		
+		// TODO: a little ugly, but workable for now (and less ugly than a
+	    // GWT.create() replace, then cast to replacement type elsewhere)
+		entryPoint.selfImpl = workerScope;
 		
 		this.entryPoint = entryPoint;
 	}
@@ -107,7 +113,7 @@ public class WorkerImplProxy implements Worker {
 	 * TODO: not sure about making the plunge to full event yet, but
 	 * other command queues (eg scheduleDeferred) add way too much overhead
 	 * for something called so often. performance is still poor in dev mode
-	 * though.
+	 * though due to drop to JSNI
 	 * 
 	 * @param cmd Command to put on event queue
 	 */
@@ -116,6 +122,17 @@ public class WorkerImplProxy implements Worker {
 			cmd.@com.google.gwt.core.client.Scheduler.ScheduledCommand::execute()();
   		}, 1);
 	}-*/;
+	
+	/**
+	 * Returns a reference to the emulated WorkerGlobalScope tied to this
+	 * proxy. Repeated calls will return the same object (i.e. every Worker
+	 * needs its own proxy).
+	 * 
+	 * @return The WorkerGlobalScope associated with this proxy
+	 */
+	public WorkerGlobalScopeImplEmulated getEmulatedScope() {
+		return workerScope;
+	}
 	
 	/**
 	 * Receives message events from emulated Worker. Queue command to pass
@@ -143,16 +160,25 @@ public class WorkerImplProxy implements Worker {
 	}
 
 	/**
-	 * Starts the emulated Worker. Invoke only once.
+	 * Starts the emulated Worker.
 	 */
 	public void runWorker() {
-		// TODO: guard call?
-		entryPoint.onModuleLoad();
+		// harder contract here since generally called from generator
+		// can't call before inited or after terminated
+		assert(entryPoint != null);
+		
+		// should only be started once
+		assert(!started);
+		
+		// async start
+		enqueueCommand(new RunWorkerCommand(entryPoint));
+		started = true;
 	}
 	
 	@Override
 	public void setErrorHandler(ErrorHandler handler) {
 		// no-op without reason to add error passing
+		// TODO: is there a need for or even a source of error events?
 	}
 
 	@Override
@@ -160,7 +186,7 @@ public class WorkerImplProxy implements Worker {
 		if (!terminated)
 			outsideMessageHandler = messageHandler;
 	}
-
+	
 	@Override
 	public void terminate() {
 		/* 

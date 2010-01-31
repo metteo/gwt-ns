@@ -18,12 +18,7 @@
 // This code is largely adapted from code from SpeedTracer, r3
 // http://code.google.com/p/speedtracer/source/detail?r=3
 
-package gwt.ns.webworker.client.impl;
-
-import gwt.ns.webworker.client.WorkerGlobalScope;
-import gwt.ns.webworker.client.ErrorHandler;
-import gwt.ns.webworker.client.MessageHandler;
-import gwt.ns.webworker.client.WorkerLocation;
+package gwt.ns.webworker.client;
 
 import com.google.gwt.core.client.JsArrayString;
 
