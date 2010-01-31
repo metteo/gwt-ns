@@ -40,14 +40,19 @@ import java.util.SortedSet;
 /**
  * A Linker for producing a single JavaScript file from a GWT module and
  * packaging it as a Web Worker. The use of this Linker requires that the
- * module has exactly one distinct compilation result.
+ * module have exactly one distinct compilation result. If it does not, a
+ * (hopefully useful) list of properties that would cause multiple compilation
+ * results will be logged.
+ * 
  * @see <a href='http://www.whatwg.org/specs/web-workers/current-work/'>Web Workers</a>
  */
 @LinkerOrder(Order.PRIMARY)
-public class DedicatedWorkerLinker extends SelectionScriptLinker {
+public class IncrementalWorkerLinker extends SelectionScriptLinker {
+  public static final String WORKER_EXTENSION = ".cache.js";
+
   @Override
   public String getDescription() {
-    return "Dedicated Web Worker";
+    return "Incremental Web Worker";
   }
 
   @Override
@@ -56,7 +61,7 @@ public class DedicatedWorkerLinker extends SelectionScriptLinker {
     ArtifactSet toReturn = new ArtifactSet(artifacts);
 
     toReturn.add(emitSelectionScript(logger, context, artifacts));
-
+    
     return toReturn;
   }
 
@@ -92,7 +97,7 @@ public class DedicatedWorkerLinker extends SelectionScriptLinker {
     out.print("var $gwt_version = \"" + About.getGwtVersionNum() + "\";");
     out.newlineOpt();
     
-    /* Point $wnd and $doc to worker global scope. Shouldn't be used, but there
+    /* Point $wnd and $doc to insideWorker global scope. Shouldn't be used, but there
      * in case preexisting code uses either as a generic global variable
      * normal access of $wnd and $doc attributes and methods will be broken,
      * per Worker spec
@@ -124,7 +129,6 @@ public class DedicatedWorkerLinker extends SelectionScriptLinker {
     }
     CompilationResult result = results.iterator().next();
     
-    // TODO: this is now the WRONG strongName because of end of this method
     out.print("var $strongName = '" + result.getStrongName() + "';");
     out.newlineOpt();
 
@@ -147,9 +151,8 @@ public class DedicatedWorkerLinker extends SelectionScriptLinker {
     out.print("})();");
     out.newlineOpt();
 
-    // TODO: what's the best naming scheme?
     return emitString(logger, out.toString(), context.getModuleName()
-        + "." + result.getStrongName() + ".cache.js");
+        + WORKER_EXTENSION);
   }
 
   /**
@@ -159,7 +162,7 @@ public class DedicatedWorkerLinker extends SelectionScriptLinker {
    * @param logger the TreeLogger to record to
    * @param properties The deferred binding properties
    */
-  private void logPermutationProperties(TreeLogger logger,
+  protected void logPermutationProperties(TreeLogger logger,
       SortedSet<SelectionProperty> properties) {
     logger.log(TreeLogger.INFO, "Deferred binding properties of current " +
       "module:");
@@ -210,6 +213,6 @@ public class DedicatedWorkerLinker extends SelectionScriptLinker {
   @Override
   protected String getSelectionScriptTemplate(TreeLogger logger,
       LinkerContext context) throws UnableToCompleteException {
-    return "gwt/ns/webworker/linker/DedicatedWorkerTemplate.js";
+    return "gwt/ns/webworker/linker/IncrementalWorkerTemplate.js";
   }
 }
