@@ -18,27 +18,16 @@
 // This code is largely adapted from code from SpeedTracer, r3
 // http://code.google.com/p/speedtracer/source/detail?r=3
 
-package gwt.ns.webworker.client.impl;
-
-import gwt.ns.webworker.client.ErrorEvent;
-import gwt.ns.webworker.client.ErrorHandler;
-import gwt.ns.webworker.client.MessageEvent;
-import gwt.ns.webworker.client.MessageHandler;
-import gwt.ns.webworker.client.Worker;
+package gwt.ns.webworker.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 
-
 /**
  * An implementation of {@link Worker} for platforms supporting Web Workers.
  */
 public class WorkerImplNative extends JavaScriptObject implements Worker {
-	protected WorkerImplNative() {
-		// constructors must be protected in JavaScriptObject overlays.
-	}
-	
 	/**
 	 * Create a Web Worker from the script located at the passed URL
 	 * 
@@ -48,7 +37,7 @@ public class WorkerImplNative extends JavaScriptObject implements Worker {
 	public static native WorkerImplNative create(String url) /*-{
 		return new Worker(url);
   	}-*/;
-
+	
 	/**
 	 * Takes care of reporting exceptions to the console in hosted mode.
 	 * 
@@ -68,7 +57,7 @@ public class WorkerImplNative extends JavaScriptObject implements Worker {
 			errorHandler.onError(event);
 		}
 	}
-	
+
 	/**
 	 * Takes care of reporting exceptions to the console in hosted mode.
 	 * 
@@ -89,6 +78,10 @@ public class WorkerImplNative extends JavaScriptObject implements Worker {
 			messageHandler.onMessage(event);
 		}
 	}
+	
+	protected WorkerImplNative() {
+		// constructors must be protected in JavaScriptObject overlays.
+	}
 
 	/* (non-Javadoc)
 	 * @see gwt.ns.webworker.client.Worker#postMessage(java.lang.String)
@@ -102,7 +95,7 @@ public class WorkerImplNative extends JavaScriptObject implements Worker {
 	 */
 	public final native void setErrorHandler(ErrorHandler handler) /*-{
 		this.onerror = function(event) {
-			@gwt.ns.webworker.client.impl.WorkerImplNative::onErrorImpl(Lgwt/ns/webworker/client/ErrorHandler;Lgwt/ns/webworker/client/ErrorEvent;)(handler, event);
+			@gwt.ns.webworker.client.WorkerImplNative::onErrorImpl(Lgwt/ns/webworker/client/ErrorHandler;Lgwt/ns/webworker/client/ErrorEvent;)(handler, event);
 		}
 	}-*/;
 	
@@ -111,7 +104,7 @@ public class WorkerImplNative extends JavaScriptObject implements Worker {
 	 */
 	public final native void setMessageHandler(MessageHandler messageHandler) /*-{
 		this.onmessage = function(event) {
-			@gwt.ns.webworker.client.impl.WorkerImplNative::onMessageImpl(Lgwt/ns/webworker/client/MessageHandler;Lgwt/ns/webworker/client/MessageEvent;)(messageHandler, event);
+			@gwt.ns.webworker.client.WorkerImplNative::onMessageImpl(Lgwt/ns/webworker/client/MessageHandler;Lgwt/ns/webworker/client/MessageEvent;)(messageHandler, event);
 		}
 	}-*/;
 	

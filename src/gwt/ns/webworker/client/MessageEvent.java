@@ -26,10 +26,6 @@ import com.google.gwt.core.client.JavaScriptObject;
  * can be accessed by {@link #getData()}.
  */
 public class MessageEvent extends JavaScriptObject {
-	protected MessageEvent() {
-		// required protected constructor for JavaScriptObject
-	}
-	
 	/**
 	 * Create a simple emulated "MessageEvent" that will work with this
 	 * overlay.
@@ -42,6 +38,10 @@ public class MessageEvent extends JavaScriptObject {
 	public final static native MessageEvent createEmulated(String message) /*-{
 		return { "data" : message };
 	}-*/;
+	
+	protected MessageEvent() {
+		// required protected constructor for JavaScriptObject
+	}
 	
 	/**
 	 * @see {@link Worker#postMessage(String)}

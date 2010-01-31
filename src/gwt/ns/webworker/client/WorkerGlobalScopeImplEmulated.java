@@ -14,15 +14,10 @@
  * the License.
  */
 
-package gwt.ns.webworker.client.impl;
+package gwt.ns.webworker.client;
 
 import com.google.gwt.core.client.JsArrayString;
 
-import gwt.ns.webworker.client.MessageEvent;
-import gwt.ns.webworker.client.WorkerGlobalScope;
-import gwt.ns.webworker.client.ErrorHandler;
-import gwt.ns.webworker.client.MessageHandler;
-import gwt.ns.webworker.client.WorkerLocation;
 
 /**
  * This class emulates the global scope of a Worker, including passing messages
@@ -34,6 +29,10 @@ import gwt.ns.webworker.client.WorkerLocation;
 public class WorkerGlobalScopeImplEmulated implements WorkerGlobalScope {
 	private MessageHandler insideMessageHandler;
 	private WorkerImplProxy outsideProxy;
+	
+	public WorkerGlobalScopeImplEmulated(WorkerImplProxy proxy) {
+		outsideProxy = proxy;
+	}
 	
 	/**
 	 * Flag for when worker has been terminated
@@ -62,35 +61,25 @@ public class WorkerGlobalScopeImplEmulated implements WorkerGlobalScope {
 	}
 	
 	@Override
-	public WorkerLocation getLocation() {
-		// TODO: emulated impl
-		return null;
-	}
+	public native WorkerLocation getLocation() /*-{
+		return $wnd.location;
+	}-*/;
 
 	@Override
 	public void importScript(String url) {
-		// TODO: emulated impl
+		// TODO: emulated importScripts
 	}
 
 	@Override
 	public void importScripts(JsArrayString urls) {
-		// TODO: emulated impl
+		// TODO: emulated importScripts
 
 	}
 
 	@Override
 	public void importScripts(String[] urls) {
-		// TODO: emulated impl
+		// TODO: emulated importScripts
 
-	}
-	
-	/**
-	 * Sets the chain for passing messages out.
-	 * 
-	 * @param proxy Worker interface proxy to outside world
-	 */
-	protected void setProxy(WorkerImplProxy proxy) {
-		outsideProxy = proxy;
 	}
 	
 	/**

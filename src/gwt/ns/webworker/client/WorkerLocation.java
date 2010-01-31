@@ -23,6 +23,9 @@ import com.google.gwt.core.client.JavaScriptObject;
  * decomposition IDL attributes, protocol, host, port, hostname, pathname,
  * search, and hash.
  * 
+ * <p>Note that these values will likely vary if this location
+ * represents a Worker location proper or that of the main script.</p>
+ * 
  * @see <a href='http://www.whatwg.org/specs/web-workers/current-work/#workerlocation'>WorkerLocation Specification</a>
  */
 public class WorkerLocation extends JavaScriptObject {

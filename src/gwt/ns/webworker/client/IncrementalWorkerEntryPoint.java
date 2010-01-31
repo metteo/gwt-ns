@@ -19,8 +19,8 @@
 
 package gwt.ns.webworker.client;
 
+
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.user.client.Timer;
 
@@ -36,7 +36,7 @@ import com.google.gwt.user.client.Timer;
  * @see <a href='http://www.whatwg.org/specs/web-workers/current-work/'>Current WHATWG Web Worker Draft Spec</a>
  */
 public abstract class IncrementalWorkerEntryPoint implements EntryPoint {
-	final WorkerGlobalScope selfImpl = GWT.create(WorkerGlobalScope.class);
+	WorkerGlobalScope selfImpl = new WorkerGlobalScopeImplNative();
 	private Timer t;
 	private boolean terminate = false;
 	
@@ -131,13 +131,16 @@ public abstract class IncrementalWorkerEntryPoint implements EntryPoint {
 		};
 		t.schedule(1); // call execute() immediately
 	}
-
+	
+	public void onWorkerShutdown() {
+		
+	}
+	
 	/**
 	 * The entry point of execution for DedicatedWorkers. Subclasses will
 	 * generally override this method (not {@link #onModuleLoad()}).
 	 */
 	public abstract void onWorkerLoad();
-	
 	
 	/**
 	 * Retrieve a reference to the global scope of this Worker.
