@@ -20,10 +20,8 @@
 
 package gwt.ns.webworker.client;
 
-import com.google.gwt.core.client.JsArrayString;
-
 /**
- * The global scope of a DedicatedWorker. Window and Document do not exist
+ * The global scope of a Worker. Window and Document do not exist
  * within a Worker.
  * 
  * @see <a href='http://www.whatwg.org/specs/web-workers/current-work/#workerglobalscope'>WorkerGlobalScope in current Web Workers Draft</a>
@@ -31,9 +29,9 @@ import com.google.gwt.core.client.JsArrayString;
 public interface WorkerGlobalScope {
 	/**
 	 * When called, any tasks currently queued for this Worker are discarded
-	 * and further tasks cannot be queued. According to the current spec, the
-	 * current task is allowed to continue for a user agent specified length of
-	 * time and then halted (as opposed to
+	 * and further tasks cannot be queued. According to the Worker
+	 * specification, the current task is allowed to continue for a short,
+	 * unspecified length of time and then halted (as opposed to
 	 * {@link Worker#terminate()}).
 	 * 
 	 * @see <a href='http://www.whatwg.org/specs/web-workers/current-work/#dom-workerglobalscope-close'>Specified close() routine</a>
@@ -48,32 +46,19 @@ public interface WorkerGlobalScope {
 	public WorkerLocation getLocation();
 
 	/**
-	 * Convenience method for importing and executing a single script.
+	 * Import a script into a Worker and execute it. This method is
+	 * synchronous. Note that the location of the imported script is evaluated
+	 * <em>relative to the Worker's creation script</em>.
 	 * 
-	 * @see {@link WorkerGlobalScope#importScripts(JsArrayString) importScripts(JSArrayString)}
+	 * @param URL of script to import
+	 * 
+	 * @see <a href='http://www.whatwg.org/specs/web-workers/current-work/#dom-workerglobalscope-importscripts'>Specified importScripts() routine</a>
 	 */
 	public void importScript(String url);
 
 	/**
-	 * Import a set of scripts into Worker and executes them. Accepts 0 or more
-	 * arguments. Execution of scripts is guaranteed to be in order specified.
-	 * This method is synchronous. Note that the location of each script is
-	 * evaluated <em>relative to the Worker creation script</em>. 
-	 * 
-	 * @see <a href='http://www.whatwg.org/specs/web-workers/current-work/#dom-workerglobalscope-importscripts'>Specified importScripts() routine</a>
-	 * 
-	 * @param urls JSArray of URLs of scripts to import.
-	 */
-	public void importScripts(JsArrayString urls);
-
-	/**
-	 * @see {@link WorkerGlobalScope#importScripts(JsArrayString) importScripts(JSArrayString)}
-	 */
-	public void importScripts(String[] urls);
-
-	/**
-	 * Sends a message to the Worker's creator (the "outside"). This accepts a
-	 * single String, which is the data to send to the creator.<br><br>
+	 * Sends a message to the MessageHandler registered by the Worker's
+	 * creator. This accepts a single String as the contents of the message.
 	 * 
 	 * @param message Message to pass to insideWorker's creator.
 	 * 
@@ -82,7 +67,7 @@ public interface WorkerGlobalScope {
 	public void postMessage(String message);
 
 	/**
-	 * Set the {@link ErrorHandler} for {@link ErrorEvent}s within this insideWorker.
+	 * Set the {@link ErrorHandler} for {@link ErrorEvent}s within this Worker.
 	 * Replaces any existing handler.
 	 * 
 	 * @param handler The error handler
@@ -91,7 +76,7 @@ public interface WorkerGlobalScope {
 
 	/**
 	 * Set the {@link MessageHandler} for {@link MessageEvent}s within this
-	 * insideWorker. Replaces any existing handler.
+	 * Worker. Replaces any existing handler.
 	 * 
 	 * @param insideMessageHandler The message handler
 	 */

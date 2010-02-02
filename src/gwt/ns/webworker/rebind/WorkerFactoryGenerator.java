@@ -16,7 +16,7 @@
 
 package gwt.ns.webworker.rebind;
 
-import gwt.ns.webworker.client.IncrementalWorkerEntryPoint;
+import gwt.ns.webworker.client.WorkerEntryPoint;
 import gwt.ns.webworker.client.WorkerModuleDef;
 import gwt.ns.webworker.client.WorkerFactory;
 import gwt.ns.webworker.linker.WorkerCompilationLinker;
@@ -34,16 +34,13 @@ import com.google.gwt.dev.cfg.ModuleDefLoader;
 
 /**
  * A class for generating a WorkerFactory, which will in turn produce a
- * native Worker on platforms that support them or will generate a context
- * in which to simulate one on platforms that don't.
+ * Worker appropriate for the calling permutation.
  * 
  * <p>Much of this class has to with validating the Worker request. An artifact
- * is then committed, requesting a {@link WorkerCompilationLinker} to do the
- * heavy lifting in compiling the Worker and inserting it correctly.<p>
- * 
- * <p>As much validation as possible needs to happen here so as to prevent long
- * compile times before discovering any Worker module configuration errors.<p>
- *
+ * is then committed, requesting the {@link WorkerCompilationLinker} do the
+ * heavy lifting in compiling the Worker and inserting it correctly. As many
+ * configuration errors as possible should be caught here so that the compile
+ * fails early.<p>
  */
 public abstract class WorkerFactoryGenerator extends Generator {
 	
@@ -89,7 +86,8 @@ public abstract class WorkerFactoryGenerator extends Generator {
 				throw e;
 			}
 			
-			// basic module validity check: one entry point extending valid class
+			// basic module validity check: one entry point extending valid
+			// Worker entry point class.
 			// checked here so as to fail as soon as possible
 			
 			// only one entrypoint is supported for now
@@ -104,11 +102,10 @@ public abstract class WorkerFactoryGenerator extends Generator {
 				throw new UnableToCompleteException();
 			}
 			
-			// TODO: expand beyond IncrementalWorkerEntryPoint
 			// check to make sure entrypoint is worker compatible
 			JClassType workerEntryType = typeOracle.findType(entryPoints[0]);
 			JClassType superEntryType = typeOracle.findType(
-					IncrementalWorkerEntryPoint.class.getCanonicalName());
+					WorkerEntryPoint.class.getCanonicalName());
 			if (!workerEntryType.isAssignableTo(superEntryType)) {
 				logger.log(TreeLogger.ERROR, "Worker EntryPoint "
 						+ workerEntryType.getName() + " must be assignable to "

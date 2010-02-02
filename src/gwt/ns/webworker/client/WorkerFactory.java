@@ -17,10 +17,9 @@
 package gwt.ns.webworker.client;
 
 /**
- * Interface implemented by classes that can create a platform appropriated
- * Web Worker (natively or an emulation best effort). Use a
- * {@link WorkerModuleDef} annotation to specify what Worker module should be
- * compiled and return. Typical usage:
+ * Interface implemented by classes that can create a platform appropriate
+ * Web Worker. Use a {@link WorkerModuleDef} annotation to specify what Worker
+ * module should be compiled and returned. Typical usage:
  * 
  * <p><code>@WorkerModuleDef("pkg1.pkg2.ModuleName")<br>
  * interface MyWorkerFactory extends WorkerFactory { }<br>
@@ -29,5 +28,8 @@ package gwt.ns.webworker.client;
  * Worker myWorker = factory.createAndStart();</code></p>
  */
 public interface WorkerFactory {
+	/**
+	 * @return A running Worker object
+	 */
 	public Worker createAndStart();
 }

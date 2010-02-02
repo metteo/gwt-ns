@@ -16,48 +16,41 @@
 
 package gwt.ns.webworker.client;
 
-import com.google.gwt.core.client.JsArrayString;
-
-
 /**
  * This class emulates the global scope of a Worker, including passing messages
- * to the "outside" via a proxy. Additional logic is in {@link WorkerImplProxy}
- * The split is necessitated (currently) by the fact that the interface of the
- * "inside" of a Worker is largely the same as that of the "outside". Most of
- * the emulation logic happens in the proxy.
+ * to the outside context via a proxy. Additional logic is in
+ * {@link WorkerImplProxy}. The split is necessitated (currently) by the fact
+ * that the internal scope interface is largely the same as that of the outside
+ * Worker handle. Wherever possible this class mimics native functionality,
+ * with emulation work handled by the proxy.
  */
 public class WorkerGlobalScopeImplEmulated implements WorkerGlobalScope {
 	private MessageHandler insideMessageHandler;
 	private WorkerImplProxy outsideProxy;
 	
+	// flag for terminated state
+	private boolean terminated = false;
+	
 	public WorkerGlobalScopeImplEmulated(WorkerImplProxy proxy) {
 		outsideProxy = proxy;
 	}
-	
-	/**
-	 * Flag for when worker has been terminated
-	 */
-	private boolean terminated = false;
 	
 	/* (non-Javadoc)
 	 * @see gwt.ns.webworker.client.WorkerGlobalScope#close()
 	 */
 	@Override
 	public void close() {
-		// let proxy handle shutdown
-		if (outsideProxy != null)
-			outsideProxy.terminate();
-	}
-	
-	/**
-	 * Termination of worker scope. Called from Worker proxy.
-	 */
-	protected void emulatedScopeTerminate() {
-		terminated = true;
-		
-		// break references
-		insideMessageHandler = null;
-		outsideProxy = null;
+		// see WorkerImplProxy.terminate()
+		if (!terminated) {
+			terminated = true;
+			
+			if (outsideProxy != null)
+				outsideProxy.terminate();
+			
+			// break references
+			outsideProxy = null;
+			insideMessageHandler = null;
+		}
 	}
 	
 	@Override
@@ -68,31 +61,6 @@ public class WorkerGlobalScopeImplEmulated implements WorkerGlobalScope {
 	@Override
 	public void importScript(String url) {
 		// TODO: emulated importScripts
-	}
-
-	@Override
-	public void importScripts(JsArrayString urls) {
-		// TODO: emulated importScripts
-
-	}
-
-	@Override
-	public void importScripts(String[] urls) {
-		// TODO: emulated importScripts
-
-	}
-	
-	/**
-	 * Pass a message into Worker scope.
-	 * 
-	 * @param message
-	 */
-	protected void onMessage(MessageEvent event) {
-		if (terminated)	//guarded for termination
-			return;
-		
-		if (insideMessageHandler != null)
-			insideMessageHandler.onMessage(event);
 	}
 	
 	@Override
@@ -116,5 +84,19 @@ public class WorkerGlobalScopeImplEmulated implements WorkerGlobalScope {
 	public void setMessageHandler(MessageHandler messageHandler) {
 		if (!terminated)
 			insideMessageHandler = messageHandler;
+	}
+	
+	
+	/**
+	 * Pass a message into Worker scope.
+	 * 
+	 * @param message
+	 */
+	protected void onMessage(MessageEvent event) {
+		if (terminated)	//guarded for termination
+			return;
+		
+		if (insideMessageHandler != null)
+			insideMessageHandler.onMessage(event);
 	}
 }
