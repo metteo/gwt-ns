@@ -26,11 +26,11 @@
   ]]></property-provider>
   
   <!-- linker for loading a module to run as a Web Worker -->
-  <define-linker name="incrementalworker"
-    class="gwt.ns.webworker.linker.IncrementalWorkerLinker" />
+  <define-linker name="worker"
+    class="gwt.ns.webworker.linker.WorkerModuleLinker" />
   
   <!-- compiles a specified module as Worker and inserts into current module -->
-  <define-linker name="workercompilation"
+  <define-linker name="workerCompilation"
     class="gwt.ns.webworker.linker.WorkerCompilationLinker" />
 
   <!-- default to emulated workers -->

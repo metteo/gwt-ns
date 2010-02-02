@@ -20,22 +20,30 @@ import com.google.gwt.core.ext.linker.Artifact;
 import com.google.gwt.core.ext.linker.impl.StandardLinkerContext;
 
 /**
- * Represents a request for a Linker to compile a Worker and include it
- * in the output directory and the scripts that need it.
- *
+ * A request for the compilation of a Worker module. Contains the logic used to
+ * determine the proper output directory for the resulting script and the
+ * context-dependent relative URL to locate it.
  */
 public class WorkerRequestArtifact extends Artifact<WorkerRequestArtifact> {
-	private static final long serialVersionUID = 7577416658370551868L;
+	private static final long serialVersionUID = 6156556088389056672L;
+	
+	/**
+	 * The file extension of worker scripts
+	 */
+	public static final String WORKER_EXTENSION = ".cache.js";
+	/**
+	 * The root subdirectory of worker scripts within compilation output
+	 */
+	public static final String WORKER_SUBDIR = "workerjs";
+	/**
+	 * The normal URL path-element separator: "/"
+	 */
+	public static final String URL_SEPARATOR = "/";
 	
 	private static final String PLACEHOLDER_STRONG_NAME = "___WORKERSTRONGNAMEPLACEHOLDE___";
 	private static final int STRONG_NAME_LEN = 32;
-	public static final String WORKER_EXTENSION = ".cache.js";
-	public static final String WORKER_SUBDIR = "workerjs";
-	public static final String URL_SEPARATOR = "/";
 	
 	protected String canonicalName;
-	protected String placeholderStrongName;
-	protected String compiledStrongName;
 	protected String shortName;
 	
 	/**
@@ -43,7 +51,9 @@ public class WorkerRequestArtifact extends Artifact<WorkerRequestArtifact> {
 	 */
 	public static String getPlaceholderStrongName() {
 		// protect against what would be a subtle bug
-		assert (PLACEHOLDER_STRONG_NAME.length() == STRONG_NAME_LEN);
+		assert (PLACEHOLDER_STRONG_NAME.length() == STRONG_NAME_LEN)
+				: "Placeholder String length altered. Length: "
+					+ PLACEHOLDER_STRONG_NAME.length();
 		
 		return PLACEHOLDER_STRONG_NAME;
 	}
@@ -55,16 +65,6 @@ public class WorkerRequestArtifact extends Artifact<WorkerRequestArtifact> {
 		
 		canonicalName = moduleCanonicalName;
 		shortName = moduleName;
-	}
-
-	@Override
-	protected int compareToComparableArtifact(WorkerRequestArtifact o) {
-		return getCanonicalName().compareTo(o.getCanonicalName());
-	}
-
-	@Override
-	protected Class<WorkerRequestArtifact> getComparableArtifactType() {
-		return WorkerRequestArtifact.class;
 	}
 
 	/**
@@ -118,12 +118,11 @@ public class WorkerRequestArtifact extends Artifact<WorkerRequestArtifact> {
 	 * Returns a recursion-level-appropriate relative path to eventual worker
 	 * directory. For the primary EntryPoint, it includes the workerjs and
 	 * strongName subdirectories. For workers created within
-	 * workers (i.e. this is being called within a recursive compile), the
-	 * requested Worker will be in the same directory, so the path is an empty
-	 * string.
+	 * workers (i.e. within a recursive compile), the requested Worker will be
+	 * in the same directory, so the directory path is an empty string.
 	 * 
 	 * @param strongName Cache-guarding strong subdirectory name
-	 * @param separator Name-separator character (e.g. {@value #URL_SEPARATOR})
+	 * @param separator Name-separator character (e.g. {@link #URL_SEPARATOR})
 	 * @return Path to Worker script dir, relative to script being compiled
 	 * 
 	 * @see {@link #getPlaceholderStrongName()} for a placeholder strong name
@@ -140,7 +139,7 @@ public class WorkerRequestArtifact extends Artifact<WorkerRequestArtifact> {
 	}
 	
 	/**
-	 * @return The file name of the Worker javascript file to be created.
+	 * @return The name of the Worker javascript file to be created
 	 */
 	public String getScriptFileName() {
 		return getName() + WORKER_EXTENSION;
@@ -149,7 +148,16 @@ public class WorkerRequestArtifact extends Artifact<WorkerRequestArtifact> {
 	@Override
 	public int hashCode() {
 		// the same module should result in a single Worker request
-		// (artifact set will keep only a single request)
 		return getCanonicalName().hashCode();
+	}
+	
+	@Override
+	protected int compareToComparableArtifact(WorkerRequestArtifact o) {
+		return getCanonicalName().compareTo(o.getCanonicalName());
+	}
+
+	@Override
+	protected Class<WorkerRequestArtifact> getComparableArtifactType() {
+		return WorkerRequestArtifact.class;
 	}
 }

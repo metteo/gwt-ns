@@ -18,6 +18,7 @@ package gwt.ns.webworker.rebind;
 
 import gwt.ns.webworker.client.Worker;
 import gwt.ns.webworker.client.WorkerImplNative;
+import gwt.ns.webworker.linker.WorkerCompilationLinker;
 import gwt.ns.webworker.linker.WorkerRequestArtifact;
 
 import java.io.PrintWriter;
@@ -30,6 +31,11 @@ import com.google.gwt.dev.cfg.ModuleDef;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
 
+/**
+ * Commits a request for {@link WorkerCompilationLinker} to compile a module as
+ * a Worker and generates a simple class to instantiate that Worker from the
+ * resulting script.
+ */
 public class NativeWorkerFactoryGenerator extends WorkerFactoryGenerator {
 	static final String SOURCE_NAME_SUFFIX = "Native";
 
@@ -41,7 +47,8 @@ public class NativeWorkerFactoryGenerator extends WorkerFactoryGenerator {
 			throws UnableToCompleteException {
 		
 		// native worker, so request worker compilation
-		WorkerRequestArtifact request = new WorkerRequestArtifact(modDef.getCanonicalName(), modDef.getName());
+		WorkerRequestArtifact request = new WorkerRequestArtifact(
+				modDef.getCanonicalName(), modDef.getName());
 		context.commitArtifact(logger, request);
 		
 		ClassSourceFileComposerFactory f = new ClassSourceFileComposerFactory(
@@ -57,7 +64,9 @@ public class NativeWorkerFactoryGenerator extends WorkerFactoryGenerator {
 			SourceWriter sw = f.createSourceWriter(context, out);
 			
 			// @Override
-			// public Worker createAndStart() { return WorkerImplNative.create("PLACEHOLDER_PATH"); }
+			// public Worker createAndStart() {
+			//   return WorkerImplNative.create("PLACEHOLDER_PATH"); }
+			// Note: placeholder path will be replaced by linker
 	        sw.println("@Override");
 			sw.println("public Worker createAndStart() {");
 	        sw.indent();

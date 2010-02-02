@@ -23,7 +23,7 @@ package gwt.ns.webworker.client;
 import com.google.gwt.core.client.JsArrayString;
 
 /**
- * Wrapper for WorkerGlobalScope for platforms that support Workers natively.
+ * Wrapper for WorkerGlobalScope for platforms that natively support Workers.
  */
 public class WorkerGlobalScopeImplNative implements WorkerGlobalScope {
 	

@@ -78,11 +78,11 @@ public class WorkerImplNative extends JavaScriptObject implements Worker {
 			messageHandler.onMessage(event);
 		}
 	}
-	
+
 	protected WorkerImplNative() {
 		// constructors must be protected in JavaScriptObject overlays.
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see gwt.ns.webworker.client.Worker#postMessage(java.lang.String)
 	 */

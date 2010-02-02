@@ -16,6 +16,8 @@
 
 package gwt.ns.webworker.linker;
 
+import gwt.ns.webworker.rebind.WorkerFactoryGenerator;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -36,6 +38,18 @@ import com.google.gwt.core.ext.linker.LinkerOrder.Order;
 import com.google.gwt.core.ext.linker.impl.StandardCompilationResult;
 import com.google.gwt.dev.util.Util;
 
+/**
+ * Linker partner to {@link WorkerFactoryGenerator}. All Worker modules
+ * requested via the artifact set are compiled and the actual paths to the
+ * scripts, strongly named based on the contents of the scripts themselves, are
+ * inserted into native-worker supporting permutations.
+ * 
+ * <p>Note that this Linker can be invoked within a recursive compilation
+ * by a Worker that needs to spawn a sub-Worker. In this case, the relative URL
+ * contains no strong name (since it will share the Worker's directory) and the
+ * request can be passed up to the original Linker, thus preventing repeated
+ * compilations and unbounded recursion.</p>
+ */
 @LinkerOrder(Order.PRE)
 public class WorkerCompilationLinker extends AbstractLinker {
 
@@ -51,43 +65,51 @@ public class WorkerCompilationLinker extends AbstractLinker {
 		ArtifactSet toReturn = new ArtifactSet(artifacts);
 		
 		// get set of requests for insideWorker compilations from artifacts
-		SortedSet<WorkerRequestArtifact> workerRequests = toReturn.find(WorkerRequestArtifact.class);
+		SortedSet<WorkerRequestArtifact> workerRequests =
+			toReturn.find(WorkerRequestArtifact.class);
 		if (workerRequests.size() == 0) {
-			// TODO: for now, warning on no change made; remove later
-			logger.log(TreeLogger.INFO, "No Worker compilations requested. No action taken.");
+			logger.log(TreeLogger.SPAM, "No Worker compilations requested. No action taken.");
 			return toReturn; // early exit, sorry
 		}
 		
 		// compile all requested workers
-		// if this is a recursive call, requests were passed up to parent so returned value is null
-		SortedMap<WorkerRequestArtifact, String> workerScripts = WorkerCompiler.exec(logger, workerRequests);
+		// if this is a recursive call, requests were passed up to parent so
+		// returned value is null
+		SortedMap<WorkerRequestArtifact, String> workerScripts =
+			WorkerCompiler.exec(logger, workerRequests);
 		
 		// if they exist, deal with compiled scripts:
-		if (workerScripts != null) {
+		if (workerScripts != null && workerScripts.size() != 0) {
 			// directory strong name from all scripts
-			byte[][] bytejs = Util.getBytes(workerScripts.values().toArray(new String[0]));
+			byte[][] bytejs = Util.getBytes(
+					workerScripts.values().toArray(new String[0]));
 			String scriptDirStrongName = Util.computeStrongName(bytejs);
 			
 			// emit worker scripts
 			for (Map.Entry<WorkerRequestArtifact, String> script : workerScripts.entrySet()) {
 				WorkerRequestArtifact req = script.getKey();
-				toReturn.add(emitString(logger, script.getValue(), req.getRelativePath(scriptDirStrongName, File.separator)));
+				toReturn.add(emitString(logger, script.getValue(),
+						req.getRelativePath(scriptDirStrongName,
+						File.separator)));
 			}
 			
 			// get the set of current compilation results
-			SortedSet<CompilationResult> compResults = toReturn.find(CompilationResult.class);
+			SortedSet<CompilationResult> compResults =
+				toReturn.find(CompilationResult.class);
 			
 			/*
-			 * Reading the js from and writing it to a new (if altered)
-			 * CompilationResult is expensive if disk cached, so read once and
-			 * write only if altered.
+			 * Reading the js from and writing it to a new CompilationResult is
+			 * expensive (possibly disk cached), so read once and write only if
+			 * altered.
 			 */
 			for (CompilationResult compRes : compResults) {
 				// assume all need modification
 				// TODO: rule out emulated permutations via properties
 				toReturn.remove(compRes);
 				
-				CompilationResult altered = replacePlaceholder(logger, compRes, WorkerRequestArtifact.getPlaceholderStrongName(), scriptDirStrongName);
+				CompilationResult altered = replacePlaceholder(logger, compRes,
+						WorkerRequestArtifact.getPlaceholderStrongName(),
+						scriptDirStrongName);
 				toReturn.add(altered);
 			}
 		}
@@ -99,7 +121,8 @@ public class WorkerCompilationLinker extends AbstractLinker {
 	 * Searches for all instances of a placeholder String in a
 	 * CompilationResult. If found, they are replaced as specified and a
 	 * new CompilationResult, with a newly generated strong name, is returned.
-	 * If no occurrences were found, the original CompilationResult is returned.
+	 * If no occurrences were found, the original CompilationResult is
+	 * returned.
 	 * 
 	 * @param logger
 	 * @param result CompilationResult to process
@@ -129,15 +152,19 @@ public class WorkerCompilationLinker extends AbstractLinker {
 		
 		// code has been altered, need to create new CompilationResult
 		if (needsMod) {
-			//logger.log(TreeLogger.INFO, "CompilationResult being modified.");
+			logger.log(TreeLogger.SPAM, "Compilation permutation "
+					+ result.getPermutationId() + " being modified.");
 			
+			// new js for compilation result
 			byte[][] newcode = new byte[jsbuf.length][];
 			for (int i = 0; i < jsbuf.length; i++) {
 				newcode[i] = Util.getBytes(jsbuf[i].toString());
 			}
 			
+			// new strong name
 			String strongName = Util.computeStrongName(newcode);
 			
+			// same symbolMap copied over since none altered
 			// symbolMap a little more complicated
 			// can only get deserialized version, need to reserialize
 			// code from com.google.gwt.dev.jjs.JavaToJavaScriptCompiler
@@ -154,8 +181,11 @@ public class WorkerCompilationLinker extends AbstractLinker {
 				throw new RuntimeException("Should never happen with in-memory stream",
 						e);
 			}
-
-			StandardCompilationResult altered = new StandardCompilationResult(strongName, newcode, serializedSymbolMap, result.getStatementRanges(), result.getPermutationId());
+			
+			StandardCompilationResult altered =
+				new StandardCompilationResult(strongName, newcode,
+					serializedSymbolMap, result.getStatementRanges(),
+					result.getPermutationId());
 			
 			// need to copy permutation properties to new result
 			for (Map<SelectionProperty, String> propertyMap : result.getPropertyMap()) {
@@ -163,7 +193,8 @@ public class WorkerCompilationLinker extends AbstractLinker {
 			}
 			
 			toReturn = altered;
-			logger.log(TreeLogger.INFO, "Compilation permuation "
+			
+			logger.log(TreeLogger.SPAM, "Compilation permuation "
 					+ toReturn.getPermutationId()
 					+ " altered to include path to worker script(s).");
 		}

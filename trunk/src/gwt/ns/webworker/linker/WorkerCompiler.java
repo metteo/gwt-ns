@@ -31,26 +31,53 @@ import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.dev.util.Util;
 
+/**
+ * Handles the compilation of Worker modules in a separate process.
+ */
 public class WorkerCompiler {
+	/**
+	 * Simple class to buffer output of compilation process to specified
+	 * logger via a separate thread.
+	 */
+	static class PipeOutput implements Runnable {
+		TreeLogger outLogger;
+		BufferedReader in;
+		public PipeOutput(final TreeLogger logger, final InputStream is) {
+			outLogger = logger;
+			in = new BufferedReader(new InputStreamReader(is));
+		}
+			
+		@Override
+		public void run() {
+			String line;
+			try {
+				while ((line = in.readLine()) != null) {
+					outLogger.log(TreeLogger.INFO, "> " + line);
+				}
+			} catch (IOException e) {
+				outLogger.log(TreeLogger.ERROR, "Error in reading output from compilation.", e);
+			}
+		}
+	}
+	
 	public static final String RECURSION_FLAG_PROP = "ns.recursed";
+	
 	private static final String TEMP_WAR_DIR_NAME = "temp_worker_dir";
 	private static final File TEMP_WAR_DIR = new File(TEMP_WAR_DIR_NAME);
 	
 	/**
-	 * @return Returns true if called within a recursive GWT compiler process.
-	 */
-	public static boolean isRecursed() {
-		return System.getProperty(RECURSION_FLAG_PROP) != null;
-	}
-	
-	/**
 	 * Compile the worker requests. If this is the initial compilation process,
 	 * a new process is started and the worker modules are compiled within. If
-	 * this is in fact a recursive process, worker request is sent up to parent
+	 * this is in fact a recursive process, requests are sent up to parent
 	 * process for it to handle compilation. This allows cycles in worker chain
 	 * (user beware) and prevents repeated compilations of a module.
 	 * 
 	 * @param logger
+	 * @param requests Workers to compile
+	 * 
+	 * @return Compiled worker scripts by associated request or null if no
+	 *   compilations executed.
+	 * 
 	 * @throws UnableToCompleteException
 	 */
 	public static SortedMap<WorkerRequestArtifact, String> exec(TreeLogger logger,
@@ -60,11 +87,29 @@ public class WorkerCompiler {
 		if (!isRecursed()) {
 			return runCompiler(logger, requests);
 		} else {
-			return null;
+			return null; // TODO: recursive module handling
 		}
 	}
-		
-	private static SortedMap<WorkerRequestArtifact, String> runCompiler(TreeLogger logger, final SortedSet<WorkerRequestArtifact> requests) throws UnableToCompleteException {
+	
+	/**
+	 * @return Returns true if called within a recursive GWT compiler process.
+	 */
+	public static boolean isRecursed() {
+		return System.getProperty(RECURSION_FLAG_PROP) != null;
+	}
+	
+	
+	/**
+	 * Compiles requests in new process.
+	 * 
+	 * @param logger
+	 * @param requests
+	 * @return Compiled worker scripts.
+	 * @throws UnableToCompleteException
+	 */
+	private static SortedMap<WorkerRequestArtifact, String> runCompiler(
+			TreeLogger logger, SortedSet<WorkerRequestArtifact> requests)
+				throws UnableToCompleteException {
 		
 		List<String> commands = new ArrayList<String>();
 		commands.add("java");
@@ -78,21 +123,23 @@ public class WorkerCompiler {
 		
 		commands.add("com.google.gwt.dev.Compiler");
 
-		// TODO: is it possible to set this to a temp dir?
+		// TODO: best practices for fixed directory that will be erased?
 		// destination war directory
 		commands.add("-war");
 		commands.add(TEMP_WAR_DIR_NAME);
+		
+		// TODO: user specified compiler options...workers, output style, etc
 		
 		for (WorkerRequestArtifact req : requests) {
 			commands.add(req.getCanonicalName());
 		}
 		
 		// output command for verification
-		// StringBuffer buf = new StringBuffer();
-		// for (String com : commands) {
-		// 	buf.append(com + " ");
-		// }
-		// logger.log(TreeLogger.INFO, "Executing cmd: \"" + buf.toString() +"\"");
+		StringBuffer buf = new StringBuffer();
+		for (String com : commands) {
+			buf.append(com + " ");
+		}
+		logger.log(TreeLogger.SPAM, "Linker executing cmd: \"" + buf.toString() +"\"");
 		
 		ProcessBuilder compileBuilder = new ProcessBuilder(commands);
 		compileBuilder.redirectErrorStream(true);
@@ -152,27 +199,5 @@ public class WorkerCompiler {
 		}
 		
 		return workerScripts;
-	}
-	
-	static class PipeOutput implements Runnable {
-		TreeLogger outLogger;
-		BufferedReader in;
-		public PipeOutput(final TreeLogger logger, final InputStream is) {
-			outLogger = logger;
-			in = new BufferedReader(new InputStreamReader(is));
-		}
-			
-		@Override
-		public void run() {
-			String line;
-			try {
-				while ((line = in.readLine()) != null) {
-					outLogger.log(TreeLogger.INFO, "> " + line);
-				}
-			} catch (IOException e) {
-				outLogger.log(TreeLogger.ERROR, "Error in reading output from compilation.", e);
-			}
-		}
-	}
-		
+	}	
 }

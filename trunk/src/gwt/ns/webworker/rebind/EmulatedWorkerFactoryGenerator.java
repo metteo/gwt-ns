@@ -17,7 +17,6 @@
 package gwt.ns.webworker.rebind;
 
 import gwt.ns.webworker.client.Worker;
-import gwt.ns.webworker.client.WorkerFactory;
 import gwt.ns.webworker.client.WorkerImplProxy;
 
 import java.io.PrintWriter;
@@ -30,22 +29,14 @@ import com.google.gwt.dev.cfg.ModuleDef;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
 
+/**
+ * Generates a simple class that wraps the entry point class in a
+ * Worker-emulating proxy and returns that proxy. No request artifact is
+ * emitted because no module needs to be compiled.
+ */
 public class EmulatedWorkerFactoryGenerator extends WorkerFactoryGenerator {
 	static final String SOURCE_NAME_SUFFIX = "Emulated";
 
-	/**
-	 * Create an implementation of {@link WorkerFactory} which will
-	 * create and return a real Web Worker object.
-	 * 
-	 * @param logger
-	 * @param context
-	 * @param sourceType The type of the implementing interface
-	 * @param sourceName The simple source name for this generated class
-	 * @param placeholder Placeholder text to be replaced with a strongName
-	 *   in linker
-	 * @return The name of the newly generated class
-	 * @throws UnableToCompleteException 
-	 */
 	@Override
 	public void generateWorkerFactory(TreeLogger logger,
 			GeneratorContext context, JClassType sourceType,
@@ -55,11 +46,6 @@ public class EmulatedWorkerFactoryGenerator extends WorkerFactoryGenerator {
 		
 		ClassSourceFileComposerFactory f = new ClassSourceFileComposerFactory(
 		        sourceType.getPackage().getName(), genName);
-		
-		
-		 //WorkerImplProxy proxy = new WorkerImplProxy(new RationalsWorker());
-		 //proxy.runWorker();
-		 //Worker simulator = (Worker)proxy;
 		
 		// imports and interface
 		f.addImport(Worker.class.getName());
@@ -72,9 +58,10 @@ public class EmulatedWorkerFactoryGenerator extends WorkerFactoryGenerator {
 		
 		// @Override
 		// public Worker createAndStart() {
-		// WorkerImplProxy proxy = new WorkerImplProxy(new RationalsWorker());
-		// proxy.runWorker();
-		// return proxy; }
+		//  WorkerImplProxy proxy = new WorkerImplProxy(new RationalsWorker());
+		//  proxy.runWorker();
+		//  return proxy;
+		// }
         sw.println("@Override");
 		sw.println("public Worker createAndStart() {");
         sw.indent();

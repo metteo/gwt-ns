@@ -44,22 +44,22 @@ import java.util.SortedSet;
  * (hopefully useful) list of properties that would cause multiple compilation
  * results will be logged.
  * 
- * @see <a href='http://www.whatwg.org/specs/web-workers/current-work/'>Web Workers</a>
+ * @see <a href='http://www.whatwg.org/specs/web-workers/current-work/'>Web Worker Draft Spec</a>
  */
 @LinkerOrder(Order.PRIMARY)
-public class IncrementalWorkerLinker extends SelectionScriptLinker {
+public class WorkerModuleLinker extends SelectionScriptLinker {
   public static final String WORKER_EXTENSION = ".cache.js";
 
   @Override
   public String getDescription() {
-    return "Incremental Web Worker";
+    return "Web Worker Module";
   }
 
   @Override
   public ArtifactSet link(TreeLogger logger, LinkerContext context,
       ArtifactSet artifacts) throws UnableToCompleteException {
+	  
     ArtifactSet toReturn = new ArtifactSet(artifacts);
-
     toReturn.add(emitSelectionScript(logger, context, artifacts));
     
     return toReturn;
@@ -69,12 +69,14 @@ public class IncrementalWorkerLinker extends SelectionScriptLinker {
   protected Collection<EmittedArtifact> doEmitCompilation(TreeLogger logger,
       LinkerContext context, CompilationResult result)
       throws UnableToCompleteException {
+	  
     if (result.getJavaScript().length != 1) {
       logger.branch(TreeLogger.ERROR,
           "The module must not have multiple fragments when using the "
               + getDescription() + " Linker.", null);
       throw new UnableToCompleteException();
     }
+    
     return super.doEmitCompilation(logger, context, result);
   }
 
@@ -123,8 +125,10 @@ public class IncrementalWorkerLinker extends SelectionScriptLinker {
           "The module must have exactly one distinct"
               + " permutation when using the " + getDescription() + " Linker.",
           null);
+      
       // give a hint to reason for failure
       logPermutationProperties(logger, context.getProperties());
+      
       throw new UnableToCompleteException();
     }
     CompilationResult result = results.iterator().next();
@@ -133,6 +137,7 @@ public class IncrementalWorkerLinker extends SelectionScriptLinker {
     out.newlineOpt();
 
     // get actual compiled javascript and output
+    // only one fragment currently supported (no runAsync)
     String[] js = result.getJavaScript();
     if (js.length != 1) {
       logger.log(TreeLogger.ERROR,
@@ -151,6 +156,8 @@ public class IncrementalWorkerLinker extends SelectionScriptLinker {
     out.print("})();");
     out.newlineOpt();
 
+    // TODO: this naming scheme helps WorkerCompilationLinker, but users
+    // compiling separate worker scripts may desire a strong file name
     return emitString(logger, out.toString(), context.getModuleName()
         + WORKER_EXTENSION);
   }
@@ -213,6 +220,6 @@ public class IncrementalWorkerLinker extends SelectionScriptLinker {
   @Override
   protected String getSelectionScriptTemplate(TreeLogger logger,
       LinkerContext context) throws UnableToCompleteException {
-    return "gwt/ns/webworker/linker/IncrementalWorkerTemplate.js";
+    return "gwt/ns/webworker/linker/WorkerScriptTemplate.js";
   }
 }

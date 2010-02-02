@@ -16,52 +16,20 @@
 
 package gwt.ns.webworker.client;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-
 
 /**
  * A class to act as proxy between the Worker interface and an emulated Web
  * Worker. Wherever possible, emulation logic happens here. For example,
  * messages passed between this class and the Worker's
  * {@link WorkerGlobalScopeImplEmulated} are placed on the event queue to
- * simulate Worker message posting process.
+ * simulate the asynchronous Worker message posting process.
  */
 public class WorkerImplProxy implements Worker {
-	private IncrementalWorkerEntryPoint entryPoint;
-	private WorkerGlobalScopeImplEmulated workerScope;
-	
 	/**
-	 * Registered recipient of messages posted by the Worker
-	 */
-	MessageHandler outsideMessageHandler;
-	
-	private boolean terminated = false;
-	private boolean started = false;
-	
-	/**
-	 * A command to pass a message from Worker's scope to the 
-	 * outsideMessageHandler, if registered. Discarded if no
-	 * messageHandler.
-	 */
-	class PassMessageOut implements ScheduledCommand {
-		MessageEvent message;
-		
-		public PassMessageOut(MessageEvent event) {
-			message = event;
-		}
-		
-		@Override
-		public void execute() {
-			if (outsideMessageHandler != null) {
-				outsideMessageHandler.onMessage(message);
-			}
-		}
-	}
-	
-	/**
-	 * A command to pass a message from postMessage()--received from
-	 * the outside--to the worker's scope. Discarded if worker has been
-	 * terminated.
+	 * A command to pass a message received from the outside context to the
+	 * worker's scope. Discarded if worker has been terminated.
 	 */
 	class PassMessageIn implements ScheduledCommand {
 		MessageEvent message;
@@ -72,8 +40,26 @@ public class WorkerImplProxy implements Worker {
 		
 		@Override
 		public void execute() {
-			if (workerScope != null) {
+			if (!isTerminated()) {
 				workerScope.onMessage(message);
+			}
+		}
+	}
+	/**
+	 * A command to pass a message from Worker's scope to the 
+	 * outsideMessageHandler, if registered. Discarded if Worker terminated.
+	 */
+	class PassMessageOut implements ScheduledCommand {
+		MessageEvent message;
+		
+		public PassMessageOut(MessageEvent event) {
+			message = event;
+		}
+		
+		@Override
+		public void execute() {
+			if (!isTerminated() && outsideMessageHandler != null) {
+				outsideMessageHandler.onMessage(message);
 			}
 		}
 	}
@@ -82,73 +68,50 @@ public class WorkerImplProxy implements Worker {
 	 * Asynchronously start the worker
 	 */
 	class RunWorkerCommand implements ScheduledCommand {
-		IncrementalWorkerEntryPoint entryPoint;
-		
-		public RunWorkerCommand(IncrementalWorkerEntryPoint entryPoint) {
-			this.entryPoint = entryPoint;
-		}
-		
 		@Override
 		public void execute() {
-			entryPoint.onModuleLoad();
+			if (!isTerminated()) // unlikely but possible
+				entryPoint.onModuleLoad();
 		}
 	}
+	/**
+	 * Asynchronously call worker's close hook
+	 */
+	class CloseWorkerCommand implements ScheduledCommand {
+		// intentionally keep reference
+		WorkerEntryPoint entryPoint;
+		
+		public CloseWorkerCommand(WorkerEntryPoint entryPoint) {
+			this.entryPoint = entryPoint;
+		}
+
+		@Override
+		public void execute() {
+			entryPoint.onModuleClose();
+		}
+	}
+	
+	private WorkerEntryPoint entryPoint;
+	private MessageHandler outsideMessageHandler;
+	private boolean started = false;
+	private boolean terminated = false;
+	private WorkerGlobalScopeImplEmulated workerScope;
 	
 	/**
 	 * Create a Worker proxy 
 	 */
-	public WorkerImplProxy(IncrementalWorkerEntryPoint entryPoint) {
+	public WorkerImplProxy(WorkerEntryPoint entryPoint) {
 		workerScope = new WorkerGlobalScopeImplEmulated(this);
-		
-		// TODO: a little ugly, but workable for now (and less ugly than a
-	    // GWT.create() replace, then cast to replacement type elsewhere)
-		entryPoint.selfImpl = workerScope;
-		
 		this.entryPoint = entryPoint;
-	}
-
-	/**
-	 * Add a scheduled command to the end of the event queue.
-	 * 
-	 * TODO: not sure about making the plunge to full event yet, but
-	 * other command queues (eg scheduleDeferred) add way too much overhead
-	 * for something called so often. performance is still poor in dev mode
-	 * though due to drop to JSNI
-	 * 
-	 * @param cmd Command to put on event queue
-	 */
-	private native void enqueueCommand(ScheduledCommand cmd) /*-{
-		setTimeout(function(){
-			cmd.@com.google.gwt.core.client.Scheduler.ScheduledCommand::execute()();
-  		}, 1);
-	}-*/;
-	
-	/**
-	 * Returns a reference to the emulated WorkerGlobalScope tied to this
-	 * proxy. Repeated calls will return the same object (i.e. every Worker
-	 * needs its own proxy).
-	 * 
-	 * @return The WorkerGlobalScope associated with this proxy
-	 */
-	public WorkerGlobalScopeImplEmulated getEmulatedScope() {
-		return workerScope;
-	}
-	
-	/**
-	 * Receives message events from emulated Worker. Queue command to pass
-	 * event to outside messageHandler.
-	 */
-	protected void onMessage(MessageEvent event) {
-		if (terminated) // discard if terminated
-			return;
 		
-		PassMessageOut passOutCmd = new PassMessageOut(event);
-		enqueueCommand(passOutCmd);
+		// TODO: ugly, but workable for now (and less ugly than a
+	    // GWT.create() replace, then cast to replacement type elsewhere)
+		this.entryPoint.selfImpl = workerScope;
 	}
 	
 	@Override
 	public void postMessage(String message) {
-		if (terminated) // discard if terminated. TODO: throw exception?
+		if (isTerminated()) // discard if terminated.
 			return;
 		
 		// TODO: full emulation of MessageEvent
@@ -164,14 +127,14 @@ public class WorkerImplProxy implements Worker {
 	 */
 	public void runWorker() {
 		// harder contract here since generally called from generator
-		// can't call before inited or after terminated
-		assert(entryPoint != null);
-		
 		// should only be started once
 		assert(!started);
 		
+		// can't call after terminated
+		assert(!isTerminated());
+		
 		// async start
-		enqueueCommand(new RunWorkerCommand(entryPoint));
+		enqueueCommand(new RunWorkerCommand());
 		started = true;
 	}
 	
@@ -183,7 +146,7 @@ public class WorkerImplProxy implements Worker {
 
 	@Override
 	public void setMessageHandler(MessageHandler messageHandler) {
-		if (!terminated)
+		if (!isTerminated())
 			outsideMessageHandler = messageHandler;
 	}
 	
@@ -194,18 +157,73 @@ public class WorkerImplProxy implements Worker {
 		 * spec algorithms are slightly different for terminate() vs close()
 		 * (immediate halt vs pause for possible task completion, then halt),
 		 * but should be close enough for emulation.
+		 * 
+		 * Repeated calls have no effect.
 		 */
-		terminated = true;
+		if (!terminated) {
+			terminated = true;
+			
+			// shutdown scope
+			// Note:humorous recursion here, but harmless since single threaded
+			workerScope.close();
+			enqueueCommand(new CloseWorkerCommand(entryPoint));
+			
+			// sever references
+			workerScope = null;
+			entryPoint = null;
+			outsideMessageHandler = null;
+		}
+	}
+	
+	/**
+	 * Receives message events from emulated Worker. Queue command to pass
+	 * event to outside messageHandler.
+	 */
+	protected void onMessage(MessageEvent event) {
+		if (isTerminated()) // discard if terminated
+			return;
 		
-		// shutdown scope
-		if (workerScope != null)
-			workerScope.emulatedScopeTerminate();
-		
-		
-		
-		// sever references
-		workerScope = null;
-		entryPoint = null;
-		outsideMessageHandler = null;
+		PassMessageOut passOutCmd = new PassMessageOut(event);
+		enqueueCommand(passOutCmd);
+	}
+	
+	/**
+	 * Add a scheduled command to the end of the event queue.
+	 * 
+	 * TODO: how best to fit into GWT's event system?
+	 * not sure about making the plunge to full event yet, but
+	 * other command queues (eg scheduleDeferred) add way too much overhead
+	 * for something called so often. performance is still poor in dev mode
+	 * due to switch to/from JSNI, though.
+	 * 
+	 * @param cmd Command to put on event queue
+	 */
+	private void enqueueCommand(ScheduledCommand cmd) {
+		if (GWT.isScript()) {
+			nativeEnqueueCommand(cmd);
+		} else {
+			hostedEnqueueCommand(cmd);
+		}
+	}
+	
+	/**
+	 * Put...somewhere for best hosted mode performance
+	 */
+	private void hostedEnqueueCommand(ScheduledCommand cmd) {
+		nativeEnqueueCommand(cmd); // TODO
+	}
+	
+	/**
+	 * Put at end of native event queue.
+	 */
+	private native void nativeEnqueueCommand(ScheduledCommand cmd) /*-{
+		setTimeout(function(){
+			cmd.@com.google.gwt.core.client.Scheduler.ScheduledCommand::execute()();
+  		}, 1);
+	}-*/;
+
+	
+	private boolean isTerminated() {
+		return terminated;
 	}
 }
