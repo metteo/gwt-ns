@@ -18,13 +18,10 @@ package gwt.ns.webworker.client;
 
 /**
  * Worker Message handler.
- * 
  */
 public interface MessageHandler {
 	/**
-	 * An event handler method that is called whenever a MessageEventImplNative with type
-	 * message bubbles through the insideWorker. The message is stored in the event's
-	 * data member.
+	 * Called when a MessageEvent is fired.
 	 */
 	void onMessage(MessageEvent event);
 }
