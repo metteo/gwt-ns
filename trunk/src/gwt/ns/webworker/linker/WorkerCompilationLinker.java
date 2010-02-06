@@ -76,7 +76,7 @@ public class WorkerCompilationLinker extends AbstractLinker {
 		// if this is a recursive call, requests were passed up to parent so
 		// returned value is null
 		SortedMap<WorkerRequestArtifact, String> workerScripts =
-			WorkerCompiler.exec(logger, workerRequests);
+			WorkerCompiler.run(logger, workerRequests);
 		
 		// if they exist, deal with compiled scripts:
 		if (workerScripts != null && workerScripts.size() != 0) {

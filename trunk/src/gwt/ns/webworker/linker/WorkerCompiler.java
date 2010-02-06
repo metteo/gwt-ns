@@ -34,9 +34,10 @@ import com.google.gwt.dev.util.Util;
 /**
  * Handles the compilation of Worker modules in a separate process.
  */
+// TODO: generalize build process or expose ability to do modify
 public class WorkerCompiler {
 	/**
-	 * Simple class to buffer output of compilation process to specified
+	 * Buffers output of compilation process to specified
 	 * logger via a separate thread.
 	 */
 	static class PipeOutput implements Runnable {
@@ -52,6 +53,7 @@ public class WorkerCompiler {
 			String line;
 			try {
 				while ((line = in.readLine()) != null) {
+					// TODO: read worker requests from child process
 					outLogger.log(TreeLogger.INFO, "> " + line);
 				}
 			} catch (IOException e) {
@@ -68,19 +70,17 @@ public class WorkerCompiler {
 	/**
 	 * Compile the worker requests. If this is the initial compilation process,
 	 * a new process is started and the worker modules are compiled within. If
-	 * this is in fact a recursive process, requests are sent up to parent
-	 * process for it to handle compilation. This allows cycles in worker chain
-	 * (user beware) and prevents repeated compilations of a module.
+	 * this is a child process, requests are sent up to parent process for it
+	 * to handle compilation.
 	 * 
 	 * @param logger
 	 * @param requests Workers to compile
 	 * 
-	 * @return Compiled worker scripts by associated request or null if no
-	 *   compilations executed.
+	 * @return Compiled worker scripts by request or null if nothing compiled
 	 * 
 	 * @throws UnableToCompleteException
 	 */
-	public static SortedMap<WorkerRequestArtifact, String> exec(TreeLogger logger,
+	public static SortedMap<WorkerRequestArtifact, String> run(TreeLogger logger,
 			final SortedSet<WorkerRequestArtifact> requests)
 			throws UnableToCompleteException {
 		
@@ -129,22 +129,23 @@ public class WorkerCompiler {
 		commands.add(TEMP_WAR_DIR_NAME);
 		
 		// TODO: user specified compiler options...workers, output style, etc
+		// are these even visible?
 		
 		for (WorkerRequestArtifact req : requests) {
 			commands.add(req.getCanonicalName());
 		}
 		
-		// output command for verification
-		StringBuffer buf = new StringBuffer();
-		for (String com : commands) {
-			buf.append(com + " ");
-		}
-		logger.log(TreeLogger.SPAM, "Linker executing cmd: \"" + buf.toString() +"\"");
-		
 		ProcessBuilder compileBuilder = new ProcessBuilder(commands);
 		compileBuilder.redirectErrorStream(true);
 		
 		TreeLogger compLogger = logger.branch(TreeLogger.INFO, "Recursively compiling Worker modules...");
+		
+		// default print command so build system mismatches are obvious
+		StringBuilder buf = new StringBuilder();
+		for (String com : commands) {
+			buf.append(com + " ");
+		}
+		logger.log(TreeLogger.INFO, "Executing cmd: \"" + buf.toString() +"\"");
 		
 		Process compile;
 		try {
