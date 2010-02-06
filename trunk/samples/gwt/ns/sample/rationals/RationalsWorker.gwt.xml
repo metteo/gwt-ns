@@ -19,8 +19,8 @@
   
   <entry-point class="gwt.ns.sample.rationals.client.RationalsWorker"/>
   
-  <!-- Use the WebWorker linker for an incrementalWorker-->
-  <add-linker name="incrementalworker" />
+  <!-- Use the Worker primary linker to package module as a Web Worker-->
+  <add-linker name="worker" />
   
   <!--  Workers are currently limited to one permutation -->
   <set-property name='user.agent' value='gecko1_8' />

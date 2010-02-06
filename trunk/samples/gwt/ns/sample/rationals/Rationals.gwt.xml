@@ -20,5 +20,5 @@
   <entry-point class="gwt.ns.sample.rationals.client.Rationals"/>
   
   <!-- Use the WorkerCompilationLinker to detect and compile sub workers-->
-  <add-linker name="workercompilation" />
+  <add-linker name="workerCompilation" />
 </module>

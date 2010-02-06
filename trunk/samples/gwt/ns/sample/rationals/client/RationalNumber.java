@@ -23,27 +23,27 @@ import com.google.gwt.core.client.JavaScriptObject;
  */
 public class RationalNumber extends JavaScriptObject {
 	protected RationalNumber() {
-		// required hidden JavaScriptObject constructor
+		// required protected constructor for JavaScriptObject
 	}
 	
 	/**
 	 * @param numerator
 	 * @param denominator
-	 * @return A new rational number javascript object.
+	 * @return A new rational number
 	 */
 	public static final native RationalNumber create(int numerator, int denominator) /*-{
 		return { "n" : numerator, "d" : denominator };
   	}-*/;
 	
 	/**
-	 * @return The denominator of this rational
+	 * @return The denominator of this rational number
 	 */
 	public final native int getDenominator() /*-{
 		return this.d;
 	}-*/;
 	
 	/**
-	 * @return The numerator of this rational
+	 * @return The numerator of this rational number
 	 */
 	public final native int getNumerator() /*-{
 		return this.n;
