@@ -28,10 +28,15 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.RootPanel;
 
+/**
+ * This module creates a Worker object that will return a sequence of
+ * rational numbers. Upon receipt of an entry, the value is displayed.
+ */
 public class Rationals implements EntryPoint, MessageHandler {
 	Element numerator;
 	Element denominator;
 	
+	// Worker module definition
 	@WorkerModuleDef("gwt.ns.sample.rationals.RationalsWorker")
 	interface RationalWorkerFactory extends WorkerFactory { }
 	
@@ -40,6 +45,7 @@ public class Rationals implements EntryPoint, MessageHandler {
 		numerator = RootPanel.get("numerator").getElement();
 		denominator = RootPanel.get("denominator").getElement();
 		
+		// Worker creation
 		RationalWorkerFactory factory = GWT.create(RationalWorkerFactory.class);
 		Worker worker = factory.createAndStart();
 

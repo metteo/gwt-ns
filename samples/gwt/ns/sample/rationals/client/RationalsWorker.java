@@ -16,39 +16,42 @@
 
 package gwt.ns.sample.rationals.client;
 
-import com.google.gwt.core.client.JsArrayInteger;
-
 import gwt.ns.json.client.Json;
-import gwt.ns.webworker.client.IncrementalWorkerEntryPoint;
+import gwt.ns.webworker.client.IterativeWorkerEntryPoint;
 
-public class RationalsWorker extends IncrementalWorkerEntryPoint {
-	static final int START_INDEX = 1; // set to 100000000 for taxing execution
-	JsArrayInteger stack = createIntStack();
+/**
+ * This Worker steps through the Calkin-Wilf enumeration of the rationals.
+ * Entries are passed back to the Worker's parent context as they are computed.
+ * 
+ * <p>The sequence is calculated through a naive, iterative version of the
+ * hyperbinary recurrence relation. Production systems which need an
+ * enumeration of the rational numbers should not rely on this implementation.
+ * </p>
+ * 
+ * @see <a href="http://www.math.upenn.edu/~wilf/website/recounting.pdf">Recounting the Rationals</a>
+ */
+public class RationalsWorker extends IterativeWorkerEntryPoint {
+	// Delay between calls of execute().
+	static final int DELAY_MS = 15;
 	
-	// jre collection for representative hosted mode performance
-	//Stack<Integer> stack = new Stack<Integer>();
-	int numerator;
+	// The index of first entry in rationals sequence to calculate. Higher
+	// indices require many more iterations to calculate. Must be non-negative.
+	static final int START_INDEX = 10000000;
+	
 	int denominator;
-	int index;
-	
-	static native JsArrayInteger createIntStack() /*-{
-      return [];
-	}-*/;
-	
-	public void postRational(int numerator, int denominator) {
-		String data = Json.strigify(RationalNumber.create(numerator, denominator));
-		postMessage(data);
-	}
+	int index = START_INDEX;
+	int numerator;
+	StackInt stack = StackInt.create();
 	
 	@Override
 	public int execute() {
-		// we must preempt ourselves to support platforms without native Workers
-		stack.unshift(index++);
+		stack.push(index++);
 		numerator = denominator;
 		denominator = 0;
 		
-		while(stack.length() != 0) { //!stack.empty()) {
-			int cur = stack.shift();//.pop();
+		// naive computation of index-th denominator in sequence
+		while(!stack.isEmpty()) {
+			int cur = stack.pop();
 			
 			if (cur == 0 || cur == 1) {
 				// base cases
@@ -56,28 +59,42 @@ public class RationalsWorker extends IncrementalWorkerEntryPoint {
 				
 			} else if (cur % 2 != 0) {
 				// odd case
-				stack.unshift((cur - 1) / 2);
+				stack.push((cur - 1) / 2);
 				
 			} else {
-				// even
+				// even case
 				cur /= 2;
-				stack.unshift(cur);
-				stack.unshift(cur - 1);
+				stack.push(cur);
+				stack.push(cur - 1);
 			}
 		}
 		
-		postRational(numerator, denominator);
+		// entry is complete when numerator is calculated
+		if (numerator != 0)
+			postRational(numerator, denominator);
 		
-		// run the next execution as soon as possible
-		return 0;
+		return DELAY_MS;
 	}
 
 	@Override
-	public void onWorkerLoad() {
-		// initial values
-		index = START_INDEX;
-		numerator = 1;
-		denominator = 1;
+	public void onWorkerClose() {
+		// nothing to close
 	}
-
+	
+	@Override
+	public void onWorkerLoad() {
+		// nothing to initialize
+	}
+	
+	/**
+	 * Create a message containing calculated numerator and denominator and
+	 * send to parent context.
+	 * 
+	 * @param numerator
+	 * @param denominator
+	 */
+	public void postRational(int numerator, int denominator) {
+		String data = Json.strigify(RationalNumber.create(numerator, denominator));
+		postMessage(data);
+	}
 }
