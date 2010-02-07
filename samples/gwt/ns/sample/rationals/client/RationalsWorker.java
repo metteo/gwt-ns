@@ -50,6 +50,10 @@ public class RationalsWorker extends IterativeWorkerEntryPoint {
 		denominator = 0;
 		
 		// naive computation of index-th denominator in sequence
+		// recurrence relation:
+		//   h(0) = 1
+		//   h(2k + 1) = h(k)
+		//   h(2k) = h(k) + h(k - 1)
 		while(!stack.isEmpty()) {
 			int cur = stack.pop();
 			
@@ -87,7 +91,7 @@ public class RationalsWorker extends IterativeWorkerEntryPoint {
 	}
 	
 	/**
-	 * Create a message containing calculated numerator and denominator and
+	 * Creates a message containing calculated numerator and denominator and
 	 * send to parent context.
 	 * 
 	 * @param numerator
