@@ -168,6 +168,7 @@ public class WorkerCompilationLinker extends AbstractLinker {
 			// symbolMap a little more complicated
 			// can only get deserialized version, need to reserialize
 			// code from com.google.gwt.dev.jjs.JavaToJavaScriptCompiler
+			// TODO: turns out this can get pretty bad. Workaround?
 			SymbolData[] symbolMap = result.getSymbolMap();
 			byte[] serializedSymbolMap;
 			try {
