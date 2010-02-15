@@ -90,7 +90,7 @@ public class WorkerGlobalScopeImplNative implements WorkerGlobalScope {
 	// Note: no UncaughtExceptionHandler since this code will never run in dev mode
 	public final native void setMessageHandler(MessageHandler messageHandler) /*-{
 	    $self.onmessage = function(event) {
-			insideMessageHandler.@gwt.ns.webworker.client.MessageHandler::onMessage(Lgwt/ns/webworker/client/MessageEvent;)(event);
+			messageHandler.@gwt.ns.webworker.client.MessageHandler::onMessage(Lgwt/ns/webworker/client/MessageEvent;)(event);
 		}
 	}-*/;
 }
