@@ -59,7 +59,6 @@ public class EmulatedWorkerFactoryGenerator extends WorkerFactoryGenerator {
 		// @Override
 		// public Worker createAndStart() {
 		//  WorkerImplProxy proxy = new WorkerImplProxy(new RationalsWorker());
-		//  proxy.runWorker();
 		//  return proxy;
 		// }
         sw.println("@Override");
@@ -69,7 +68,6 @@ public class EmulatedWorkerFactoryGenerator extends WorkerFactoryGenerator {
         sw.print("WorkerImplProxy proxy = new WorkerImplProxy(new ");
         sw.print(workerEntryType.getSimpleSourceName());
         sw.println("());");
-        sw.println("proxy.runWorker();");
         sw.println("return proxy;");
         
         sw.outdent();

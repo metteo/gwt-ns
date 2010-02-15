@@ -28,7 +28,7 @@ import com.google.gwt.user.client.Timer;
 public abstract class IterativeWorkerEntryPoint extends WorkerEntryPoint {
 	private Timer t;
 	private boolean terminate = false;
-	
+
 	// TODO: be able to restart timer?
 	
 	/**
@@ -52,7 +52,7 @@ public abstract class IterativeWorkerEntryPoint extends WorkerEntryPoint {
 	@Override
 	public void onModuleLoad() {
 		super.onModuleLoad();
-		
+
 		// TODO: something more lightweight than Timer? what overhead
 		// does it bring? (cancel() each time newly scheduled, etc)
 		t = new Timer() {
@@ -74,7 +74,7 @@ public abstract class IterativeWorkerEntryPoint extends WorkerEntryPoint {
 	@Override
 	protected void onModuleClose() {
 		super.onModuleClose();
-		
+
 		terminate = true;
 		t.cancel();
 	}
