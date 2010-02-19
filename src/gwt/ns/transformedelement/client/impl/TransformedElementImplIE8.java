@@ -20,6 +20,7 @@ import gwt.ns.transformedelement.client.TransformedElement;
 import gwt.ns.transforms.client.Transform;
 
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 
@@ -49,6 +50,7 @@ public class TransformedElementImplIE8 extends TransformedElement {
 	 * The size attributes of the original element before transformation
 	 */
 	protected double originalWidth, originalHeight;
+	protected double halfOrigWidth, halfOrigHeight;
 	
 	/**
 	 * The position attributes of the original element before transformation
@@ -84,44 +86,58 @@ public class TransformedElementImplIE8 extends TransformedElement {
 		// correct for origin change. corrected (or not) now in originCorrected
 		setOriginCorrectedTransform();
 		
-		// set linear part of transformation (2x2 matrix)
-		target.getStyle().setProperty("filter", get2dFilterString());
-		
 		/* translation: 
 		 * need to keep origin unaffected by linear transformation, only moved
 		 * by translation. IE places left top corner of bounding box at
 		 * (left, top). This causes shifting as bounding box changes.
-		 * Find offset between where the origin (currently middle of element)
-		 * should be and where it is, then subtract it from its new, translated
-		 * position.
+		 * Find offset between where the origin should be and where it is, then
+		 * subtract it from its new, translated position.
 		 */
-		// correct for bounding box repositioning (recenter midpoint)
-		double xAdj = target.getOffsetWidth();
-		xAdj = xAdj > 0 ? (xAdj - originalWidth) / 2. : 0;
-		double yAdj = target.getOffsetHeight();
-		yAdj = yAdj > 0 ? (yAdj - originalHeight) / 2. : 0;
+		// find axis aligned bounding box *size*
+		// left adj
+		double m11 = originCorrected.m11();
+		m11 = m11 < 0 ? -m11 : m11; // abs()
+		double m12 = originCorrected.m12();
+		m12 = m12 < 0 ? -m12 : m12; // abs()
+		double xAdj = ((1 - m11)*halfOrigWidth - m12*halfOrigHeight);
 		
-		if (!originChanged) {
-			// if origin is midpoint, just adjust for translation
-			xAdj -= originCorrected.m14();
-			yAdj -= originCorrected.m24();
+		// top adj
+		double m21 = originCorrected.m21();
+		m21 = m21 < 0 ? -m21 : m21; // abs()
+		double m22 = originCorrected.m22();
+		m22 = m22 < 0 ? -m22 : m22; // abs()
+		double yAdj = (-m21*halfOrigWidth + (1 - m22)*halfOrigHeight);
+		
+		if (originChanged) {
+			// transformed offset from top corner to current origin
+			double ox = originX - halfOrigWidth;
+			double oy = originY - halfOrigHeight;
+			double tox = ox*originCorrected.m11() + oy*originCorrected.m12();
+			double toy = ox*originCorrected.m21() + oy*originCorrected.m22();
 			
-		} else {
-			// reposition transformed origin to origin + translation
-			double ox = originX - originalWidth/2.;
-			double oy = originY - originalHeight/2.;
-			double tox = originCorrected.transformX(ox, oy);
-			double toy = originCorrected.transformY(ox, oy);
-			
-			tox += target.getOffsetWidth()/2.;
-			toy += target.getOffsetHeight()/2.;
-			xAdj = tox - 2*originCorrected.m14();
-			yAdj = toy - 2*originCorrected.m21();
+			// remove from adj computed above, but orig size already figured in
+			xAdj -= tox + halfOrigWidth;
+			yAdj -= toy + halfOrigHeight;
 		}
-
-		// set translation from original position, transform and adjustment
-		target.getStyle().setLeft(originalLeft - xAdj, Unit.PX);
-		target.getStyle().setTop(originalTop - yAdj, Unit.PX);
+		
+		// add translation
+		xAdj += originCorrected.m14();
+		yAdj += originCorrected.m24();
+		
+		
+		Style tarStyle = target.getStyle();
+		
+		// set linear part of transformation (2x2 matrix)
+		tarStyle.setProperty("filter", get2dFilterString());
+		
+		// TODO:
+		// seems like this would be faster, but in-IE benchmarks find it causes
+		// ~30% longer execution time for commitTransform(). needs more testing
+		//setFilter(originCorrected.m11(), originCorrected.m12(), originCorrected.m21(), originCorrected.m22());
+		
+		// set translation from original position, translation and adjustment
+		tarStyle.setLeft(originalLeft + xAdj, Unit.PX);
+		tarStyle.setTop(originalTop + yAdj, Unit.PX);
 	}
 
 
@@ -168,23 +184,44 @@ public class TransformedElementImplIE8 extends TransformedElement {
 		return filt;
 	}
 	
+	/**
+	 * Set the matrix filter by property access. Note that the filter does not
+	 * exist until it is written to once. Currently this takes place with
+	 * an identity transform in {@link #initElementLayout()}.
+	 * 
+	 * @param m11 The matrix entry in the 1st row, 1st column.
+	 * @param m12 The matrix entry in the 1st row, 2nd column.
+	 * @param m21 The matrix entry in the 2nd row, 1st column.
+	 * @param m22 The matrix entry in the 2nd row, 2nd column.
+	 */
+	protected final native void setFilter(double m11, double m12, double m21, double m22) /*-{
+		// only exists if filter has been set before (see initElementLayout)
+		var matFilter = this.@gwt.ns.transformedelement.client.TransformedElement::target.filters['DXImageTransform.Microsoft.Matrix'];
+		matFilter.M11 = m11;
+		matFilter.M12 = m12;
+		matFilter.M21 = m21;
+		matFilter.M22 = m22;
+	}-*/;
 	
 	/**
 	 * Apply an identity filter and store target's untransformed dimensions
 	 */
 	protected void initElementLayout() {
-		// explicitly set an identity transform
+		// explicitly set an identity transform. this will:
+		// a) flush out possible layout changes caused by transforms
+		// b) set filter so it can be accessed by property
 		target.getStyle().setProperty("filter", IDENTITY_FILTER);
 
 		// get untransfomed dimensions
 		originalWidth = target.getOffsetWidth();
+		halfOrigWidth = originalWidth / 2.;
 		originalHeight = target.getOffsetHeight();
+		halfOrigHeight = originalHeight / 2.;
 		
 		originalLeft = target.getOffsetLeft();
 		originalTop = target.getOffsetTop();
 
 		// allow to move freely within parent coord system
-		//target.getStyle().setPosition(Position.ABSOLUTE);
 		target.getStyle().setLeft(0, Unit.PX);
 		target.getStyle().setTop(0, Unit.PX);
 		target.getStyle().setPosition(Position.ABSOLUTE);
