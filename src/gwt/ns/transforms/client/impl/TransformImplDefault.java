@@ -19,27 +19,33 @@ package gwt.ns.transforms.client.impl;
 import gwt.ns.transforms.client.Transform;
 
 /**
- * Java implementation of an affine transformation using a 4x4 matrix.<br><br>
+ * Java implementation of an affine transformation using a 3x3 matrix.
  * 
- * <em>Note:</em> This implementation (for now) is column-major, per W3C SVG
+ * <p><em>Note:</em> This implementation (for now) is column-major, per W3C SVG
  * specifications, so local transforms are done on the right, view transforms
  * are done on the left. This choice has been made explicit in the method
  * signatures: transforms are, by default, local transforms, unless the "view"
  * variant is selected. If internal matrix entries are accessed, however,
- * be aware that the translation vector can be found in the fourth column.
+ * be aware that the translation vector can be found in the fourth column.</p>
  *
+ * <p>Since the interface needs a 4x4 matrix, individual entry access maps to
+ * an equivalent 4x4 matrix (e.g. translation is in the 4th column). This works
+ * since methods to move points along the z-axis are not exposed yet, and
+ * allows the interface to match the Webkit version. This also makes the
+ * eventual transition to 3d transforms easy and without any breaking
+ * changes.</p>
  */
 public class TransformImplDefault extends Transform {
 	/**
 	 * Representation of current transform
 	 */
-	protected Matrix4x4 transform = new Matrix4x4();
+	protected Matrix3x3 transform = new Matrix3x3();
 	
 	/**
 	 * "Scratch" matrix needed for transformations.
 	 * TODO: Investigate making static to save memory.
 	 */
-	private Matrix4x4 temp = new Matrix4x4();
+	private Matrix3x3 temp = new Matrix3x3();
 	
 	
 	/**
@@ -49,70 +55,70 @@ public class TransformImplDefault extends Transform {
 	
 	@Override
 	public void rotate(double angle) {
-		Matrix4x4.rotate(transform, angle);
+		Matrix3x3.rotate(transform, angle);
 	}
 
 	@Override
 	public void rotateAtPoint(double angle, double px, double py) {
 		// TODO: optimize this to reduce matrix operations.
 		// possibly refactor to combine with viewRotateAtPoint
-		Matrix4x4.translate(transform, px, py);
-		Matrix4x4.rotate(transform, angle);
-		Matrix4x4.translate(transform, -px, -py);
+		Matrix3x3.translate(transform, px, py);
+		Matrix3x3.rotate(transform, angle);
+		Matrix3x3.translate(transform, -px, -py);
 	}
 
 	@Override
 	public void scale(double sx, double sy) {
-		Matrix4x4.scale(transform, sx, sy);
+		Matrix3x3.scale(transform, sx, sy);
 	}
 
 	@Override
 	public void scaleAtPoint(double sx, double sy, double px, double py) {
 		// TODO: optimize this to reduce matrix operations,
 		// possibly refactor to combine with viewScaleAtPoint
-		Matrix4x4.translate(transform, px, py);
-		Matrix4x4.scale(transform, sx, sy);
-		Matrix4x4.translate(transform, -px, -py);
+		Matrix3x3.translate(transform, px, py);
+		Matrix3x3.scale(transform, sx, sy);
+		Matrix3x3.translate(transform, -px, -py);
 	}
 
 	@Override
 	public void translate(double tx, double ty) {
-		Matrix4x4.translate(transform, tx, ty);
+		Matrix3x3.translate(transform, tx, ty);
 	}
 
 
 	@Override
 	public void skewX(double angle) {
-		Matrix4x4.skewX(transform, angle);
+		Matrix3x3.skewX(transform, angle);
 	}
 
 	@Override
 	public void skewXView(double angle) {
-		Matrix4x4.identity(temp);
-		Matrix4x4.skewX(temp, angle);
+		Matrix3x3.identity(temp);
+		Matrix3x3.skewX(temp, angle);
 		
-		Matrix4x4.multiplyView(transform, temp);
+		Matrix3x3.multiplyView(transform, temp);
 	}
 	
 	@Override
 	public void skewY(double angle) {
-		Matrix4x4.skewY(transform, angle);
+		Matrix3x3.skewY(transform, angle);
 	}
 
 	@Override
 	public void skewYView(double angle) {
-		Matrix4x4.identity(temp);
-		Matrix4x4.skewY(temp, angle);
+		Matrix3x3.identity(temp);
+		Matrix3x3.skewY(temp, angle);
 		
-		Matrix4x4.multiplyView(transform, temp);
+		Matrix3x3.multiplyView(transform, temp);
 	}
 	
 	@Override
 	public void rotateView(double angle) {
-		Matrix4x4.identity(temp);
-		Matrix4x4.rotate(temp, angle);
+		Matrix3x3.identity(temp);
+		Matrix3x3.rotate(temp, angle);
 		
-		Matrix4x4.multiplyView(transform, temp);
+		Matrix3x3.multiplyView(transform, temp);
 	}
 
 	@Override
@@ -120,12 +126,12 @@ public class TransformImplDefault extends Transform {
 		// TODO: optimize this to reduce matrix operations.
 		// possibly refactor to combine with userRotateAtPoint
 		// TODO: check order of ops
-		Matrix4x4.identity(temp);
-		Matrix4x4.translate(temp, px, py);
-		Matrix4x4.rotate(temp, angle);
-		Matrix4x4.translate(temp, -px, -py);
+		Matrix3x3.identity(temp);
+		Matrix3x3.translate(temp, px, py);
+		Matrix3x3.rotate(temp, angle);
+		Matrix3x3.translate(temp, -px, -py);
 		
-		Matrix4x4.multiplyView(transform, temp);
+		Matrix3x3.multiplyView(transform, temp);
 	}
 	
 	@Override
@@ -133,12 +139,10 @@ public class TransformImplDefault extends Transform {
 		transform.m11 *= sx;
 		transform.m12 *= sx;
 		transform.m13 *= sx;
-		transform.m14 *= sx;
 		
 		transform.m21 *= sy;
 		transform.m22 *= sy;
 		transform.m23 *= sy;
-		transform.m24 *= sy;
 	}
 
 	@Override
@@ -146,24 +150,24 @@ public class TransformImplDefault extends Transform {
 		// TODO: optimize this to reduce matrix operations,
 		// possibly refactor to combine with userScaleAtPoint
 		// TODO: check order of ops
-		Matrix4x4.identity(temp);
-		Matrix4x4.translate(temp, px, py);
-		Matrix4x4.scale(temp, sx, sy);
-		Matrix4x4.translate(temp, -px, -py);
+		Matrix3x3.identity(temp);
+		Matrix3x3.translate(temp, px, py);
+		Matrix3x3.scale(temp, sx, sy);
+		Matrix3x3.translate(temp, -px, -py);
 		
-		Matrix4x4.multiplyView(transform, temp);
+		Matrix3x3.multiplyView(transform, temp);
 	}
 
 	@Override
 	public void translateView(double tx, double ty) {
 		// skip the extra matrix work
-		transform.m14 += tx;
-		transform.m24 += ty;
+		transform.m13 += tx;
+		transform.m23 += ty;
 	}
 
 	@Override
 	public void setToIdentity() {
-		Matrix4x4.identity(transform);
+		Matrix3x3.identity(transform);
 	}
 
 	@Override
@@ -178,12 +182,12 @@ public class TransformImplDefault extends Transform {
 
 	@Override
 	public double m13() {
-		return transform.m13;
+		return 0;
 	}
 
 	@Override
 	public double m14() {
-		return transform.m14;
+		return transform.m13;
 	}
 
 	@Override
@@ -198,12 +202,12 @@ public class TransformImplDefault extends Transform {
 
 	@Override
 	public double m23() {
-		return transform.m23;
+		return 0;
 	}
 
 	@Override
 	public double m24() {
-		return transform.m24;
+		return transform.m23;
 	}
 
 	@Override
@@ -218,32 +222,32 @@ public class TransformImplDefault extends Transform {
 
 	@Override
 	public double m33() {
-		return transform.m33;
+		return 0;
 	}
 
 	@Override
 	public double m34() {
-		return transform.m34;
+		return transform.m33;
 	}
 
 	@Override
 	public double m41() {
-		return transform.m41;
+		return 0;
 	}
 
 	@Override
 	public double m42() {
-		return transform.m42;
+		return 0;
 	}
 
 	@Override
 	public double m43() {
-		return transform.m43;
+		return 0;
 	}
 
 	@Override
 	public double m44() {
-		return transform.m44;
+		return 1;
 	}
 
 	@Override
@@ -258,12 +262,12 @@ public class TransformImplDefault extends Transform {
 
 	@Override
 	public void setM13(double m13) {
-		transform.m13 = m13;
+		;
 	}
 
 	@Override
 	public void setM14(double m14) {
-		transform.m14 = m14;
+		transform.m13 = m14;
 	}
 
 	@Override
@@ -278,12 +282,12 @@ public class TransformImplDefault extends Transform {
 
 	@Override
 	public void setM23(double m23) {
-		transform.m23 = m23;
+		;
 	}
 
 	@Override
 	public void setM24(double m24) {
-		transform.m24 = m24;
+		transform.m23 = m24;
 	}
 
 	@Override
@@ -298,31 +302,31 @@ public class TransformImplDefault extends Transform {
 
 	@Override
 	public void setM33(double m33) {
-		transform.m33 = m33;
+		;
 	}
 
 	@Override
 	public void setM34(double m34) {
-		transform.m34 = m34;
+		transform.m33 = m34;
 	}
 
 	@Override
 	public void setM41(double m41) {
-		transform.m41 = m41;
+		;
 	}
 
 	@Override
 	public void setM42(double m42) {
-		transform.m42 = m42;
+		;
 	}
 
 	@Override
 	public void setM43(double m43) {
-		transform.m43 = m43;
+		;
 	}
 
 	@Override
 	public void setM44(double m44) {
-		transform.m44 = m44;
+		;
 	}
 }

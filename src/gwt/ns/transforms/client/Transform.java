@@ -16,6 +16,8 @@
 
 package gwt.ns.transforms.client;
 
+import com.google.gwt.core.client.GWT;
+
 /**
  * TODO: fix this up.<br>
  * this is the abstract base class for Transform objects which internally use a matrix
@@ -35,6 +37,12 @@ package gwt.ns.transforms.client;
  * </pre>
  */
 public abstract class Transform implements Transformable {
+	/**
+	 * @return A new, system-appropriate Transform
+	 */
+	public static Transform create() {
+		return GWT.create(Transform.class);
+	}
 	
 	@Override
 	public void setTransform(double t11, double t21, double t31, double t41, double t12,
