@@ -33,7 +33,7 @@ public interface Transformable {
 	 * Rotation in <em>local</em> (transformed) coordinates by 
 	 * angle theta.<br><br>
 	 * <strong>Note:</strong> due to definition of screen coordinates
-	 * (with positive y pointing down), positive values of theta rotate
+	 * (with positive y pointing down), positive values of angle rotate
 	 * <em>clockwise</em>.
 	 * 
 	 * @param angle The angle to rotate, in degrees
