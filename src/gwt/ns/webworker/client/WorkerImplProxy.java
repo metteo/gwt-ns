@@ -114,6 +114,8 @@ public class WorkerImplProxy implements Worker {
 		this.entryPoint = entryPoint;
 		
 		// TODO: ugly. Workable for now but need to fix
+		// TODO: **much more than ugly, makes all worker scope calls within
+		//  emulated worker virtual in browsers that need most efficient impl**
 		this.entryPoint.selfImpl = workerScope;
 		
 		// async start.
