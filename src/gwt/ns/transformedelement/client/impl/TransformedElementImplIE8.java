@@ -19,6 +19,7 @@ package gwt.ns.transformedelement.client.impl;
 import gwt.ns.transformedelement.client.TransformedElement;
 import gwt.ns.transforms.client.Transform;
 
+import com.google.gwt.core.client.JsArrayNumber;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Position;
@@ -33,8 +34,8 @@ public class TransformedElementImplIE8 extends TransformedElement {
 	 *  TODO: there are many pitfalls here:
 	 *  1. accurate translation relies on originalWidth/Height being set and
 	 *  	accurate which only happen when target is attached to the DOM and
-	 *  	not reattached in a way that changes its layout. currently this
-	 *  	class only lazily loads the original bounds once
+	 *  	not reattached or changed in a way that changes its layout.
+	 *  	currently this class only lazily loads the original bounds once.
 	 *  2. moreover, these are only loaded when commitTransform() is called
 	 *  	and the element is attached to the DOM. if not, lazy loading is
 	 *  	delayed to the next call, something the user might not be aware of.
@@ -47,44 +48,98 @@ public class TransformedElementImplIE8 extends TransformedElement {
 	 */
 	
 	/**
-	 * The size attributes of the original element before transformation
-	 */
-	protected double originalWidth, originalHeight;
-	protected double halfOrigWidth, halfOrigHeight;
-	
-	/**
-	 * The position attributes of the original element before transformation
-	 */
-	protected double originalLeft, originalTop;
-	
-	/**
-	 * MsFilter value string for an identity transform
+	 * MsFilter identity transformation
 	 */
 	protected static final String IDENTITY_FILTER = "progid:DXImageTransform.Microsoft.Matrix("
 					+ "M11=1, M12=0, M21=0, M22=1, SizingMethod = 'auto expand')";
 	
+	// static array used to construct filter string
+	private static JsArrayNumber filterArray;
+	
+	// flag for static array intilization
+	private static boolean filterArrayInited = false;
 	
 	/**
-	 * true if original* variables, above, are initialized
+	 * Constructs a Matrix Filter string for the 2d linear transformation
+	 * portion of the specified transform.
+	 * 
+	 * @param transform The transform to be applied
+	 * 
+	 * @return A Matrix Filter string
 	 */
-	protected boolean elementInitialized = false;
-
-	private boolean originChanged = false;
-	private double originX, originY;
+	protected static String get2dFilterString(Transform transform) {
+		// construct only once
+		if (!filterArrayInited) {
+			filterArray = getFilterArray();
+			filterArrayInited = true;
+		}
+		
+		filterArray.set(1, transform.m11());
+		filterArray.set(3, transform.m12());
+		filterArray.set(5, transform.m21());
+		filterArray.set(7, transform.m22());
+		return filterArray.join("");
+	}
 	
-	// may refer to transform, so change this at your peril
-	private Transform originCorrected;
+	/**
+	 * Creates a native array of filter string components. When odd entries are
+	 * filled, array can be joined for filter string.
+	 * 
+	 * NOTE: breaks type safety
+	 * 
+	 * @return filter array
+	 */
+	private static native JsArrayNumber getFilterArray() /*-{
+		return [
+			"progid:DXImageTransform.Microsoft.Matrix(M11=",
+			1,
+			", M12=",
+			0,
+			", M21=",
+			0,
+			", M22=",
+			1,
+			", SizingMethod = 'auto expand')"
+			];
+	}-*/; 
+	
+	/**
+	 * The size and position attributes of the original element
+	 */
+	protected double halfOrigWidth;
+	protected double halfOrigHeight;
+	protected double originalHeight;
+	protected double originalLeft;
+	protected double originalTop;
+	protected double originalWidth;
+	
+	// true if original variables, above, are initialized
+	private boolean elementInitialized = false;
+
+	// user has specified a new origin
+	private boolean originChanged = false;
+	
+	// temporary transform to store transformation with changed origin
 	private Transform originTemp;
+	
+	// user-specified origin coordinates
+	private double originX;
+	private double originY;
 	
 	@Override
 	public void commitTransform() {
 		// store untransformed dimensions if we haven't already
 		// element must be attached to document to have dimensions
-		if (!elementInitialized && Document.get().getBody().isOrHasChild(target))
-			initElementLayout();
+		if (!elementInitialized) {
+			if (Document.get().getBody().isOrHasChild(target)) {
+				initElementLayout();
+			} else {
+				return;
+			}
+		}
 		
-		// correct for origin change. corrected (or not) now in originCorrected
-		setOriginCorrectedTransform();
+		// correct for origin change. corrected (or not) returned
+		Transform finalTransform = getOriginCorrectedTransform();
 		
 		/* translation: 
 		 * need to keep origin unaffected by linear transformation, only moved
@@ -93,18 +148,18 @@ public class TransformedElementImplIE8 extends TransformedElement {
 		 * Find offset between where the origin should be and where it is, then
 		 * subtract it from its new, translated position.
 		 */
-		// find axis aligned bounding box *size*
+		
 		// left adj
-		double m11 = originCorrected.m11();
+		double m11 = finalTransform.m11();
 		m11 = m11 < 0 ? -m11 : m11; // abs()
-		double m12 = originCorrected.m12();
+		double m12 = finalTransform.m12();
 		m12 = m12 < 0 ? -m12 : m12; // abs()
 		double xAdj = ((1 - m11)*halfOrigWidth - m12*halfOrigHeight);
 		
 		// top adj
-		double m21 = originCorrected.m21();
+		double m21 = finalTransform.m21();
 		m21 = m21 < 0 ? -m21 : m21; // abs()
-		double m22 = originCorrected.m22();
+		double m22 = finalTransform.m22();
 		m22 = m22 < 0 ? -m22 : m22; // abs()
 		double yAdj = (-m21*halfOrigWidth + (1 - m22)*halfOrigHeight);
 		
@@ -112,8 +167,8 @@ public class TransformedElementImplIE8 extends TransformedElement {
 			// transformed offset from top corner to current origin
 			double ox = originX - halfOrigWidth;
 			double oy = originY - halfOrigHeight;
-			double tox = ox*originCorrected.m11() + oy*originCorrected.m12();
-			double toy = ox*originCorrected.m21() + oy*originCorrected.m22();
+			double tox = ox*finalTransform.m11() + oy*finalTransform.m12();
+			double toy = ox*finalTransform.m21() + oy*finalTransform.m22();
 			
 			// remove from adj computed above, but orig size already figured in
 			xAdj -= tox + halfOrigWidth;
@@ -121,39 +176,48 @@ public class TransformedElementImplIE8 extends TransformedElement {
 		}
 		
 		// add translation
-		xAdj += originCorrected.m14();
-		yAdj += originCorrected.m24();
-		
+		xAdj += finalTransform.m14();
+		yAdj += finalTransform.m24();
 		
 		Style tarStyle = target.getStyle();
 		
 		// set linear part of transformation (2x2 matrix)
-		tarStyle.setProperty("filter", get2dFilterString());
+		tarStyle.setProperty("filter", get2dFilterString(finalTransform));
 		
 		// TODO:
 		// seems like this would be faster, but in-IE benchmarks find it causes
-		// ~30% longer execution time for commitTransform(). needs more testing
+		// ~30% longer execution time for entire commitTransform().
+		// needs more testing
 		//setFilter(originCorrected.m11(), originCorrected.m12(), originCorrected.m21(), originCorrected.m22());
 		
-		// set translation from original position, translation and adjustment
-		tarStyle.setLeft(originalLeft + xAdj, Unit.PX);
-		tarStyle.setTop(originalTop + yAdj, Unit.PX);
+		// set translation from: original position, translation, and adjustment
+		// TODO: avoiding enum clinit. should that be happening?
+		tarStyle.setProperty("left", originalLeft + xAdj + "px");
+		tarStyle.setProperty("top", originalTop + yAdj + "px");
 	}
 
 
 	@Override
 	public void setOrigin(double ox, double oy) {
 		originChanged  = true;
+		
+		originTemp = this.createTransform();
+		
 		originX = ox;
 		originY = oy;
 	}
 	
 	/**
-	 * set originCorrected to current transform corrected for a change in origin
+	 * If the origin of the current transformation has been altered, a
+	 * transform is constructed by applying the current transformation about
+	 * the new origin and returned. If not, the current transformation is
+	 * simply returned.
+	 * 
+	 * @return The current transform corrected for a change in origin
 	 */
-	protected void setOriginCorrectedTransform() {
+	protected Transform getOriginCorrectedTransform() {
 		if (!originChanged) {
-			originCorrected = transform;
+			return transform;
 			
 		} else {
 			double xadj = originX - originalWidth/2;
@@ -163,31 +227,43 @@ public class TransformedElementImplIE8 extends TransformedElement {
 			originTemp.translateView(xadj, yadj); // view is faster
 			originTemp.transform(transform);
 			originTemp.translate(-xadj, -yadj);
-			originCorrected = originTemp;
+			return originTemp;
 		}
 	}
 	
 	/**
-	 * Get the MsFilter string that will set the element to the current
-	 * transform (2d linear transform only).
-	 * 
-	 * @return filter property string
+	 * Apply an identity filter and store target's untransformed dimensions
 	 */
-	protected String get2dFilterString() {
-		String filt = "progid:DXImageTransform.Microsoft.Matrix(M11=";
-		filt +=	originCorrected.m11();
-		filt += ", M12=" + originCorrected.m12();
-		filt += ", M21=" + originCorrected.m21();
-		filt += ", M22=" + originCorrected.m22();
-		filt += ", SizingMethod = 'auto expand')";
+	protected void initElementLayout() {
+		// explicitly set an identity transform. this will:
+		// a) flush out possible layout changes caused by transforms
+		// b) set filter so it can be accessed by property
+		target.getStyle().setProperty("filter", IDENTITY_FILTER);
+
+		// get untransformed dimensions
+		originalWidth = target.getOffsetWidth();
+		halfOrigWidth = originalWidth / 2.;
+		originalHeight = target.getOffsetHeight();
+		halfOrigHeight = originalHeight / 2.;
 		
-		return filt;
+		originalLeft = target.getOffsetLeft();
+		originalTop = target.getOffsetTop();
+
+		// allow to move freely within parent coord system
+		target.getStyle().setLeft(0, Unit.PX);
+		target.getStyle().setTop(0, Unit.PX);
+		target.getStyle().setPosition(Position.ABSOLUTE);
+		
+		elementInitialized = true;
 	}
 	
 	/**
 	 * Set the matrix filter by property access. Note that the filter does not
 	 * exist until it is written to once. Currently this takes place with
 	 * an identity transform in {@link #initElementLayout()}.
+	 * 
+	 * <p>Note: this method appears to be the slower way to apply a transform
+	 * to an element. It remains for more definitive testing.</p>
 	 * 
 	 * @param m11 The matrix entry in the 1st row, 1st column.
 	 * @param m12 The matrix entry in the 1st row, 2nd column.
@@ -202,31 +278,4 @@ public class TransformedElementImplIE8 extends TransformedElement {
 		matFilter.M21 = m21;
 		matFilter.M22 = m22;
 	}-*/;
-	
-	/**
-	 * Apply an identity filter and store target's untransformed dimensions
-	 */
-	protected void initElementLayout() {
-		// explicitly set an identity transform. this will:
-		// a) flush out possible layout changes caused by transforms
-		// b) set filter so it can be accessed by property
-		target.getStyle().setProperty("filter", IDENTITY_FILTER);
-
-		// get untransfomed dimensions
-		originalWidth = target.getOffsetWidth();
-		halfOrigWidth = originalWidth / 2.;
-		originalHeight = target.getOffsetHeight();
-		halfOrigHeight = originalHeight / 2.;
-		
-		originalLeft = target.getOffsetLeft();
-		originalTop = target.getOffsetTop();
-
-		// allow to move freely within parent coord system
-		target.getStyle().setLeft(0, Unit.PX);
-		target.getStyle().setTop(0, Unit.PX);
-		target.getStyle().setPosition(Position.ABSOLUTE);
-			
-		elementInitialized = true;
-		originTemp = this.createTransform();
-	}
 }
