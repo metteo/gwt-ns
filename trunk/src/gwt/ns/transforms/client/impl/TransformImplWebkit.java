@@ -50,12 +50,12 @@ public class TransformImplWebkit extends Transform {
 	public TransformImplWebkit() { }
 	
 	/**
-	 * Get a copy of the underlying javascript matrix
 	 * 
-	 * @return A WebKitCssMatrix javascript overlay
+	 * @return The transform's underlying JavaScript WebKitCssMatrix
 	 */
 	public WebKitCssMatrix getJsoMatrix() {
-		return WebKitCssMatrix.create().multiply(transform);
+		// object is immutable, fine to do a straight return
+		return transform;
 	}
 	
 	@Override
