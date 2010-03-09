@@ -21,6 +21,8 @@
   <!-- Inherit the core Web Toolkit stuff.                        -->
   <inherits name='com.google.gwt.core.Core'/>
   <inherits name='com.google.gwt.user.UserAgent'/>
+  
+  <inherits name="gwt.ns.transforms.Transforms" />
 
   <!-- deferred binding logic supported by ie6, ie8, but only a subset
 		of safari and gecko (1.9.1+).
@@ -51,7 +53,10 @@
     <when-type-is class='gwt.ns.transformedelement.client.TransformedElement'/>
     <when-property-is name='user.agent' value='safari'/>
   </replace-with>
-
-  <!-- Other module inherits          -->
-  <inherits name="gwt.ns.transforms.Transforms" />
+  
+  <!-- opera 10.5 -->
+  <replace-with class='gwt.ns.transformedelement.client.impl.TransformedElementImplOpera'>
+    <when-type-is class='gwt.ns.transformedelement.client.TransformedElement'/>
+    <when-property-is name='user.agent' value='opera'/>
+  </replace-with>
 </module>
