@@ -59,38 +59,24 @@ public class TransformImplWebkit extends Transform {
 	}
 	
 	@Override
-	public void rotate(double angle) {
-		transform = transform.rotate(angle);
-	}
-
-	@Override
-	public void rotateAtPoint(double angle, double px, double py) {
-		// TODO: optimize this to reduce matrix creations and arithmetic.
-		// possibly refactor to combine with viewRotateAtPoint
-		transform = transform.translate(px, py).rotate(angle).translate(-px, -py);
+	public void rotate(double theta) {
+		transform = transform.rotate(theta);
 	}
 
 	@Override
 	public void scale(double sx, double sy) {
 		transform = transform.scale(sx, sy);
 	}
-
-	@Override
-	public void scaleAtPoint(double sx, double sy, double px, double py) {
-		// TODO: optimize this to reduce matrix creations and arithmetic,
-		// possibly refactor to combine with viewScaleAtPoint
-		transform = transform.translate(px, py).scale(sx, sy).translate(-px, -py);
-	}
 	
 
 	@Override
-	public void skewX(double angle) {
-		transform = transform.skewX(angle);
+	public void skewX(double theta) {
+		transform = transform.skewX(theta);
 	}
 
 	@Override
-	public void skewY(double angle) {
-		transform = transform.skewY(angle);
+	public void skewY(double theta) {
+		transform = transform.skewY(theta);
 	}
 
 	@Override
@@ -100,36 +86,14 @@ public class TransformImplWebkit extends Transform {
 	}
 
 	@Override
-	public void rotateView(double angle) {
-		WebKitCssMatrix rot = WebKitCssMatrix.create().rotate(angle);
-		transform = transform.multiplyView(rot);
-	}
-
-	@Override
-	public void rotateViewAtPoint(double angle, double px, double py) {
-		// TODO: optimize this to reduce matrix creations and arithmetic.
-		// possibly refactor to combine with userRotateAtPoint
-		// TODO: check the order of ops on rot.
-		WebKitCssMatrix rot = WebKitCssMatrix.create();
-		rot = rot.translate(px, py).rotate(angle).translate(-px, -py);
-		
+	public void rotateView(double theta) {
+		WebKitCssMatrix rot = WebKitCssMatrix.create().rotate(theta);
 		transform = transform.multiplyView(rot);
 	}
 
 	@Override
 	public void scaleView(double sx, double sy) {
 		WebKitCssMatrix scale = WebKitCssMatrix.create().scale(sx, sy);
-		transform = transform.multiplyView(scale);
-	}
-
-	@Override
-	public void scaleViewAtPoint(double sx, double sy, double px, double py) {
-		// TODO: optimize this to reduce matrix creations and arithmetic,
-		// possibly refactor to combine with userScaleAtPoint
-		// TODO: check the order of ops on scale.
-		WebKitCssMatrix scale = WebKitCssMatrix.create();
-		scale = scale.translate(px, py).scale(sx, sy).translate(-px, -py);
-		
 		transform = transform.multiplyView(scale);
 	}
 
@@ -141,14 +105,14 @@ public class TransformImplWebkit extends Transform {
 	
 
 	@Override
-	public void skewXView(double angle) {
-		WebKitCssMatrix trans = WebKitCssMatrix.create().skewX(angle);
+	public void skewXView(double theta) {
+		WebKitCssMatrix trans = WebKitCssMatrix.create().skewX(theta);
 		transform = transform.multiplyView(trans);
 	}
 
 	@Override
-	public void skewYView(double angle) {
-		WebKitCssMatrix trans = WebKitCssMatrix.create().skewY(angle);
+	public void skewYView(double theta) {
+		WebKitCssMatrix trans = WebKitCssMatrix.create().skewY(theta);
 		transform = transform.multiplyView(trans);
 	}
 

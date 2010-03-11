@@ -24,11 +24,6 @@ import gwt.ns.transformedelement.client.TransformedElement;
  */
 public class TransformedElementImplGecko extends TransformedElement {
 	
-	/**
-	 * string builder for filter string
-	 */
-	protected StringBuilder str = new StringBuilder();
-	
 	@Override
 	public void commitTransform() {
 		target.getStyle().setProperty("MozTransform", get2dCssString());
@@ -52,14 +47,6 @@ public class TransformedElementImplGecko extends TransformedElement {
 	 * @return
 	 */
 	public String get2dCssString() {
-		//str.delete(0, str.length());
-		//str.append("matrix(");
-		//str.append(toFixed(transform.m11())).append(", ");
-		//str.append(toFixed(transform.m21())).append(", ");
-		//str.append(toFixed(transform.m12())).append(", ");
-		//str.append(toFixed(transform.m22())).append(", ");
-		//str.append(toFixed(transform.m14())).append("px, ");
-		//str.append(toFixed(transform.m24())).append("px)");
 		String tmp = "matrix(";
 		tmp += toFixed(transform.m11()) + ", ";
 		tmp += toFixed(transform.m21()) + ", ";

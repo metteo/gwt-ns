@@ -170,44 +170,20 @@ public abstract class TransformedElement implements Transformable {
 	
 	
 	@Override
-	public void rotate(double angle) {
-		transform.rotate(angle);
+	public void rotate(double theta) {
+		transform.rotate(theta);
 		scheduleCommit();
 	}
 
 	@Override
-	public void rotateAtPoint(double angle, double px, double py) {
-		transform.rotateAtPoint(angle, px, py);
-		scheduleCommit();
-	}
-
-	@Override
-	public void rotateViewAtPoint(double angle, double px, double py) {
-		transform.rotateViewAtPoint(angle, px, py);
-		scheduleCommit();
-	}
-
-	@Override
-	public void rotateView(double angle) {
-		transform.rotateView(angle);
+	public void rotateView(double theta) {
+		transform.rotateView(theta);
 		scheduleCommit();
 	}
 
 	@Override
 	public void scale(double sx, double sy) {
 		transform.scale(sx, sy);
-		scheduleCommit();
-	}
-
-	@Override
-	public void scaleAtPoint(double sx, double sy, double px, double py) {
-		transform.scaleAtPoint(sx, sy, px, py);
-		scheduleCommit();
-	}
-
-	@Override
-	public void scaleViewAtPoint(double sx, double sy, double px, double py) {
-		transform.scaleViewAtPoint(sx, sy, px, py);
 		scheduleCommit();
 	}
 
@@ -241,26 +217,26 @@ public abstract class TransformedElement implements Transformable {
 	}
 
 	@Override
-	public void skewX(double angle) {
-		transform.skewX(angle);
+	public void skewX(double theta) {
+		transform.skewX(theta);
 		scheduleCommit();
 	}
 
 	@Override
-	public void skewXView(double angle) {
-		transform.skewXView(angle);
+	public void skewXView(double theta) {
+		transform.skewXView(theta);
 		scheduleCommit();
 	}
 
 	@Override
-	public void skewY(double angle) {
-		transform.skewY(angle);
+	public void skewY(double theta) {
+		transform.skewY(theta);
 		scheduleCommit();
 	}
 
 	@Override
-	public void skewYView(double angle) {
-		transform.skewYView(angle);
+	public void skewYView(double theta) {
+		transform.skewYView(theta);
 		scheduleCommit();
 	}
 
