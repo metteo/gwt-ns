@@ -56,7 +56,7 @@ public class TransformedElementImplIE8 extends TransformedElement {
 	// static array used to construct filter string
 	private static JsArrayNumber filterArray;
 	
-	// flag for static array intilization
+	// flag for static array initialization
 	private static boolean filterArrayInited = false;
 	
 	/**
@@ -79,7 +79,7 @@ public class TransformedElementImplIE8 extends TransformedElement {
 		filterArray.set(5, transform.m21());
 		filterArray.set(7, transform.m22());
 		return filterArray.join("");
-	}
+	} 
 	
 	/**
 	 * Creates a native array of filter string components. When odd entries are
@@ -101,7 +101,18 @@ public class TransformedElementImplIE8 extends TransformedElement {
 			1,
 			", SizingMethod = 'auto expand')"
 			];
-	}-*/; 
+	}-*/;
+	
+	/**
+	 * Primitive-type conservatism causes some slow parts to JRE Math
+	 * emulation.
+	 * 
+	 * @param value Number to round to nearest integer
+	 * @return Rounded value
+	 */
+	private static native double nativeRound(double value) /*-{
+		return Math.round(value);
+	}-*/;
 	
 	/**
 	 * The size and position attributes of the original element
@@ -192,8 +203,8 @@ public class TransformedElementImplIE8 extends TransformedElement {
 		
 		// set translation from: original position, translation, and adjustment
 		// TODO: avoiding enum clinit. should that be happening?
-		tarStyle.setProperty("left", Math.round(originalLeft + xAdj) + "px");
-		tarStyle.setProperty("top", Math.round(originalTop + yAdj) + "px");
+		tarStyle.setProperty("left", nativeRound(originalLeft + xAdj) + "px");
+		tarStyle.setProperty("top", nativeRound(originalTop + yAdj) + "px");
 	}
 
 
