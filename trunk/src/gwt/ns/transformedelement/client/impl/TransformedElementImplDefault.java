@@ -38,25 +38,13 @@ public class TransformedElementImplDefault extends TransformedElement {
 	public void resetTranform() { }
 	
 	@Override
-	public void rotate(double angle) { }
-
-	@Override
-	public void rotateAtPoint(double angle, double px, double py) { }
-
-	@Override
-	public void rotateViewAtPoint(double angle, double px, double py) { }
+	public void rotate(double theta) { }
 	
 	@Override
-	public void rotateView(double angle) { }
+	public void rotateView(double theta) { }
 
 	@Override
 	public void scale(double sx, double sy) { }
-
-	@Override
-	public void scaleAtPoint(double sx, double sy, double px, double py) { }
-
-	@Override
-	public void scaleViewAtPoint(double sx, double sy, double px, double py) { }
 
 	@Override
 	public void scaleView(double sx, double sy) { }
@@ -74,16 +62,16 @@ public class TransformedElementImplDefault extends TransformedElement {
 	public void setTransform(Transform transfrom) { }
 
 	@Override
-	public void skewX(double angle) { }
+	public void skewX(double theta) { }
 
 	@Override
-	public void skewXView(double angle) { }
+	public void skewXView(double theta) { }
 
 	@Override
-	public void skewY(double angle) { }
+	public void skewY(double theta) { }
 
 	@Override
-	public void skewYView(double angle) { }
+	public void skewYView(double theta) { }
 
 	@Override
 	public void transform(Transform transform) { }

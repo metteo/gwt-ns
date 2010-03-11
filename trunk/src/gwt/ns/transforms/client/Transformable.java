@@ -18,10 +18,8 @@ package gwt.ns.transforms.client;
 
 /*
  *	TODO:
- 	javadocs
 	inverse (why? maybe wait until use case comes up for designing api)
 	units?? ems, px, cm allowed in firefox at least...
-	shear?
 	get copy? need to think about differed binding for this
 	reset vs set to identity?
 	push/pop()?
@@ -36,18 +34,19 @@ public interface Transformable {
 	 * (with positive y pointing down), positive values of angle rotate
 	 * <em>clockwise</em>.
 	 * 
-	 * @param angle The angle to rotate, in degrees
+	 * @param theta The angle to rotate, in radians
 	 */
-	public void rotate(double angle);
+	public void rotate(double theta);
 
 	/**
-	 * Rotate in local coordinates around point (px, py) by angle theta.
+	 * Rotation in <em>view</em> coordinates by angle theta.<br><br>
+	 * <strong>Note:</strong> due to definition of screen coordinates
+	 * (with positive y pointing down), positive values of theta rotate
+	 * <em>clockwise</em>.
 	 * 
-	 * @param angle The angle to rotate in degrees
-	 * @param px The x-coordinate of origin of rotation, in local coordinatess
-	 * @param py The y-coordinate of origin of rotation, in local coordinates
+	 * @param theta The angle to rotate in radians
 	 */
-	public void rotateAtPoint(double angle, double px, double py);
+	public void rotateView(double theta);
 
 	/**
 	 * Scale in <em>local</em> (transformed) coordinates by vector (sx, sy).
@@ -58,45 +57,6 @@ public interface Transformable {
 	public void scale(double sx, double sy);
 
 	/**
-	 * Scale in local coordinates, expanding from point (px, py) by
-	 * vector(sx, sy).
-	 * 
-	 * @param sx The scaling along the local x-axis
-	 * @param sy The scaling along the local y-axis
-	 * @param px The x-coordinate of origin of scaling, in local coordinates
-	 * @param py The y-coordinate of origin of scaling, in local coordinates
-	 */
-	public void scaleAtPoint(double sx, double sy, double px, double py);
-
-	/**
-	 * Translation in <em>local</em> (transformed) coordinates by vector (tx, ty).
-	 * 
-	 * @param tx The translation along local x-axis
-	 * @param ty The translation along local y-axis
-	 */
-	public void translate(double tx, double ty);
-
-	/**
-	 * Rotation in <em>view</em> coordinates by angle theta.<br><br>
-	 * <strong>Note:</strong> due to definition of screen coordinates
-	 * (with positive y pointing down), positive values of theta rotate
-	 * <em>clockwise</em>.
-	 * 
-	 * @param angle The angle to rotate in degrees
-	 */
-	public void rotateView(double angle);
-
-	/**
-	 * Rotate, in <em>view</em> coordinates, around point (px, py) by
-	 * angle theta.
-	 * 
-	 * @param angle The angle to rotate in degrees
-	 * @param px The x-coordinate of origin of rotation in view coordinates
-	 * @param py The y-coordinate of origin of rotation in view coordinates
-	 */
-	public void rotateViewAtPoint(double angle, double px, double py);
-
-	/**
 	 * Scale in <em>view</em> coordinates by vector (sx, sy).
 	 * 
 	 * @param sx The scaling along view x-axis
@@ -105,78 +65,9 @@ public interface Transformable {
 	public void scaleView(double sx, double sy);
 
 	/**
-	 * Scale by vector(sx, sy), in <em>view</em> coordinates, expanding from
-	 * point (px, py).
-	 * 
-	 * @param sx The scaling along view x-axis
-	 * @param sy The scaling along view y-axis
-	 * @param px The x-coordinate of origin of scaling, in view coordinates
-	 * @param py The y-coordinate of origin of scaling, in view coordinates
-	 */
-	public void scaleViewAtPoint(double sx, double sy, double px, double py);
-
-	/**
-	 * Translation in <em>view</em> coordinates by vector (tx, ty).
-	 * 
-	 * @param tx The translation along view x-axis
-	 * @param ty The translation along view y-axis
-	 */
-	public void translateView(double tx, double ty);
-	
-	/**
-	 * Skews <em>local</em> (transformed) coordinates around the x-axis by 
-	 * the given angle.
-	 * 
-	 * @param angle The skew angle.
-	 */
-	public void skewX(double angle);
-	
-	/**
-	 * Skews <em>local</em> (transformed) coordinates around the y-axis by
-	 * the given angle.
-	 * 
-	 * @param angle The skew angle.
-	 */
-	public void skewY(double angle);
-	
-	/**
-	 * Skews <em>view</em> coordinates around the x-axis by the given angle.
-	 * 
-	 * @param angle The skew angle.
-	 */
-	public void skewXView(double angle);
-	
-	/**
-	 * Skews <em>view</em> coordinates around the y-axis by the given angle.
-	 * 
-	 * @param angle The skew angle.
-	 */
-	public void skewYView(double angle);
-
-	/**
-	 * Returns the x-component of the image of view-space point (x, y)
-	 * under the current transform.
-	 * 
-	 * @param x The x coordinate of point to transform
-	 * @param y The y coordinate of point to transform
-	 * @return The x component of the transformed point
-	 */
-	double transformX(double x, double y);
-
-	/**
-	 * Returns the y-component of the image of view-space point (x, y)
-	 * under the current transform.
-	 * 
-	 * @param x The x coordinate of point to transform
-	 * @param y The y coordinate of point to transform
-	 * @return The y component of the transformed point
-	 */
-	double transformY(double x, double y);
-
-	/**
 	 * Reset this transformation to the identity transform.
 	 */
-	void setToIdentity();
+	public void setToIdentity();
 	// TODO: not wild about that method signature, but got it from
 	// java.awt.geom.AffineTransform so good for now
 
@@ -195,18 +86,47 @@ public interface Transformable {
 	 * @param t11-t44 a new value. t[row][column] represents the
 	 * ([row],[column])th entry of the matrix
 	 */
-	void setTransform(double t11, double t21, double t31, double t41,
+	public void setTransform(double t11, double t21, double t31, double t41,
 			double t12, double t22, double t32, double t42, double t13,
 			double t23, double t33, double t43, double t14, double t24,
 			double t34, double t44);
-	
 	
 	/**
 	 * Set new values in the transformation matrix.
 	 * 
 	 * @param transfrom The new transform to copy into this one
 	 */
-	void setTransform(Transform transfrom);
+	public void setTransform(Transform transfrom);
+	
+	/**
+	 * Skews <em>local</em> (transformed) coordinates around the x-axis by 
+	 * the given angle.
+	 * 
+	 * @param angle The skew angle.
+	 */
+	public void skewX(double angle);
+	
+	/**
+	 * Skews <em>view</em> coordinates around the x-axis by the given angle.
+	 * 
+	 * @param angle The skew angle.
+	 */
+	public void skewXView(double angle);
+	
+	/**
+	 * Skews <em>local</em> (transformed) coordinates around the y-axis by
+	 * the given angle.
+	 * 
+	 * @param angle The skew angle.
+	 */
+	public void skewY(double angle);
+
+	/**
+	 * Skews <em>view</em> coordinates around the y-axis by the given angle.
+	 * 
+	 * @param angle The skew angle.
+	 */
+	public void skewYView(double angle);
 
 	/**
 	 * Apply a transformation to the current <em>local</em> coordinate system.
@@ -216,7 +136,7 @@ public interface Transformable {
 	 * 
 	 * @param transform the transformation to apply
 	 */
-	void transform(Transform transform);
+	public void transform(Transform transform);
 
 	/**
 	 * Apply a transformation to the current <em>view</em> coordinate system.
@@ -225,5 +145,41 @@ public interface Transformable {
 	 * 
 	 * @param transform the transformation to apply
 	 */
-	void transformView(Transform transform);
+	public void transformView(Transform transform);
+
+	/**
+	 * Returns the x-component of the image of local-space point (x, y)
+	 * under the current transform.
+	 * 
+	 * @param x The x coordinate of point to transform
+	 * @param y The y coordinate of point to transform
+	 * @return The x component of the transformed point
+	 */
+	public double transformX(double x, double y);
+	
+	/**
+	 * Returns the y-component of the image of local-space point (x, y)
+	 * under the current transform.
+	 * 
+	 * @param x The x coordinate of point to transform
+	 * @param y The y coordinate of point to transform
+	 * @return The y component of the transformed point
+	 */
+	public double transformY(double x, double y);
+
+	/**
+	 * Translation in <em>local</em> (transformed) coordinates by vector (tx, ty).
+	 * 
+	 * @param tx The translation along local x-axis
+	 * @param ty The translation along local y-axis
+	 */
+	public void translate(double tx, double ty);
+
+	/**
+	 * Translation in <em>view</em> coordinates by vector (tx, ty).
+	 * 
+	 * @param tx The translation along view x-axis
+	 * @param ty The translation along view y-axis
+	 */
+	public void translateView(double tx, double ty);
 }

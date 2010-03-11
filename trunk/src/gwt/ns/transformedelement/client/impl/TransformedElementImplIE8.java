@@ -192,8 +192,8 @@ public class TransformedElementImplIE8 extends TransformedElement {
 		
 		// set translation from: original position, translation, and adjustment
 		// TODO: avoiding enum clinit. should that be happening?
-		tarStyle.setProperty("left", originalLeft + xAdj + "px");
-		tarStyle.setProperty("top", originalTop + yAdj + "px");
+		tarStyle.setProperty("left", Math.round(originalLeft + xAdj) + "px");
+		tarStyle.setProperty("top", Math.round(originalTop + yAdj) + "px");
 	}
 
 

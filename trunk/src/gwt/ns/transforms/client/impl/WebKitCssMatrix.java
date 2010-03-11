@@ -113,11 +113,11 @@ public class WebKitCssMatrix extends JavaScriptObject {
 	 * <strong>Note:</strong> due to the implicit viewport transform (+y points
 	 * down on the screen), positive angles rotate clockwise.
 	 * 
-	 * @param angle The angle of rotation in degrees.
-	 * @return A matrix that is a rotation of this matrix by angle degrees
+	 * @param theta The angle of rotation in radians.
+	 * @return A matrix that is a rotation of this matrix by angle radians
 	 */
-	public final native WebKitCssMatrix rotate(double angle) /*-{
-		return this.rotate(angle);
+	public final native WebKitCssMatrix rotate(double theta) /*-{
+		return this.rotate(theta * (180 / Math.PI));
 	}-*/;
 	
 	/**
@@ -138,12 +138,12 @@ public class WebKitCssMatrix extends JavaScriptObject {
 	 * given angle, in local coordinates.
 	 * This matrix is not modified by this method.
 	 * 
-	 * @param angle The angle of the skew
+	 * @param theta The angle of the skew, in radians
 	 * @return A new matrix that is the result of skewing this matrix.
 	 */
-	public final WebKitCssMatrix skewX(double angle) {
+	public final WebKitCssMatrix skewX(double theta) {
 		WebKitCssMatrix tmp = WebKitCssMatrix.create();
-		tmp.setM21(Math.tan(Math.toRadians(angle)));
+		tmp.setM21(Math.tan(theta));
 		
 		return multiplyLocal(tmp);
 	}
@@ -153,12 +153,12 @@ public class WebKitCssMatrix extends JavaScriptObject {
 	 * given angle, in local coordinates.
 	 * This matrix is not modified by this method.
 	 * 
-	 * @param angle The angle of the skew
+	 * @param theta The angle of the skew, in radians
 	 * @return A new matrix that is the result of skewing this matrix.
 	 */
-	public final WebKitCssMatrix skewY(double angle) {
+	public final WebKitCssMatrix skewY(double theta) {
 		WebKitCssMatrix tmp = WebKitCssMatrix.create();
-		tmp.setM12(Math.tan(Math.toRadians(angle)));
+		tmp.setM12(Math.tan(theta));
 		
 		return multiplyLocal(tmp);
 	}

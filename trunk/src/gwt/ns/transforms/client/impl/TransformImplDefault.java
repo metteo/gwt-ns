@@ -43,9 +43,8 @@ public class TransformImplDefault extends Transform {
 	
 	/**
 	 * "Scratch" matrix needed for transformations.
-	 * TODO: Investigate making static to save memory.
 	 */
-	private Matrix3x3 temp = new Matrix3x3();
+	private static Matrix3x3 temp = new Matrix3x3();
 	
 	
 	/**
@@ -53,123 +52,6 @@ public class TransformImplDefault extends Transform {
 	 */
 	public TransformImplDefault() { }
 	
-	@Override
-	public void rotate(double angle) {
-		Matrix3x3.rotate(transform, angle);
-	}
-
-	@Override
-	public void rotateAtPoint(double angle, double px, double py) {
-		// TODO: optimize this to reduce matrix operations.
-		// possibly refactor to combine with viewRotateAtPoint
-		Matrix3x3.translate(transform, px, py);
-		Matrix3x3.rotate(transform, angle);
-		Matrix3x3.translate(transform, -px, -py);
-	}
-
-	@Override
-	public void scale(double sx, double sy) {
-		Matrix3x3.scale(transform, sx, sy);
-	}
-
-	@Override
-	public void scaleAtPoint(double sx, double sy, double px, double py) {
-		// TODO: optimize this to reduce matrix operations,
-		// possibly refactor to combine with viewScaleAtPoint
-		Matrix3x3.translate(transform, px, py);
-		Matrix3x3.scale(transform, sx, sy);
-		Matrix3x3.translate(transform, -px, -py);
-	}
-
-	@Override
-	public void translate(double tx, double ty) {
-		Matrix3x3.translate(transform, tx, ty);
-	}
-
-
-	@Override
-	public void skewX(double angle) {
-		Matrix3x3.skewX(transform, angle);
-	}
-
-	@Override
-	public void skewXView(double angle) {
-		Matrix3x3.identity(temp);
-		Matrix3x3.skewX(temp, angle);
-		
-		Matrix3x3.multiplyView(transform, temp);
-	}
-	
-	@Override
-	public void skewY(double angle) {
-		Matrix3x3.skewY(transform, angle);
-	}
-
-	@Override
-	public void skewYView(double angle) {
-		Matrix3x3.identity(temp);
-		Matrix3x3.skewY(temp, angle);
-		
-		Matrix3x3.multiplyView(transform, temp);
-	}
-	
-	@Override
-	public void rotateView(double angle) {
-		Matrix3x3.identity(temp);
-		Matrix3x3.rotate(temp, angle);
-		
-		Matrix3x3.multiplyView(transform, temp);
-	}
-
-	@Override
-	public void rotateViewAtPoint(double angle, double px, double py) {
-		// TODO: optimize this to reduce matrix operations.
-		// possibly refactor to combine with userRotateAtPoint
-		// TODO: check order of ops
-		Matrix3x3.identity(temp);
-		Matrix3x3.translate(temp, px, py);
-		Matrix3x3.rotate(temp, angle);
-		Matrix3x3.translate(temp, -px, -py);
-		
-		Matrix3x3.multiplyView(transform, temp);
-	}
-	
-	@Override
-	public void scaleView(double sx, double sy) {
-		transform.m11 *= sx;
-		transform.m12 *= sx;
-		transform.m13 *= sx;
-		
-		transform.m21 *= sy;
-		transform.m22 *= sy;
-		transform.m23 *= sy;
-	}
-
-	@Override
-	public void scaleViewAtPoint(double sx, double sy, double px, double py) {
-		// TODO: optimize this to reduce matrix operations,
-		// possibly refactor to combine with userScaleAtPoint
-		// TODO: check order of ops
-		Matrix3x3.identity(temp);
-		Matrix3x3.translate(temp, px, py);
-		Matrix3x3.scale(temp, sx, sy);
-		Matrix3x3.translate(temp, -px, -py);
-		
-		Matrix3x3.multiplyView(transform, temp);
-	}
-
-	@Override
-	public void translateView(double tx, double ty) {
-		// skip the extra matrix work
-		transform.m13 += tx;
-		transform.m23 += ty;
-	}
-
-	@Override
-	public void setToIdentity() {
-		Matrix3x3.identity(transform);
-	}
-
 	@Override
 	public double m11() {
 		return transform.m11;
@@ -185,6 +67,7 @@ public class TransformImplDefault extends Transform {
 		return 0;
 	}
 
+
 	@Override
 	public double m14() {
 		return transform.m13;
@@ -194,7 +77,7 @@ public class TransformImplDefault extends Transform {
 	public double m21() {
 		return transform.m21;
 	}
-
+	
 	@Override
 	public double m22() {
 		return transform.m22;
@@ -204,12 +87,12 @@ public class TransformImplDefault extends Transform {
 	public double m23() {
 		return 0;
 	}
-
+	
 	@Override
 	public double m24() {
 		return transform.m23;
 	}
-
+	
 	@Override
 	public double m31() {
 		return transform.m31;
@@ -248,6 +131,35 @@ public class TransformImplDefault extends Transform {
 	@Override
 	public double m44() {
 		return 1;
+	}
+
+	@Override
+	public void rotate(double theta) {
+		Matrix3x3.rotate(transform, theta);
+	}
+
+	@Override
+	public void rotateView(double theta) {
+		Matrix3x3.identity(temp);
+		Matrix3x3.rotate(temp, theta);
+		
+		Matrix3x3.multiplyView(transform, temp);
+	}
+
+	@Override
+	public void scale(double sx, double sy) {
+		Matrix3x3.scale(transform, sx, sy);
+	}
+
+	@Override
+	public void scaleView(double sx, double sy) {
+		transform.m11 *= sx;
+		transform.m12 *= sx;
+		transform.m13 *= sx;
+		
+		transform.m21 *= sy;
+		transform.m22 *= sy;
+		transform.m23 *= sy;
 	}
 
 	@Override
@@ -328,5 +240,48 @@ public class TransformImplDefault extends Transform {
 	@Override
 	public void setM44(double m44) {
 		;
+	}
+
+	@Override
+	public void setToIdentity() {
+		Matrix3x3.identity(transform);
+	}
+
+	@Override
+	public void skewX(double theta) {
+		Matrix3x3.skewX(transform, theta);
+	}
+
+	@Override
+	public void skewXView(double theta) {
+		Matrix3x3.identity(temp);
+		Matrix3x3.skewX(temp, theta);
+		
+		Matrix3x3.multiplyView(transform, temp);
+	}
+
+	@Override
+	public void skewY(double theta) {
+		Matrix3x3.skewY(transform, theta);
+	}
+
+	@Override
+	public void skewYView(double theta) {
+		Matrix3x3.identity(temp);
+		Matrix3x3.skewY(temp, theta);
+		
+		Matrix3x3.multiplyView(transform, temp);
+	}
+
+	@Override
+	public void translate(double tx, double ty) {
+		Matrix3x3.translate(transform, tx, ty);
+	}
+
+	@Override
+	public void translateView(double tx, double ty) {
+		// skip the extra matrix work
+		transform.m13 += tx;
+		transform.m23 += ty;
 	}
 }
