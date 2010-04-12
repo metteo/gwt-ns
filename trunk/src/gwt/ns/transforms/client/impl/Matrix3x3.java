@@ -39,6 +39,9 @@ public class Matrix3x3 {
 	 */
 	private static Matrix3x3 tempm;
 	
+	private static String TEMPM_ERROR_MSG =
+		"Internal Matrix3x3 not returned to identity.";
+	
 	/**
 	 * Copies matrix data from src into dest.
 	 * @param dest The destination matrix
@@ -137,6 +140,7 @@ public class Matrix3x3 {
 		tempm.m12 = 0;
 		tempm.m21 = 0;
 		tempm.m22 = 1;
+		assert isIdentity(tempm) : TEMPM_ERROR_MSG;
 	}
 	
 	/**
@@ -155,6 +159,7 @@ public class Matrix3x3 {
 		// return tempm to identity state
 		tempm.m11 = 1;
 		tempm.m22 = 1;
+		assert isIdentity(tempm) : TEMPM_ERROR_MSG;
 	}
 	
 	/**
@@ -171,6 +176,7 @@ public class Matrix3x3 {
 		
 		// return tempm to identity state
 		tempm.m12 = 0;
+		assert isIdentity(tempm) : TEMPM_ERROR_MSG;
 	}
 	
 	/**
@@ -187,6 +193,7 @@ public class Matrix3x3 {
 		
 		// return tempm to identity state
 		tempm.m21 = 0;
+		assert isIdentity(tempm) : TEMPM_ERROR_MSG;
 	}
 	
 	/**
@@ -206,6 +213,21 @@ public class Matrix3x3 {
 		// return tempm to identity state
 		tempm.m13 = 0;
 		tempm.m23 = 0;
+		assert isIdentity(tempm) : TEMPM_ERROR_MSG;
+	}
+	
+	/**
+	 * Checks if a matrix is set to the identity. Not suitable for testing
+	 * if a transform brings a matrix back to the identity due to floating
+	 * point behavior.
+	 * 
+	 * @param target Matrix3x3 to test
+	 * @return true if the matrix is set to the identity.
+	 */
+	protected static boolean isIdentity(Matrix3x3 target) {
+		return  target.m11 == 1 && target.m12 == 0 && target.m13 == 0 &&
+				target.m21 == 0 && target.m22 == 1 && target.m23 == 0 &&
+				target.m31 == 0 && target.m32 == 0 && target.m33 == 1;
 	}
 	
 	/*
@@ -233,6 +255,8 @@ public class Matrix3x3 {
 			clinit_guard = true;
 			multm = new Matrix3x3();
 			tempm = new Matrix3x3();
+			
+			assert isIdentity(tempm) : TEMPM_ERROR_MSG;
 		}
 	}
 }
