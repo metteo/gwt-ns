@@ -1,6 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 1.7.1//EN" "http://google-web-toolkit.googlecode.com/svn/tags/1.7.1/distro-source/core/src/gwt-module.dtd">
-
 <!--
  Copyright 2009 Brendan Kenny
 
@@ -18,8 +15,6 @@
  -->
 
 <module>
-  <!-- Browser-sensitive code should use the 'locale' client property. -->
-  <!-- 'default' is always defined.                                    -->
   <define-property name="JSON.support" values="native,emulated" />
   
   <!-- be conservative with making sure native JSON support exists. emulated
@@ -45,11 +40,11 @@
 		<when-property-is name="JSON.support" value="native" />
 		
 		<!-- only browsers that might have support -->
-		<!-- TODO: opera 10? -->
 		<any>
 			<when-property-is name="user.agent" value="gecko1_8" /> 
 			<when-property-is name='user.agent' value='ie8'/>
 			<when-property-is name='user.agent' value='safari'/>
+			<when-property-is name='user.agent' value='opera'/>
 		</any>
 	</all>
   </replace-with>

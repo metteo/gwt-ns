@@ -38,7 +38,7 @@ public class JsonImplEmulated extends JsonImpl {
 		// for defining the JSON object on $wnd
 		
 		// http://www.JSON.org/json2.js
-		// 2009-09-29
+		// 2010-03-20
 		// Public Domain.
 		// NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
 		// See http://www.JSON.org/js.html
@@ -47,12 +47,9 @@ public class JsonImplEmulated extends JsonImpl {
 
 		// Create a JSON object only if one does not already exist. We create the
 		// methods in a closure to avoid creating global variables.
-		// NOTE: all references to JSON modified to use $wnd.JSON
 		if (!$wnd.JSON) {
 			$wnd.JSON = {};
 		}
-
-
 
 		(function () {
 
@@ -293,6 +290,7 @@ public class JsonImplEmulated extends JsonImpl {
 					// Parsing happens in four stages. In the first stage, we replace certain
 					// Unicode characters with escape sequences. JavaScript handles many characters
 					// incorrectly, either silently deleting them, or treating them as line endings.
+					text = String(text);
 				    cx.lastIndex = 0;
 				    if (cx.test(text)) {
 				        text = text.replace(cx, function (a) {
@@ -319,7 +317,7 @@ public class JsonImplEmulated extends JsonImpl {
 					replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
 		
 						// In the third stage we use the eval function to compile the text into a
-						// JavaScript structure. The '}' operator is subject to a syntactic ambiguity
+						// JavaScript structure. The '{' operator is subject to a syntactic ambiguity
 						// in JavaScript: it can begin a block or an object literal. We wrap the text
 						// in parens to eliminate the ambiguity.
 				        j = eval('(' + text + ')');
