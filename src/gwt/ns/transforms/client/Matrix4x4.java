@@ -17,16 +17,17 @@
 package gwt.ns.transforms.client;
 
 /**
- * 4x4 matrix for representation of affine transformations (in homogenous
- * coordinates). Interfaces for 2d and 3d transformations based on CSSMatrix.
+ * 4x4 matrix for representation of affine transformations in three dimensions
+ * (using homogeneous coordinates). Matrix is "column-major," meaning that, in
+ * the multiplication of a series of transforms, the first applied matrix is
+ * on the far right. The translation values are found in column four.
  * 
- * <p>Note that, unlike CSSMatrix, Matrix4x4s are mutable. For non-destructive
- * concatenation of transforms, use the static
- * {@link #multiply(Matrix4x4, Matrix4x4, Matrix4x4)}.</p>
- * 
- * @see <a href="http://www.w3.org/TR/css3-2d-transforms/">W3C 2D Transforms Draft</a> 
- * @see <a href="http://www.w3.org/TR/css3-3d-transforms/">W3C 3D Transforms Draft</a>
- *
+ * <p>All methods have been optimized, but full multiplies and inversions still
+ * incur relatively heavy performance costs. If possible, tend toward the
+ * problem specific. For example, use <code>matrix.rotateX(angle)</code>
+ * instead of <code>matrix.multiply(rotationMatrix)</code>, or note that the
+ * transpose of an orthonormal matrix is also its inverse, so does not require
+ * a full inverse calculation.<p>
  */
 public class Matrix4x4 {
 	private static boolean clinit_guard;
@@ -36,44 +37,6 @@ public class Matrix4x4 {
 	 * since we are single threaded.
 	 */
 	private static Matrix4x4 multm;
-	
-	/**
-	 * Multiplies matrix a by b and stores the result in dest.
-	 * dest is overwritten in process of multiplication, so should not itself
-	 * be a or b. Note that this matrix is "column-major," so b will transform
-	 * the image of a (i.e. b will transform the local coordinate system
-	 * created by a).
-	 * 
-	 * <pre>dest = a*b</pre>
-	 * 
-	 * @param a left-hand matrix
-	 * @param b right-hand matrix
-	 * @param dest result of multiplication
-	 */
-	public static final void multiply(Matrix4x4 dest, Matrix4x4 a, Matrix4x4 b) {
-		assert (!dest.equals(a) && !dest.equals(b)) : "destination matrix should not be one of the factors";
-		
-		// results stored in dest
-		dest.m11 = a.m11*b.m11 + a.m12*b.m21 + a.m13*b.m31 + a.m14*b.m41;
-		dest.m12 = a.m11*b.m12 + a.m12*b.m22 + a.m13*b.m32 + a.m14*b.m42;
-		dest.m13 = a.m11*b.m13 + a.m12*b.m23 + a.m13*b.m33 + a.m14*b.m43;
-		dest.m14 = a.m11*b.m14 + a.m12*b.m24 + a.m13*b.m34 + a.m14*b.m44;
-		
-		dest.m21 = a.m21*b.m11 + a.m22*b.m21 + a.m23*b.m31 + a.m24*b.m41;
-		dest.m22 = a.m21*b.m12 + a.m22*b.m22 + a.m23*b.m32 + a.m24*b.m42;
-		dest.m23 = a.m21*b.m13 + a.m22*b.m23 + a.m23*b.m33 + a.m24*b.m43;
-		dest.m24 = a.m21*b.m14 + a.m22*b.m24 + a.m23*b.m34 + a.m24*b.m44;
-		
-		dest.m31 = a.m31*b.m11 + a.m32*b.m21 + a.m33*b.m31 + a.m34*b.m41;
-		dest.m32 = a.m31*b.m12 + a.m32*b.m22 + a.m33*b.m32 + a.m34*b.m42;
-		dest.m33 = a.m31*b.m13 + a.m32*b.m23 + a.m33*b.m33 + a.m34*b.m43;
-		dest.m34 = a.m31*b.m14 + a.m32*b.m24 + a.m33*b.m34 + a.m34*b.m44;
-		
-		dest.m41 = a.m41*b.m11 + a.m42*b.m21 + a.m43*b.m31 + a.m44*b.m41;
-		dest.m42 = a.m41*b.m12 + a.m42*b.m22 + a.m43*b.m32 + a.m44*b.m42;
-		dest.m43 = a.m41*b.m13 + a.m42*b.m23 + a.m43*b.m33 + a.m44*b.m43;
-		dest.m44 = a.m41*b.m14 + a.m42*b.m24 + a.m43*b.m34 + a.m44*b.m44;
-	}
 	
 	/**
 	 * Internal representation of a matrix entry.
@@ -96,23 +59,203 @@ public class Matrix4x4 {
 	}
 	
 	/**
-	 * Applies a transform in <em>local</em> coordinates to the target matrix.
+	 * Sets this matrix to the specified transform.
 	 * 
-	 * @param transform The transform to apply.
+	 * @param src The transform to be copied.
 	 */
-	public void multiply(Matrix4x4 transform) {
-		multiply(multm, this, transform);
-		set(multm);
+	public void copy(Matrix4x4 src) {
+		m11 = src.m11; m12 = src.m12; m13 = src.m13; m14 = src.m14;
+		m21 = src.m21; m22 = src.m22; m23 = src.m23; m24 = src.m24;
+		m31 = src.m31; m32 = src.m32; m33 = src.m33; m34 = src.m34;
+		m41 = src.m41; m42 = src.m42; m43 = src.m43; m44 = src.m44;
+	}
+	
+	/*
+	 * Calculate the determinant.
+	 * 
+	 * @return the determinant of this matrix
+	 */
+	//public double determinant() {
+	//	// TODO: see: inverse calc
+	//}
+	
+	/**
+	 * Calculates the inverse of this matrix, if it exists, and stores it in
+	 * dest. This is an intensive calculation and should be avoided if
+	 * possible. If this matrix is orthonormal, try
+	 * {@link #inverseOrthonormalAffine(Matrix4x4)}.
+	 * 
+	 * <p>Implementation from David Eberly's "The Laplace Expansion Theorem:
+	 * Computing the Determinants and Inverses of Matrices".</p>
+	 * 
+	 * @param dest The destination of the inverse.
+	 * 
+	 * @see <a href="http://www.geometrictools.com/Documentation/LaplaceExpansionTheorem.pdf">"The Laplace Expansion Theorem: Computing the Determinants and Inverses of Matrices"</a> 
+	 */
+	public void inverse(Matrix4x4 dest) {
+		// I count 95 multiplies, vs 64 for even a full multiply
+		// or 201 for Richard Carling's reference matrix inverse implementation
+		
+		double s0 = m11*m22 - m21*m12;
+		double s1 = m11*m23 - m21*m13;
+		double s2 = m11*m24 - m21*m14;
+		double s3 = m12*m23 - m22*m13;
+		double s4 = m12*m24 - m22*m14;
+		double s5 = m13*m24 - m23*m14;
+		
+		double c5 = m33*m44 - m43*m34;
+		double c4 = m32*m44 - m42*m34;
+		double c3 = m32*m43 - m42*m33;
+		double c2 = m31*m44 - m41*m34;
+		double c1 = m31*m43 - m41*m33;
+		double c0 = m31*m42 - m41*m32;
+		
+		// adjugate
+		dest.m11 =  m22*c5 - m23*c4 + m24*c3;
+		dest.m12 = -m12*c5 + m13*c4 - m14*c3;
+		dest.m13 =  m42*s5 - m43*s4 + m44*s3;
+		dest.m14 = -m32*s5 + m33*s4 - m34*s3;
+		
+		dest.m21 = -m21*c5 + m23*c2 - m24*c1;
+		dest.m22 =  m11*c5 - m13*c2 + m14*c1;
+		dest.m23 = -m41*s5 + m43*s2 - m44*s1;
+		dest.m24 =  m31*s5 - m33*s2 + m34*s1;
+		
+		dest.m31 =  m21*c4 - m22*c2 + m24*c0;
+		dest.m32 = -m11*c4 + m12*c2 - m14*c0;
+		dest.m33 =  m41*s4 - m42*s2 + m44*s0;
+		dest.m34 = -m31*s4 + m32*s2 - m34*s0;
+		
+		dest.m41 = -m21*c3 + m22*c1 - m23*c0;
+		dest.m42 =  m11*c3 - m12*c1 + m13*c0;
+		dest.m43 = -m41*s3 + m42*s1 - m43*s0;
+		dest.m44 =  m31*s3 - m32*s1 + m33*s0;
+		
+		double det = s0*c5 -s1*c4 + s2*c3 + s3*c2 - s4*c1 + s5*c0;
+		
+		if (Math.abs(det) < 1.e-8) {
+			// TODO: an exception makes more sense than an assertion here
+			// but not exactly parallel to JavaScriptException thrown by native
+			// code. what to do?
+			throw new RuntimeException("Matrix is singular");
+		
+		} else {
+			det = 1. / det;
+			dest.m11 *= det;
+			dest.m12 *= det;
+			dest.m13 *= det;
+			dest.m14 *= det;
+			dest.m21 *= det;
+			dest.m22 *= det;
+			dest.m23 *= det;
+			dest.m24 *= det;
+			dest.m31 *= det;
+			dest.m32 *= det;
+			dest.m33 *= det;
+			dest.m34 *= det;
+			dest.m41 *= det;
+			dest.m42 *= det;
+			dest.m43 *= det;
+			dest.m44 *= det;
+		}
 	}
 	
 	/**
-	 * Applies a transform in <em>view</em> coordinates to the target matrix.
+	 * Calculates the inverse of this matrix, assuming this is an orthonormal
+	 * matrix + translation (e.g. concatenation of rotations and
+	 * translations). Any perspective projection will likely have an adverse
+	 * effect on the result. Incredibly fast compared to a full inverse.
 	 * 
-	 * @param transform The transform to apply
+	 * @param dest The destination of the inverse.
 	 */
-	public void multiplyView(Matrix4x4 transform) {
-		multiply(multm, transform, this);
-		set(multm);
+	public void inverseOrthonormalAffine(Matrix4x4 dest) {
+		// transpose upper 3x3
+		dest.m11 = m11;
+		dest.m12 = m21;
+		dest.m13 = m31;
+		dest.m21 = m12;
+		dest.m22 = m22;
+		dest.m23 = m32;
+		dest.m31 = m13;
+		dest.m32 = m23;
+		dest.m33 = m33;
+		
+		// invert translation
+		dest.m14 = -(dest.m11*m14 + dest.m12*m24 + dest.m13*m34);
+		dest.m24 = -(dest.m21*m14 + dest.m22*m24 + dest.m23*m34);
+		dest.m34 = -(dest.m31*m14 + dest.m32*m24 + dest.m33*m34);
+		
+		// shouldn't have to, but possible
+		dest.m41 = 0;
+		dest.m42 = 0;
+		dest.m43 = 0;
+		dest.m44 = 1;
+	}
+	
+	/**
+	 * Applies a transform in <em>local</em> coordinates to this matrix.
+	 * Essentially, <code>this=this*local</code>.
+	 * 
+	 * @param local The transform to apply.
+	 */
+	public void multiply(Matrix4x4 local) {
+		multm.multiply(this, local);
+		copy(multm);
+	}
+	
+	/**
+	 * Sets this matrix equal to <code>view</code> multiplied by
+	 * <code>local</code>, with <code>view</code> on the left and
+	 * <code>local</code> on the right. This matrix is overwritten in process
+	 * of multiplication, so should not itself be view or local.
+	 * 
+	 * <p>Note: this is the most efficient of the multiply methods, because
+	 * no copy is required, but use the transformation-specific methods if at
+	 * all possible. They are each optimized for their particular
+	 * operation, which can result in needing only a small fraction of the
+	 * calculations needed for this general method.</p>
+	 * 
+	 * <pre>this = view*local</pre>
+	 * 
+	 * @param view left-hand matrix
+	 * @param local right-hand matrix
+	 */
+	public void multiply(Matrix4x4 view, Matrix4x4 local) {
+		// TODO: is this still the most descriptive name for this method?
+		assert (this != view && this != local) : "destination matrix should not be one of the factors";
+		
+		// results stored in dest
+		m11 = view.m11*local.m11 + view.m12*local.m21 + view.m13*local.m31 + view.m14*local.m41;
+		m12 = view.m11*local.m12 + view.m12*local.m22 + view.m13*local.m32 + view.m14*local.m42;
+		m13 = view.m11*local.m13 + view.m12*local.m23 + view.m13*local.m33 + view.m14*local.m43;
+		m14 = view.m11*local.m14 + view.m12*local.m24 + view.m13*local.m34 + view.m14*local.m44;
+		
+		m21 = view.m21*local.m11 + view.m22*local.m21 + view.m23*local.m31 + view.m24*local.m41;
+		m22 = view.m21*local.m12 + view.m22*local.m22 + view.m23*local.m32 + view.m24*local.m42;
+		m23 = view.m21*local.m13 + view.m22*local.m23 + view.m23*local.m33 + view.m24*local.m43;
+		m24 = view.m21*local.m14 + view.m22*local.m24 + view.m23*local.m34 + view.m24*local.m44;
+		
+		m31 = view.m31*local.m11 + view.m32*local.m21 + view.m33*local.m31 + view.m34*local.m41;
+		m32 = view.m31*local.m12 + view.m32*local.m22 + view.m33*local.m32 + view.m34*local.m42;
+		m33 = view.m31*local.m13 + view.m32*local.m23 + view.m33*local.m33 + view.m34*local.m43;
+		m34 = view.m31*local.m14 + view.m32*local.m24 + view.m33*local.m34 + view.m34*local.m44;
+		
+		m41 = view.m41*local.m11 + view.m42*local.m21 + view.m43*local.m31 + view.m44*local.m41;
+		m42 = view.m41*local.m12 + view.m42*local.m22 + view.m43*local.m32 + view.m44*local.m42;
+		m43 = view.m41*local.m13 + view.m42*local.m23 + view.m43*local.m33 + view.m44*local.m43;
+		m44 = view.m41*local.m14 + view.m42*local.m24 + view.m43*local.m34 + view.m44*local.m44;
+	}
+	
+	/**
+	 * Applies a transform in <em>view</em> coordinates to this matrix.
+	 * 
+	 * <pre>this=view*this</pre>
+	 * 
+	 * @param view The transform to apply
+	 */
+	public void multiplyView(Matrix4x4 view) {
+		multm.multiply(view, this);
+		copy(multm);
 	}
 	
 	/**
@@ -274,15 +417,32 @@ public class Matrix4x4 {
 	}
 	
 	/**
-	 * Sets this matrix to the specified transform.
+	 * Scales the matrix by the given vector in <em>local</em> coordinates. In
+	 * 2-space, the vector is [sx, sy]. In 3, it is [sx, sy, 1].
 	 * 
-	 * @param transform The transform to be copied.
+	 * @param sx The x coordinate of the scale vector
+	 * @param sy The y coordinate of the scale vector
 	 */
-	public void set(Matrix4x4 transform) {
-		m11 = transform.m11; m12 = transform.m12; m13 = transform.m13; m14 = transform.m14;
-		m21 = transform.m21; m22 = transform.m22; m23 = transform.m23; m24 = transform.m24;
-		m31 = transform.m31; m32 = transform.m32; m33 = transform.m33; m34 = transform.m34;
-		m41 = transform.m41; m42 = transform.m42; m43 = transform.m43; m44 = transform.m44;
+	public void scale(double sx, double sy) {
+		/* equivalent to the following
+		 * 
+		 * tempm.m11 = sx;
+		 * tempm.m22 = sy;
+		 * tempm.m33 = 1;
+		 * 
+		 * multiply(tempm);
+		 */
+		
+		// just scaling the basis vectors (columns)
+		m11 *= sx;
+		m21 *= sx;
+		m31 *= sx;
+		m41 *= sx;
+		
+		m12 *= sy;
+		m22 *= sy;
+		m32 *= sy;
+		m42 *= sy;
 	}
 	
 	/**
@@ -295,46 +455,43 @@ public class Matrix4x4 {
 		m41 = 0; m42 = 0; m43 = 0; m44 = 1;
 	}
 	
+	
 	/**
-	 * Skews the matrix around the x-axis by the given angle, in <em>local</em>
-	 * coordinates.
+	 * Shear space along the x-axis by a value multiple of a y-coordinate.
 	 * 
-	 * @param theta The angle of the skew, in radians.
+	 * @param value Shear value.
 	 */
-	public void skewX(double theta) {
+	public void shearX(double value) {
 		/* equivalent to the following, but since tempm is mostly the identity,
 		 * saves 15/16 of the multiplies and the copy.
 		 * 
-		 * tempm.m12 = Math.tan(theta);
+		 * tempm.m12 = value;
 		 * multiply(tempm);
 		 */
 		
-		double tan = Math.tan(theta);
-		m12 += m11*tan;
-		m22 += m21*tan;
-		m32 += m31*tan;
-		m42 += m41*tan;
+		m12 += m11*value;
+		m22 += m21*value;
+		m32 += m31*value;
+		m42 += m41*value;
 	}
 	
 	/**
-	 * Skews the matrix around the y-axis by the given angle, in <em>local</em>
-	 * coordinates.
+	 * Shear space along the y-axis by a value multiple of a x-coordinate.
 	 * 
-	 * @param theta The angle of the skew, in radians
+	 * @param value Shear value.
 	 */
-	public void skewY(double theta) {
+	public void shearY(double value) {
 		/* equivalent to the following, but since tempm is mostly the identity,
 		 * saves 15/16 of the multiplies and the copy.
 		 * 
-		 * tempm.m21 = Math.tan(theta);
+		 * tempm.m21 = value;
 		 * multiply(tempm);
 		 */
 		
-		double tan = Math.tan(theta);
-		m11 += m12*tan;
-		m21 += m22*tan;
-		m31 += m32*tan;
-		m41 += m42*tan;
+		m11 += m12*value;
+		m21 += m22*value;
+		m31 += m32*value;
+		m41 += m42*value;
 	}
 	
 	/**
@@ -383,6 +540,21 @@ public class Matrix4x4 {
 	}
 	
 	/**
+	 * Returns the w-component of the image of local-space point (x, y, z, w)
+	 * under the current transform. A w value of 1 is generally used for
+	 * points, 0 for vectors.
+	 * 
+	 * @param x The x coordinate of point to transform
+	 * @param y The y coordinate of point to transform
+	 * @param z The z coordinate of point to transform
+	 * @param w The w coordinate of point to transform
+	 * @return The w coordinate of the transformed point
+	 */
+	public double transformW(double x, double y, double z, double w) {
+		return x*m41 + y*m42 + z*m43 + w*m44;
+	}
+	
+	/**
 	 * Translates the matrix by a given vector, in <em>local</em> coordinates.
 	 * 
 	 * @param tx The x coordinate of the translation vector
@@ -404,5 +576,26 @@ public class Matrix4x4 {
 		m24 += m21*tx + m22*ty + m23*tz;
 		m34 += m31*tx + m32*ty + m33*tz;
 		m44 += m41*tx + m42*ty + m43*tz;
+	}
+	
+	/**
+	 * Translates the matrix by a given vector, in <em>local</em> coordinates.
+	 * 
+	 * @param tx The x coordinate of the translation vector
+	 * @param ty The y coordinate of the translation vector
+	 */
+	public void translate(double tx, double ty) {
+		/* equivalent to the following
+		 * 
+		 * tempm.m14 = tx;
+		 * tempm.m24 = ty;
+		 * multiply(tempm);
+		 */
+		
+		// adding translation vector in changed basis
+		m14 += m11*tx + m12*ty;
+		m24 += m21*tx + m22*ty;
+		m34 += m31*tx + m32*ty;
+		m44 += m41*tx + m42*ty;
 	}
 }
