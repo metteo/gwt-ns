@@ -1,8 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 1.7.1//EN" "http://google-web-toolkit.googlecode.com/svn/tags/1.7.1/distro-source/core/src/gwt-module.dtd">
-
 <!--
- Copyright 2009 Brendan Kenny
+ Copyright 2010 Brendan Kenny
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -21,22 +18,55 @@
   <!-- Inherit the core Web Toolkit stuff.                        -->
   <inherits name='com.google.gwt.core.Core'/>
   <inherits name='com.google.gwt.user.UserAgent'/>
+  
+  <!-- define property for column or row major matrices in safari -->
+  <define-property name="transform.notation" values="column_major, row_major"/>
 
-  <!-- if a user is requesting GWT create a system appropriate Transform,
-		return a webkit impl for webkit, otherwise return software implementation 
-		
-		TODO: more detailed detection to allow support of standard CSSMatrix in
-		future browsers -->
-		
-  <!-- default -->
-  <replace-with class='gwt.ns.transforms.client.impl.TransformImplDefault'>
+  <property-provider name="transform.notation"><![CDATA[
+    if (!!$wnd.WebKitCSSMatrix) {
+      var trans = (new WebKitCSSMatrix()).translate(1, 0, 0);
+	  var scale = (new WebKitCSSMatrix()).scale(5, 1, 1);
+      if (scale.multiply(trans).m41 > trans.multiply(scale).m41) {
+        return "column_major";
+      } else {
+        return "row_major";
+      }
+	}
+	return "column_major";
+  ]]></property-provider>
+  
+  <!-- distinction irrelevant outside of webkit -->
+  <set-property name="transform.notation" value="column_major" >
+    <none>
+      <when-property-is name="user.agent" value="safari" />
+    </none>
+  </set-property>
+  
+  <!--
+    currently defaults to emulated. while not future proof, it is supported
+	everywhere (even if actual element transforms are not). TransformStandard
+	is available as a reference, a base class, and for use in that no-doubt
+	nearly here standards utopia.
+  -->
+  <replace-with class='gwt.ns.transforms.client.TransformEmulated'>
     <when-type-is class='gwt.ns.transforms.client.Transform'/>
   </replace-with>
   
-  <!-- safari 4+ and chrome -->
-  <replace-with class='gwt.ns.transforms.client.impl.TransformImplWebkit'>
+  <!-- safari and chrome -->
+  <replace-with class='gwt.ns.transforms.client.TransformWebKit'>
     <when-type-is class='gwt.ns.transforms.client.Transform'/>
-    <when-property-is name='user.agent' value='safari'/>
+    <all>
+      <when-property-is name="user.agent" value="safari"/>
+      <when-property-is name="transform.notation" value="column_major"/>
+    </all>
+  </replace-with>
+  
+  <replace-with class='gwt.ns.transforms.client.TransformWebKitRowMajor'>
+    <when-type-is class='gwt.ns.transforms.client.Transform'/>
+    <all>
+      <when-property-is name="user.agent" value="safari"/>
+      <when-property-is name="transform.notation" value="row_major"/>
+    </all>
   </replace-with>
 
 </module>
