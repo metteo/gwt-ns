@@ -28,7 +28,13 @@ class TransformedElementOpera extends TransformedElement {
 	}
 
 	@Override
-	public void setOrigin(double ox, double oy) {
+	public void setOriginPercentage(double ox, double oy) {
+		String origin = toFixed(ox, 2) + "% " + toFixed(oy, 2) + "%";
+		target.getStyle().setProperty("OTransformOrigin", origin);
+	}
+
+	@Override
+	public void setOriginPixels(double ox, double oy) {
 		String origin = toFixed(ox, 0) + "px " + toFixed(oy, 0) + "px";
 		target.getStyle().setProperty("OTransformOrigin", origin);
 	}

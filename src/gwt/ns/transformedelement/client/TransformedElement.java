@@ -313,16 +313,35 @@ public abstract class TransformedElement {
 	}
 
 	/**
-	 * Set the origin of the transformation. In other words, this point will be
-	 * affected by translations only. All other transformations will leave this
-	 * (and only this) point in the same position. Defaults to (50%, 50%).
+	 * Sets the origin of the transformation, relative to the
+	 * <em>border box</em> of the element, specified as a percentage of that
+	 * box's dimensions. In other words, this point will be affected by
+	 * translations only. All other transformations will leave this (and only
+	 * this) point unmoved.
 	 * 
-	 * <p>Currently only accepts lengths in pixel units.</p>
+	 * <p>The default origin is (50%, 50%).<p>
 	 * 
-	 * @param ox The x-coordinate of the new origin in pixels
-	 * @param oy The y-coordinate of the new origin in pixels
+	 * @param ox The x-coordinate of the new origin, as a percentage
+	 * @param oy The y-coordinate of the new origin, as a percentage
+	 * 
+	 * @see <a href="http://dev.w3.org/csswg/css3-2d-transforms/#transform-origin">Transform Origin Property</a>
 	 */
-	public abstract void setOrigin(double ox, double oy);
+	public abstract void setOriginPercentage(double ox, double oy);
+	
+	/**
+	 * Sets the origin of the transformation, relative to the
+	 * <em>border box</em> of the element, specified in pixels. In other
+	 * words, this point will be affected by translations only. All other
+	 * transformations will leave this (and only this) point unmoved.
+	 * 
+	 * <p>The default origin is (50%, 50%).<p>
+	 * 
+	 * @param ox The x-coordinate of the new origin, in pixels
+	 * @param oy The y-coordinate of the new origin, in pixels
+	 * 
+	 * @see <a href="http://dev.w3.org/csswg/css3-2d-transforms/#transform-origin">Transform Origin Property</a>
+	 */
+	public abstract void setOriginPixels(double ox, double oy);
 
 	/**
 	 * Reset the current transform to the identity. This will leave the
