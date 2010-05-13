@@ -100,7 +100,7 @@ public class TreesWidget extends Composite {
 	 */
 	public void update() {
 		/*
-		 * Clearly _custom_ animations, even for four elements, gets rather
+		 * Clearly _custom_ animations, even for four elements, get rather
 		 * involved. To scale to even a few more than this, another
 		 * approach will be needed. For something easily describable
 		 * algorithmically, like a clock, this approach would be fine.
