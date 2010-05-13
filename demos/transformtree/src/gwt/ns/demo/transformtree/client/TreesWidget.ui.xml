@@ -1,0 +1,157 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	
+	<ui:style>
+		@def borderWidth 15px;
+	
+		.body, .div {
+			margin: 0;
+			padding: 0;
+		}
+		
+		.container {
+			position: relative;
+			background-color: #ffe3ab;
+			height: 650px;
+			position: relative;
+			width: 650px;
+			margin: 10px;
+		}
+		
+		.bigTreeDiv {
+			background-color: #17A235;
+			border: borderWidth solid #141E09;
+			height: 500px;
+			left: 130px;
+			position: absolute;
+			top: 55px;
+			width: 300px;
+			-moz-border-radius: 180px 145px 100px 140px;
+			border-radius: 180px 145px 100px 140px;
+		}
+		.bigShadowDiv {
+			background-color: #383226;
+			height: 530px;
+			left: 130px;
+			position: absolute;
+			top: 55px;
+			width: 330px;
+			-moz-border-radius: 180px 145px 100px 140px;
+			border-radius: 180px 145px 100px 140px;
+		}
+		.bigTreeDiv > div { /* big eyes */
+			float: left;
+			background-color: #18240b;
+			-moz-border-radius: 28px 20px 20px 20px;
+			border-radius: 28px 20px 20px 20px;
+		}
+		.bigLeftEye {
+			margin-left: 45px;
+			height: 108px;
+			margin-top: 101px;
+			width: 49px;
+		}
+		.bigRightEye {
+			margin-left: 40px;
+			height: 110px;
+			margin-top: 100px;
+			width: 50px;
+		}
+		
+		
+		.littleTreeDiv {
+			background-color: #18A237;
+			border: borderWidth solid #141E09;
+			height: 300px;
+			left: 310px;
+			position: absolute;
+			top: 285px;
+			width: 210px;
+			-moz-border-radius: 115px 115px 90px 60px;
+			border-radius: 115px 115px 90px 60px;
+		}
+		.littleShadowDiv {
+			background-color: #383226;
+			height: 330px;
+			left: 310px;
+			position: absolute;
+			top: 285px;
+			width: 240px;
+			-moz-border-radius: 115px 115px 90px 60px;
+			border-radius: 115px 115px 90px 60px;
+		}
+		.littleTreeDiv > div { /* little eyes */
+			background-color: #18240b;
+			float: left;
+			-moz-border-radius: 18px;
+			-webkit-border-radius: 18px;
+			border-radius: 18px;
+		}
+		.littleLeftEye {
+			margin-left: 30px;
+			height: 69px;
+			margin-top: 61px;
+			width: 39px;
+		}
+		.littleRightEye {
+			margin-left: 28px;
+			height: 70px;
+			margin-top: 60px;
+			width: 40px;
+		}
+		
+		/*
+		Kind of a hack, but worth it. Older versions of Webkit
+		support border-radius, but only for a single value. Support
+		for multiple values is split roughly at the same point that
+		WebKitCSSMatrix's notation changed, which I know is already
+		split by the GWT compiler from inclusion of the transform module.
+		
+		For a larger project, something more maintainable would be needed.
+		*/
+		
+		@if user.agent safari {
+			@if transform.notation row_major {
+				.bigTreeDiv, .bigShadowDiv { -webkit-border-radius: 160px; }
+				.bigTreeDiv > div { -webkit-border-radius: 23px; }
+				.littleTreeDiv, .littleShadowDiv { -webkit-border-radius: 105px; }
+			} @else {
+				.bigTreeDiv, .bigShadowDiv { -webkit-border-radius: 180px 145px 100px 140px; }
+				.bigTreeDiv > div { -webkit-border-radius: 28px 20px 20px 20px; }
+				.littleTreeDiv, .littleShadowDiv { -webkit-border-radius: 115px 115px 90px 60px; }
+			}
+		}
+		
+		/*
+		Another workaround, this time just because IE does not support
+		rounded corners. The shadows are positioned slightly unnaturally,
+		so this just shifts them slightly downwards. Again, to scale, this
+		would be better handled with deferred binding.
+		
+		Note that IE9 _does_ support rounded corners, so should be treated
+		like all the other browsers and not have this adjustment applied.
+		*/
+		
+		@if user.agent ie6 ie8 {
+			.bigShadowDiv { top: 64px; }
+			.littleShadowDiv { top: 294px; }
+		}
+		
+	</ui:style>
+	<g:HTMLPanel styleName="{style.container}">
+		<div class="{style.bigShadowDiv}" ui:field="bigShadowDiv"></div>
+		<div class="{style.littleShadowDiv}" ui:field="littleShadowDiv"></div>
+		
+		<div class="{style.bigTreeDiv}" ui:field="bigTreeDiv">
+			<div class="{style.bigLeftEye}"></div>
+			<div class="{style.bigRightEye}"></div>
+		</div>
+		
+		<div class="{style.littleTreeDiv}" ui:field="littleTreeDiv">
+			<div class="{style.littleLeftEye}"></div>
+			<div class="{style.littleRightEye}"></div>
+		</div>
+		
+	</g:HTMLPanel>
+</ui:UiBinder> 
