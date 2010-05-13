@@ -193,7 +193,7 @@ class TransformWebKit extends TransformStandard {
 	public void skewX(double theta) {
 		// for some reason this isn't implemented on (at least) Windows yet
 		CssMatrix tmp = createNewMatrix();
-		tmp.setM12(Math.tan(theta));
+		tmp.setM21(Math.tan(theta)); // m<column><row>
 		transform = transform.multiply(tmp);
 	}
 
@@ -201,7 +201,7 @@ class TransformWebKit extends TransformStandard {
 	public void skewY(double theta) {
 		// for some reason this isn't implemented on (at least) Windows yet
 		CssMatrix tmp = createNewMatrix();
-		tmp.setM21(Math.tan(theta));
+		tmp.setM12(Math.tan(theta)); // m<column><row>
 		transform = transform.multiply(tmp);
 	}
 	
