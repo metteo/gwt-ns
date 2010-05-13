@@ -28,7 +28,12 @@ class TransformedElementDefault extends TransformedElement {
 	}
 
 	@Override
-	public void setOrigin(double ox, double oy) {
+	public void setOriginPercentage(double ox, double oy) {
+		
+	}
+
+	@Override
+	public void setOriginPixels(double ox, double oy) {
 		
 	}
 

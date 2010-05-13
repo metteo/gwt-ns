@@ -69,6 +69,10 @@ class TransformedElementIE8 extends TransformedElement {
 	private double originX;
 	private double originY;
 	
+	// if originChanged, true if origin in percentage, false if in pixels
+	// inelegant, but fine, for now
+	private boolean isOriginPercentage;
+	
 	@Override
 	public void commitTransform() {
 		// store untransformed dimensions if we haven't already
@@ -106,18 +110,6 @@ class TransformedElementIE8 extends TransformedElement {
 		m22 = m22 < 0 ? -m22 : m22; // abs()
 		double yAdj = (-m21*halfOrigWidth + (1 - m22)*halfOrigHeight);
 		
-		if (originChanged) {
-			// transformed offset from top corner to current origin
-			double ox = originX - halfOrigWidth;
-			double oy = originY - halfOrigHeight;
-			double tox = ox*finalTransform.getA() + oy*finalTransform.getC();
-			double toy = ox*finalTransform.getB() + oy*finalTransform.getD();
-			
-			// remove from adj computed above, but orig size already figured in
-			xAdj -= tox + halfOrigWidth;
-			yAdj -= toy + halfOrigHeight;
-		}
-		
 		// add translation
 		xAdj += finalTransform.getE();
 		yAdj += finalTransform.getF();
@@ -140,14 +132,13 @@ class TransformedElementIE8 extends TransformedElement {
 	}
 	
 	@Override
-	public void setOrigin(double ox, double oy) {
-		if (!originChanged) {
-			originTemp = Transform.create();
-			originChanged  = true;
-		}
-		
-		originX = ox;
-		originY = oy;
+	public void setOriginPercentage(double ox, double oy) {
+		setOrigin(true, ox, oy);
+	}
+	
+	@Override
+	public void setOriginPixels(double ox, double oy) {
+		setOrigin(false, ox, oy);
 	}
 	
 	/**
@@ -163,8 +154,16 @@ class TransformedElementIE8 extends TransformedElement {
 			return transform;
 			
 		} else {
-			double xadj = originX - originalWidth/2;
-			double yadj = originY - originalHeight/2;
+			double ox = originX;
+			double oy = originY;
+			
+			if (isOriginPercentage) {
+				ox = originalWidth * (ox / 100.);
+				oy = originalHeight * (oy / 100.);
+			}
+			
+			double xadj = ox - originalWidth/2;
+			double yadj = oy - originalHeight/2;
 			
 			originTemp.setToIdentity();
 			originTemp.translate(xadj, yadj);
@@ -198,5 +197,25 @@ class TransformedElementIE8 extends TransformedElement {
 		target.getStyle().setPosition(Position.ABSOLUTE);
 		
 		elementInitialized = true;
+	}
+	
+	/**
+	 * Stores the user specified origin. For percentages, stored
+	 * non-destructively so the values can (theoretically) adjust if the
+	 * dimensions of the element are adjusted.
+	 * 
+	 * @param isPercentage true if the origin coordinates are specified as a percentage
+	 * @param ox the x coordinate of the new origin
+	 * @param oy the y coordinate of the new origin
+	 */
+	protected void setOrigin(boolean isPercentage, double ox, double oy) {
+		if (!originChanged) {
+			originTemp = Transform.create();
+			originChanged  = true;
+		}
+		
+		isOriginPercentage = isPercentage;
+		originX = ox;
+		originY = oy;
 	}
 }
