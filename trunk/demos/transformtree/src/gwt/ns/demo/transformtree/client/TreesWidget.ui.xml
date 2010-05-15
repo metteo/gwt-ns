@@ -19,31 +19,34 @@
 			margin: 10px;
 		}
 		
+		.bigTreeDiv, .bigShadowDiv {
+			left: 130px;
+			position: absolute;
+			top: 55px;
+			-moz-border-radius: 180px 145px 100px 140px;
+			-webkit-border-top-left-radius: 180px 180px;
+			-webkit-border-top-right-radius: 145px 145px;
+			-webkit-border-bottom-right-radius:100px 100px;
+			-webkit-border-bottom-left-radius: 140px 140px;
+			border-radius: 180px 145px 100px 140px;
+		}
 		.bigTreeDiv {
 			background-color: #17A235;
 			border: borderWidth solid #141E09;
 			height: 500px;
-			left: 130px;
-			position: absolute;
-			top: 55px;
 			width: 300px;
-			-moz-border-radius: 180px 145px 100px 140px;
-			border-radius: 180px 145px 100px 140px;
 		}
 		.bigShadowDiv {
 			background-color: #383226;
 			height: 530px;
 			left: 130px;
-			position: absolute;
-			top: 55px;
 			width: 330px;
-			-moz-border-radius: 180px 145px 100px 140px;
-			border-radius: 180px 145px 100px 140px;
 		}
-		.bigTreeDiv > div { /* big eyes */
+		.bigLeftEye, .bigRightEye {
 			float: left;
 			background-color: #18240b;
 			-moz-border-radius: 28px 20px 20px 20px;
+			-webkit-border-radius: 23px;
 			border-radius: 28px 20px 20px 20px;
 		}
 		.bigLeftEye {
@@ -59,29 +62,30 @@
 			width: 50px;
 		}
 		
-		
+		.littleTreeDiv, .littleShadowDiv {
+			left: 310px;
+			position: absolute;
+			top: 285px;
+			-moz-border-radius: 115px 115px 90px 60px;
+			-webkit-border-top-left-radius: 115px 115px;
+			-webkit-border-top-right-radius: 115px 115px;
+			-webkit-border-bottom-right-radius:90px 90px;
+			-webkit-border-bottom-left-radius: 60px 60px;
+			border-radius: 115px 115px 90px 60px;
+		}
 		.littleTreeDiv {
 			background-color: #18A237;
 			border: borderWidth solid #141E09;
 			height: 300px;
-			left: 310px;
-			position: absolute;
-			top: 285px;
 			width: 210px;
-			-moz-border-radius: 115px 115px 90px 60px;
-			border-radius: 115px 115px 90px 60px;
+			
 		}
 		.littleShadowDiv {
 			background-color: #383226;
 			height: 330px;
-			left: 310px;
-			position: absolute;
-			top: 285px;
 			width: 240px;
-			-moz-border-radius: 115px 115px 90px 60px;
-			border-radius: 115px 115px 90px 60px;
 		}
-		.littleTreeDiv > div { /* little eyes */
+		.littleLeftEye, .littleRightEye {
 			background-color: #18240b;
 			float: left;
 			-moz-border-radius: 18px;
@@ -102,29 +106,7 @@
 		}
 		
 		/*
-		Kind of a hack, but worth it. Older versions of Webkit
-		support border-radius, but only for a single value. Support
-		for multiple values is split roughly at the same point that
-		WebKitCSSMatrix's notation changed, which I know is already
-		split by the GWT compiler from inclusion of the transform module.
-		
-		For a larger project, something more maintainable would be needed.
-		*/
-		
-		@if user.agent safari {
-			@if transform.notation row_major {
-				.bigTreeDiv, .bigShadowDiv { -webkit-border-radius: 160px; }
-				.bigTreeDiv > div { -webkit-border-radius: 23px; }
-				.littleTreeDiv, .littleShadowDiv { -webkit-border-radius: 105px; }
-			} @else {
-				.bigTreeDiv, .bigShadowDiv { -webkit-border-radius: 180px 145px 100px 140px; }
-				.bigTreeDiv > div { -webkit-border-radius: 28px 20px 20px 20px; }
-				.littleTreeDiv, .littleShadowDiv { -webkit-border-radius: 115px 115px 90px 60px; }
-			}
-		}
-		
-		/*
-		Another workaround, this time just because IE does not support
+		A workaround for Internet Explorer, because it does not support
 		rounded corners. The shadows are positioned slightly unnaturally,
 		so this just shifts them slightly downwards. Again, to scale, this
 		would be better handled with deferred binding.
