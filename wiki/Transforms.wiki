@@ -6,7 +6,9 @@ The Transforms module provides tools for the manipulation of 2D and 3D geometric
 
 To use the Transforms module in your project, include the following line in your `gwt.xml` file:
 
-{{{<inherits name="gwt.ns.transforms.Transforms" />}}}
+{{{
+<inherits name="gwt.ns.transforms.Transforms" />
+}}}
 
 
 = Available Classes =
@@ -15,8 +17,10 @@ To use the Transforms module in your project, include the following line in your
 
 This class is ostensibly for wrapping a transformation suitable for use with the CSS3 transform style property, but has proven suitable for general 4x4 matrix use. Where supported, it wraps native code implementations of CSSMatrix (for now, just in WebKit). Everywhere else, it falls back to the pure-Java Matrix4x4.
 
-*Creation:*<br>
-{{{Transform m = Transform.create();}}}
+*Creation:*
+{{{
+Transform m = Transform.create();
+}}}
 
 [http://gwt-ns.googlecode.com/svn/trunk/javadoc/gwt/ns/transforms/client/Transform.html Transform Javadoc]
 
@@ -34,8 +38,10 @@ Again, I have no data either way, but would be very interested in hearing if oth
 
 A pure Java representation of a 2D or 3D transformation. In general and if possible, use a Transform instead of an instance of this class (see above).
 
-*Creation:*<br>
-{{{Matrix4x4 m = new Matrix4x4();}}}
+*Creation:*
+{{{
+Matrix4x4 m = new Matrix4x4();
+}}}
 
 [http://gwt-ns.googlecode.com/svn/trunk/javadoc/gwt/ns/transforms/client/Matrix4x4.html Matrix4x4 Javadoc]
 
@@ -45,7 +51,9 @@ A JavaScript overlay for the (eventual) standard CSSMatrix JavaScript object. Si
 
 In general and if possible, use a Transform instead of an instance of this class (see above).
 
-*Creation:*<br>
-{{{CssMatrix m = CssMatrix.create();}}}
+*Creation:*
+{{{
+CssMatrix m = CssMatrix.create();
+}}}
 
 [http://gwt-ns.googlecode.com/svn/trunk/javadoc/gwt/ns/transforms/client/CssMatrix.html CssMatrix Javadoc]
