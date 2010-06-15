@@ -33,22 +33,19 @@
   <define-linker name="workerCompilation"
     class="gwt.ns.webworker.linker.WorkerCompilationLinker" />
 
-  <!-- default to emulated workers -->
-  <generate-with class="gwt.ns.webworker.rebind.EmulatedWorkerFactoryGenerator">
+  <!-- default to possibility of native workers -->
+  <generate-with class="gwt.ns.webworker.rebind.NativeWorkerFactoryGenerator">
     <when-type-assignable class="gwt.ns.webworker.client.WorkerFactory" />
   </generate-with>
   
-  <!-- native workers -->
-  <generate-with class="gwt.ns.webworker.rebind.NativeWorkerFactoryGenerator">
+  <!-- emulated workers when no support -->
+  <!-- collapse some older UA permutations -->
+  <generate-with class="gwt.ns.webworker.rebind.EmulatedWorkerFactoryGenerator">
     <when-type-assignable class="gwt.ns.webworker.client.WorkerFactory" />
-    <all>
-      <when-property-is name="worker.support" value="native" />
-		<!-- only browsers that might have support -->
-		<any>
-			<when-property-is name="user.agent" value="gecko1_8" /> 
-			<when-property-is name='user.agent' value='ie8'/>
-			<when-property-is name='user.agent' value='safari'/>
-		</any>
-	</all>
+    <any>
+      <when-property-is name="worker.support" value="emulated" />
+      <when-property-is name="user.agent" value="gecko" /> 
+      <when-property-is name='user.agent' value='ie6'/>
+    </any>
   </generate-with>
 </module>
