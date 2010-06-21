@@ -601,8 +601,6 @@ public abstract class Transform {
 	 * Constructs a Matrix Filter string for the 2d linear transformation
 	 * portion of the specified transform.
 	 * 
-	 * @param transform The transform to be applied
-	 * 
 	 * @return A Matrix Filter string
 	 */
 	public String toIEFilterString() {

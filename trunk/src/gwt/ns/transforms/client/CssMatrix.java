@@ -146,7 +146,7 @@ public class CssMatrix extends JavaScriptObject {
 	 * 
 	 * <p>Note that this method is not yet widely implemented.</p>
 	 * 
-	 * @param theta The angle of the skew, in degrees
+	 * @param angle The angle of the skew, in degrees
 	 * @return A new matrix that is the result of skewing this matrix.
 	 */
 	public final native CssMatrix skewX(double angle) /*-{
@@ -160,7 +160,7 @@ public class CssMatrix extends JavaScriptObject {
 	 * 
 	 * <p>Note that this method is not yet widely implemented.</p>
 	 * 
-	 * @param theta The angle of the skew, in degrees
+	 * @param angle The angle of the skew, in degrees
 	 * @return A new matrix that is the result of skewing this matrix.
 	 */
 	public final native CssMatrix skewY(double angle) /*-{
