@@ -169,6 +169,8 @@ public class Matrix4x4 {
 	 * @param dest The destination of the inverse.
 	 */
 	public void inverseOrthonormalAffine(Matrix4x4 dest) {
+		assert (this != dest) : "destination matrix cannot be this matrix";
+		
 		// transpose upper 3x3
 		dest.m11 = m11;
 		dest.m12 = m21;
@@ -185,7 +187,7 @@ public class Matrix4x4 {
 		dest.m24 = -(dest.m21*m14 + dest.m22*m24 + dest.m23*m34);
 		dest.m34 = -(dest.m31*m14 + dest.m32*m24 + dest.m33*m34);
 		
-		// shouldn't have to, but possible
+		// since we're assured the transform is affine, bottom row is identity
 		dest.m41 = 0;
 		dest.m42 = 0;
 		dest.m43 = 0;
@@ -375,8 +377,8 @@ public class Matrix4x4 {
 		m31 = c1;
 		m32 = c2;
 		
-		c1 = cos*m31 + m32*sin;
-		c2 = cos*m32 - m31*sin;
+		c1 = cos*m41 + m42*sin;
+		c2 = cos*m42 - m41*sin;
 		m41 = c1;
 		m42 = c2;
 	}
