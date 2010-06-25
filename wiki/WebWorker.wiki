@@ -9,8 +9,8 @@ This module provides a framework for automatically compiling designated portions
 
 This module works well, but is still under development. For now, consult the following links:
 
-*Design Document* (in progress)<br>
-[http://groups.google.com/group/google-web-toolkit-contributors/browse_thread/thread/72575f10314c454b/b70023a7b26b026c?#b70023a7b26b026c Link]
+*Design Document* (in progress and requires a Wave account)<br>
+[https://wave.google.com/wave/#restored:wave:googlewave.com!w%252BWqHsByV5A Link]
 
 *Sample usage: The Rationals*<br>
 [http://extremelysatisfactorytotalitarianism.com/projects/ns/rationals/ Run Sample]<br>
